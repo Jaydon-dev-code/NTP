@@ -1,8 +1,4 @@
-﻿using Autofac;
-using SL.MLineDataPrecisionTracking.Client.Middleware;
-using SL.MLineDataPrecisionTracking.Client.View;
-using SL.MLineDataPrecisionTracking.Core.Middleware;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -10,6 +6,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using Autofac;
+using Serilog;
+using SL.MLineDataPrecisionTracking.Client.Middleware;
+using SL.MLineDataPrecisionTracking.Client.View;
+using SL.MLineDataPrecisionTracking.Core.Middleware;
 
 namespace SL.MLineDataPrecisionTracking.Client
 {
@@ -33,9 +34,10 @@ namespace SL.MLineDataPrecisionTracking.Client
             builder.AddInfrastructureMiddleware();
             builder.AddCoreMiddleware();
             builder.AddSqlSugerMiddleware();
+            builder.AddLogMiddleware();
 
-              // 4. 构建容器
-              Container = builder.Build();
+            // 4. 构建容器
+            Container = builder.Build();
 
             // 5. 从容器解析主窗口（关键！这样才能自动注入）
             var mainWindow = Container.Resolve<MainWindow>();
@@ -45,8 +47,12 @@ namespace SL.MLineDataPrecisionTracking.Client
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            var result = HandyControl.Controls.MessageBox.Show("确定要退出双林轴承数字追溯管理系统吗？", "确认关闭",
-        MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var result = HandyControl.Controls.MessageBox.Show(
+                "确定要退出双林轴承数字追溯管理系统吗？",
+                "确认关闭",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question
+            );
 
             if (result != MessageBoxResult.Yes)
             {
@@ -56,12 +62,20 @@ namespace SL.MLineDataPrecisionTracking.Client
         }
 
         // UI 线程异常（最常用）
-        private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        private void App_DispatcherUnhandledException(
+            object sender,
+            DispatcherUnhandledExceptionEventArgs e
+        )
         {
             e.Handled = true; // 关键：标记已处理，程序不闪退
 
-            HandyControl.Controls.MessageBox.Show($"UI异常，请联系管理员。{e.Exception.Message}", "错误",
-                MessageBoxButton.OK, MessageBoxImage.Error);
+            HandyControl.Controls.MessageBox.Show(
+                $"UI异常，请联系管理员。",
+                "错误",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
+            Log.Error("UI异常，请联系管理员。\r\n{e}", e);
         }
 
         // 非UI线程 / 后台异常
@@ -69,12 +83,16 @@ namespace SL.MLineDataPrecisionTracking.Client
         {
             if (e.ExceptionObject is Exception ex)
             {
-                HandyControl.Controls.MessageBox.Show($"全局异常：{ex.Message}", "致命错误。请联系管理员。",
-                    MessageBoxButton.OK, MessageBoxImage.Stop);
+                HandyControl.Controls.MessageBox.Show(
+                    $"全局异常，请联系管理员。",
+                    "发生致命错误。。",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Stop
+                );
+             Log.Error("全局异常，请联系管理员。\r\n{ex}", ex );
             }
 
             // 这里可以加日志保存
         }
     }
-
 }
