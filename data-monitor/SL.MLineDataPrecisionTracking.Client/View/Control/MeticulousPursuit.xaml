@@ -1,0 +1,253 @@
+﻿<UserControl
+    x:Class="SL.MLineDataPrecisionTracking.Client.View.Control.MeticulousPursuit"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:local="clr-namespace:SL.MLineDataPrecisionTracking.Client.View.Control"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+
+    <Grid Margin="0,5">
+        <Grid.Resources>
+            <Style TargetType="TextBlock">
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+
+
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="180" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="25" />
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="5" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="5" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="5" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="5" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="*" />
+
+            </Grid.ColumnDefinitions>
+            <TextBlock
+                Grid.Row="0"
+                Grid.Column="0"
+                Text="起始时间" />
+            <Grid
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <hc:DatePicker Grid.Column="0" SelectedDate="{Binding QueryConditions.StartDate, Mode=TwoWay}" />
+                <hc:TimePicker
+                    Grid.Column="1"
+                    SelectedTime="{Binding QueryConditions.StartTime, Mode=TwoWay}"
+                    Style="{StaticResource TimePickerPlus}">
+                    <hc:TimePicker.Clock>
+                        <hc:ListClock />
+                    </hc:TimePicker.Clock>
+                </hc:TimePicker>
+            </Grid>
+
+            <!--<hc:DateTimePicker SelectedDateTime="{Binding QueryConditions.StartTime, Mode=TwoWay}" Style="{StaticResource DateTimePickerPlus.Small}" />-->
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="0"
+                Text="结束时间" />
+            <Grid
+                Grid.Row="2"
+                Grid.Column="1"
+                Grid.ColumnSpan="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <hc:DatePicker Grid.Column="0" SelectedDate="{Binding QueryConditions.EndDate, Mode=TwoWay}" />
+                <hc:TimePicker
+                    Grid.Column="1"
+                    SelectedTime="{Binding QueryConditions.EndTime, Mode=TwoWay}"
+                    Style="{StaticResource TimePickerPlus}">
+                    <hc:TimePicker.Clock>
+                        <hc:ListClock />
+                    </hc:TimePicker.Clock>
+                </hc:TimePicker>
+            </Grid>
+
+            <!--<hc:DateTimePicker
+
+                SelectedDateTime="{Binding QueryConditions.EndTime, Mode=TwoWay}"
+                Style="{StaticResource DateTimePickerPlus.Small}" />-->
+            <TextBlock
+                Grid.Row="4"
+                Grid.Column="0"
+                Text="A 托盘编号" />
+            <TextBox
+                Grid.Row="4"
+                Grid.Column="1"
+                Width="150"
+                Style="{StaticResource DataGridEditingTextColumnStyle.Small}"
+                Text="{Binding QueryConditions.APalletNo, Mode=TwoWay}" />
+            <TextBlock
+                Grid.Row="4"
+                Grid.Column="2"
+                Text="B 托盘编号" />
+            <TextBox
+                Grid.Row="4"
+                Grid.Column="3"
+                Width="150"
+                Style="{StaticResource DataGridEditingTextColumnStyle.Small}"
+                Text="{Binding QueryConditions.BPalletNo, Mode=TwoWay}" />
+            <TextBlock
+                Grid.Row="6"
+                Grid.Column="0"
+                Text="A NG编号" />
+            <TextBox
+                Grid.Row="6"
+                Grid.Column="1"
+                Width="150"
+                Style="{StaticResource DataGridEditingTextColumnStyle.Small}"
+                Text="{Binding QueryConditions.ANGNo, Mode=TwoWay}" />
+            <TextBlock
+                Grid.Row="6"
+                Grid.Column="2"
+                Text="B NG编号" />
+            <TextBox
+                Grid.Row="6"
+                Grid.Column="3"
+                Width="150"
+                Style="{StaticResource DataGridEditingTextColumnStyle.Small}"
+                Text="{Binding QueryConditions.BNGNo, Mode=TwoWay}" />
+
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="4"
+                Text="模型编号" />
+            <TextBox
+                Grid.Row="2"
+                Grid.Column="5"
+                Width="150"
+                Style="{StaticResource DataGridEditingTextColumnStyle.Small}"
+                Text="{Binding QueryConditions.ModelName, Mode=TwoWay}" />
+
+            <TextBlock
+                Grid.Row="4"
+                Grid.Column="4"
+                Text="OP" />
+            <ComboBox
+                Grid.Row="4"
+                Grid.Column="5"
+                Width="150"
+                SelectedIndex="0"
+                SelectedValue="{Binding QueryConditions.OP, Mode=TwoWay}"
+                Style="{StaticResource ComboBox.Small}">
+                <ComboBoxItem>ALL</ComboBoxItem>
+                <ComboBoxItem>300</ComboBoxItem>
+                <ComboBoxItem>400</ComboBoxItem>
+                <ComboBoxItem>620</ComboBoxItem>
+                <ComboBoxItem>640</ComboBoxItem>
+                <ComboBoxItem>650</ComboBoxItem>
+                <ComboBoxItem>660</ComboBoxItem>
+                <ComboBoxItem>680</ComboBoxItem>
+                <ComboBoxItem>690</ComboBoxItem>
+                <ComboBoxItem>730</ComboBoxItem>
+                <ComboBoxItem>800</ComboBoxItem>
+                <ComboBoxItem>900</ComboBoxItem>
+                <ComboBoxItem>1000</ComboBoxItem>
+                <ComboBoxItem>1110</ComboBoxItem>
+                <ComboBoxItem>1310</ComboBoxItem>
+                <ComboBoxItem>1400</ComboBoxItem>
+                <ComboBoxItem>1500</ComboBoxItem>
+                <ComboBoxItem>1600</ComboBoxItem>
+                <ComboBoxItem>1700</ComboBoxItem>
+            </ComboBox>
+
+            <TextBlock
+                Grid.Row="6"
+                Grid.Column="4"
+                Text="结果" />
+            <ComboBox
+                Grid.Row="6"
+                Grid.Column="5"
+                Width="150"
+                SelectedIndex="0"
+                SelectedValue="{Binding QueryConditions.Result, Mode=TwoWay}">
+                <ComboBoxItem>ALL</ComboBoxItem>
+                <ComboBoxItem>OK</ComboBoxItem>
+                <ComboBoxItem>NG</ComboBoxItem>
+            </ComboBox>
+            <TextBlock
+                Grid.Row="8"
+                Grid.Column="0"
+                Text="序列码" />
+            <TextBox
+                Grid.Row="8"
+                Grid.Column="1"
+                Grid.ColumnSpan="3"
+                Text="{Binding QueryConditions.MarkingNo, Mode=TwoWay}" />
+            <Button
+                Grid.Row="0"
+                Grid.Column="4"
+                Command="{Binding QueryCommand}"
+                Content="查询" />
+            <Button
+                Grid.Row="0"
+                Grid.Column="5"
+                Command="{Binding SaveQueryValueCommand}"
+                Content="导出" />
+        </Grid>
+
+        <DataGrid
+            Grid.Row="1"
+            Margin="0,5"
+            ItemsSource="{Binding QueryValue}">
+            <DataGrid.Columns>
+
+                <DataGridTextColumn Binding="{Binding Name}" Header="序号" />
+                <DataGridTextColumn Binding="{Binding Name}" Header="时间" />
+                <DataGridTextColumn Binding="{Binding Name}" Header="模型编号" />
+                <DataGridTextColumn Binding="{Binding Name}" Header="模型编号" />
+                <DataGridTextColumn Binding="{Binding Name}" Header="模型名称" />
+                <DataGridTextColumn Binding="{Binding Name}" Header="A 托盘编号" />
+                <DataGridTextColumn Binding="{Binding Name}" Header="B 托盘编号" />
+                <DataGridTextColumn Binding="{Binding Name}" Header="MARKING NO" />
+                <DataGridTextColumn Binding="{Binding Name}" Header="结果" />
+                <DataGridTextColumn Binding="{Binding Name}" Header="A线NG编号" />
+                <DataGridTextColumn Binding="{Binding Name}" Header="B线NG编号" />
+
+            </DataGrid.Columns>
+        </DataGrid>
+        <hc:Pagination
+            Grid.Row="2"
+            DataCountPerPage="{Binding PaginationPage.DataCountPerPage}"
+            MaxPageCount="{Binding PaginationPage.MaxPageCount}"
+            PageIndex="{Binding PaginationPage.PageIndex, Mode=TwoWay}">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="PageUpdated">
+                    <i:InvokeCommandAction Command="{Binding PageUpdatedCommand}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </hc:Pagination>
+    </Grid>
+
+</UserControl>

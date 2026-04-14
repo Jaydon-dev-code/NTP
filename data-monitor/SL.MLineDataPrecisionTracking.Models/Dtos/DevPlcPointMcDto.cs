@@ -1,0 +1,43 @@
+﻿using McpXLib.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SL.MLineDataPrecisionTracking.Models.Dtos
+{
+    public class DevPlcPointMcDto
+    {
+  
+
+        public DevPlcPointMcDto(string deviceName, string pointName, string ipAddress, int port, Prefix prefix, TypeCode typeCode, int address, int length)
+        {
+            DeviceName = deviceName;
+            PointName= pointName;
+            IpAddress = ipAddress;
+            Port = port;
+            Prefix= prefix;
+            DataType= typeCode;
+            Address = address;
+            Length = length;
+        }
+
+     
+
+        public string DeviceName { get; set; }
+        public string PointName { get; set; }
+        public string IpAddress { get; set; }     // PLC_IP
+        public int Port { get; set; }             // 端口
+        public Prefix Prefix { get; set; }          // D/M/X/Y
+        public int Address { get; set; }          // 地址
+        public TypeCode DataType { get; set; }      // Int16/Float/Bool
+
+    
+        public int Length { get; set; }
+     
+
+        public List<object> Value { get; set; }
+
+    }
+}
