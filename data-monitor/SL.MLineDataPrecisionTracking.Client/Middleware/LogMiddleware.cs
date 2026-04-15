@@ -14,25 +14,14 @@ namespace SL.MLineDataPrecisionTracking.Client.Middleware
         public static void AddLogMiddleware(this ContainerBuilder services)
         {
 #if DEBUG
-            Log.Logger = new LoggerConfiguration()
-                // 核心：Debug模式才开启Debug级别，否则只记录Info及以上
-                .MinimumLevel.Is(Serilog.Events.LogEventLevel.Debug)
-                // 彻底屏蔽所有系统日志
-                .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Fatal)
-                .MinimumLevel.Override("System", Serilog.Events.LogEventLevel.Fatal)
-                .Enrich.FromLogContext()
-                .WriteTo.File(
-                    path: Path.Combine(AppContext.BaseDirectory, "Logs/log-.txt"),
-                    rollingInterval: RollingInterval.Day,
-                    retainedFileCountLimit: 31,
-                    flushToDiskInterval: TimeSpan.FromSeconds(1),
-                    encoding: System.Text.Encoding.UTF8
-                )
-                .CreateLogger();
+            var minLogEventLevel = Serilog.Events.LogEventLevel.Debug;
 #else
+            var minLogEventLevel = Serilog.Events.LogEventLevel.Information;
+#endif
+
             Log.Logger = new LoggerConfiguration()
                 // 核心：Debug模式才开启Debug级别，否则只记录Info及以上
-                .MinimumLevel.Is(Serilog.Events.LogEventLevel.Information)
+                .MinimumLevel.Is(minLogEventLevel)
                 // 彻底屏蔽所有系统日志
                 .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Fatal)
                 .MinimumLevel.Override("System", Serilog.Events.LogEventLevel.Fatal)
@@ -45,8 +34,6 @@ namespace SL.MLineDataPrecisionTracking.Client.Middleware
                     encoding: System.Text.Encoding.UTF8
                 )
                 .CreateLogger();
-
-#endif
         }
     }
 }
