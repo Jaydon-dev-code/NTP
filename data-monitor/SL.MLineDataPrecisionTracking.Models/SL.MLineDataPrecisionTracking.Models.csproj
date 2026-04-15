@@ -51,9 +51,10 @@
     <Compile Include="Dtos\DevPlcPointMcReadDto.cs" />
     <Compile Include="Dtos\PlcPointImportDto.cs" />
     <Compile Include="Entities\Tb_Equipment.cs" />
+    <Compile Include="Entities\Tb_LineA.cs" />
+    <Compile Include="Entities\TB_LineB.cs" />
     <Compile Include="Entities\Tb_PlcConnection.cs" />
     <Compile Include="Entities\Tb_PlcPoint.cs" />
-    <Compile Include="Entities\Tb_ProductionLineRecords.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
