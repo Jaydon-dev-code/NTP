@@ -2,12 +2,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using McpXLib;
 using McpXLib.Enums;
+using Serilog;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
+using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Dtos;
 
 namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
@@ -15,41 +19,58 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
     public class McpCommunication
     {
         Dictionary<string, McpX> _mcpDic;
+        private readonly object _lockObj = new object();
 
         public McpCommunication()
         {
             _mcpDic = new Dictionary<string, McpX>();
         }
 
-        McpX GetMcp(string ipAddress, int port)
+         McpX GetMcp(string ipAddress, int port)
         {
-            if (_mcpDic.TryGetValue(ipAddress + port, out McpX mcp))
+            string key = $"{ipAddress}:{port}";
+
+            lock (_lockObj) // 多线程安全必须加
             {
-                return mcp;
-            }
-            else
-            {
-                var mcpAdd = new McpX(ipAddress, port);
-                _mcpDic.Add(ipAddress + port, mcpAdd);
-                return mcpAdd;
+                // 1. 存在就先返回
+                if (_mcpDic.TryGetValue(key, out McpX mcp))
+                {
+                    return mcp;
+                }
+
+                // 2. 不存在就创建
+                var newMcp = new McpX(ipAddress, port);
+                _mcpDic[key] = newMcp;
+                return newMcp;
             }
         }
 
-        public async Task<List<DevPlcPointMcDto>> ReadAsync(List<DevPlcPointMcDto> lineReadPlcInfo)
+        public async Task<Result<List<DevPlcPointMcDto>>> ReadAsync(
+            List<DevPlcPointMcDto> lineReadPlcInfo
+        )
         {
             var re = await ReadAsync(
                 lineReadPlcInfo
-                    .Select(x => new DevPlcPointMcReadDto(x,x.DataType.GetTypeOfShortOffset()))
+                    .Select(x => new DevPlcPointMcReadDto(x, x.DataType.GetTypeOfShortOffset()))
                     .ToList()
             );
-            for (int i = 0; i < lineReadPlcInfo.Count; i++)
+            if (re.IsSuccess is false)
             {
-                lineReadPlcInfo[i].Value = re[i].Value;
+                return Result<List<DevPlcPointMcDto>>.Fail(re.Message);
             }
-            return lineReadPlcInfo;
+            else
+            {
+                for (int i = 0; i < lineReadPlcInfo.Count; i++)
+                {
+                    lineReadPlcInfo[i].Value = re.Data[i].Value;
+                }
+                return Result<List<DevPlcPointMcDto>>.Success(lineReadPlcInfo);
+            }
         }
 
-        async Task<List<DevPlcPointMcReadDto>> ReadAsync(List<DevPlcPointMcReadDto> lineReadPlcInfo)
+        async Task<Result<List<DevPlcPointMcReadDto>>> ReadAsync(
+            List<DevPlcPointMcReadDto> lineReadPlcInfo
+        )
         {
             try
             {
@@ -64,42 +85,64 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                     var startAddre = group.Min(x => x.Address);
                     var endAddressInfo = group.OrderByDescending(x => x.Address).First();
                     //mcpx 是按照short 也就是可读取最小寄存器 来解析的所以要加上shourt偏移
-                    var lenght = endAddressInfo.Address+(endAddressInfo.Length * endAddressInfo.ShortOffset) - startAddre;
-                    var mcp = GetMcp(group.Key.IpAddress, group.Key.Port);
+                    var lenght =
+                        endAddressInfo.Address
+                        + (endAddressInfo.Length * endAddressInfo.ShortOffset)
+                        - startAddre;
+
                     var readValue = await PaginatedReading(
+                        group.Key.IpAddress,
+                        group.Key.Port,
                         group.Key.Prefix,
                         startAddre,
-                        lenght,
-                        mcp
+                        lenght
                     );
-                    foreach (DevPlcPointMcReadDto item in group)
+                    if (readValue.IsSuccess is false)
                     {
-                        item.Value = readValue.ConvertToValues(
-                           ( item.Address- startAddre)*item.ShortOffset,
-                            item.DataType,
-                            item.Length
-                        );
+                        byte[] bytes = new byte[lenght*2];
+                        foreach (DevPlcPointMcReadDto item in group)
+                        {
+                            item.Value = bytes.ConvertToValues(
+                                (item.Address - startAddre) * item.ShortOffset,
+                                item.DataType,
+                                item.Length
+                            );
+                        }
+                    }
+                    else
+                    {
+                        foreach (DevPlcPointMcReadDto item in group)
+                        {
+                            item.Value = readValue.Data.ConvertToValues(
+                                (item.Address - startAddre) * item.ShortOffset,
+                                item.DataType,
+                                item.Length
+                            );
+                        }
                     }
                 }
-                return lineReadPlcInfo;
+                return Result<List<DevPlcPointMcReadDto>>.Success(lineReadPlcInfo);
             }
             catch (Exception ex)
             {
-                throw;
+                Log.Warning("[Mcp通讯异常]解析数据错误：{ex.Message}", ex.Message);
+                return Result<List<DevPlcPointMcReadDto>>.Fail(ex.Message);
             }
         }
 
-        private async Task<byte[]> PaginatedReading(
+        private async Task<Result<byte[]>> PaginatedReading(
+            string ipAddress,
+            int port,
             Prefix prefix,
             int startAddre,
-            int lenght,
-            McpX mcp
+            int lenght
         )
         {
+            Result<byte[]> result = new Result<byte[]>() { IsSuccess = true };
             // 开始地址
-            long currentAddress = startAddre;
+            int currentAddress = startAddre;
             // 剩余长度
-            long remaining = lenght;
+            int remaining = lenght;
             // 存储所有读取结果
             List<byte> allData = new List<byte>();
 
@@ -111,10 +154,11 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
 
                 try
                 {
-                    // 调用你的读取方法
-                    var data = await mcp.BatchReadByteAsync(
+                    var data = await ReadWithRetry(
+                        ipAddress,
+                        port,
                         prefix,
-                        currentAddress.ToString(),
+                        currentAddress,
                         readLen
                     );
 
@@ -123,9 +167,17 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                 }
                 catch (Exception ex)
                 {
+                    Log.Warning(
+                        "[Mcp通讯异常]读取信息：{ipAddress}-{port}-{prefix}-{startAddre}-{lenght}。\r\n{ex}",
+                        ipAddress,
+                        port,
+                        prefix,
+                        startAddre,
+                        lenght,
+                        ex
+                    );
                     allData.AddRange(new byte[readLen]);
-
-                    throw;
+                    result.IsSuccess = false;
                 }
 
                 // 偏移地址
@@ -133,63 +185,65 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                 // 减少剩余长度
                 remaining -= readLen;
             }
-
+            result.Data = allData.ToArray();
             // 最终所有数据在这里
-            return allData.ToArray();
+            return result;
         }
 
-        //    void Read(List<PlcPointMcReadDto> variables)
-        //    {
-        //        // 2. 自动计算每个变量的Byte长度 + 连续起始索引（关键）
-        //        int currentIndex = 0;
-        //        foreach (var variable in variables)
-        //        {
-        //            variable.ByteLength = variable.DataType.GetTypeByteLength();
-        //            variable.ByteStartIndex = currentIndex;
-        //            currentIndex += variable.ByteLength;
-        //        }
+        private void MarkMcpInvalid(string ipAddress, int port)
+        {
+            string key = $"{ipAddress}:{port}";
 
-        //        // 3. 【最优】一次性读取总长度的Byte数组
-        //        // 这里替换成你的MCP库读取Byte方法
-        //        byte[] plcRawData = ReadPlcBytes("DB1", 0, currentIndex);
+            lock (_lockObj)
+            {
+                if (_mcpDic.TryGetValue(key, out var oldMcp))
+                {
+                    try
+                    {
+                        oldMcp.Dispose();
+                        _mcpDic.Remove(key);
+                    }
+                    catch { }
+                }
+            }
+        }
 
-        //        // 4. 批量解析：Byte数组 → 对应数据类型
-        //        foreach (var variable in variables)
-        //        {
-        //            variable.Value = PlcByteConverter.ConvertToValue(
-        //                plcRawData,
-        //                variable.ByteStartIndex,
-        //                variable.DataType
-        //            );
-        //        }
+        /// <summary>
+        /// 带重试 + 自动重建连接的读取
+        /// </summary>
+        async Task<byte[]> ReadWithRetry(
+            string ipAddress,
+            int port,
+            Prefix prefix,
+            int currentAddress,
+            ushort readLen,
+            int maxRetry = 3, // 最多重试次数
+            int retryInterval = 300
+        ) // 重试间隔毫秒
+        {
+            for (int i = 0; i < maxRetry; i++)
+            {
+                try
+                {
+                    // 调用纯业务方法
+                    return await GetMcp(ipAddress, port)
+                        .BatchReadByteAsync(prefix, currentAddress.ToString(), readLen);
+                }
+                catch (Exception ex)
+                {
+                    // 最后一次还失败 → 不重试了
+                    if (i == maxRetry - 1)
+                        throw new Exception($"读取失败，已重试{maxRetry}次：{ex.Message}", ex);
 
-        //    //McpX GetMcp(McpLinkInfo mcpLinkInfo)
-        //    //{
-        //    //    if (_mcpDic.TryGetValue($"{mcpLinkInfo.Ip}{mcpLinkInfo.Port}", out McpX re))
-        //    //    {
-        //    //        return re;
-        //    //    }
-        //    //    else
-        //    //    {
-        //    //        var mcpx = new McpX(mcpLinkInfo.Ip, mcpLinkInfo.Port, isAscii: mcpLinkInfo.IsAscii);
-        //    //        _mcpDic.Add($"{mcpLinkInfo.Ip}{mcpLinkInfo.Port}", mcpx);
-        //    //        mcpx.Read<byte>
-        //    //        return mcpx;
-        //    //    }
-        //    //}
-        //    //public void Read()
-        //    //{
-        //    //    using (var mcpx = new McpX("127.0.0.1", 6000))
-        //    //    {
-        //    //        // Read 7000 points starting from M0
+                    // 出现异常 → 标记连接失效（下次自动新建）
+                    MarkMcpInvalid(ipAddress, port);
 
-        //    //        // Read 7000 words starting from D1000
-        //    //        short[] dArr = mcpx.BatchRead<short>(Prefix.D, "120", 1);
+                    // 等待后重试
+                    await Task.Delay(retryInterval);
+                }
+            }
 
-        //    //        // Write 1234 to D0 and 5678 to D1 as signed 32-bit integers
-        //    //        mcpx.BatchWrite<int>(Prefix.D, "120", [1234]);
-        //    //    }
-        //    //}
-        //}
+            throw new Exception("重试失败");
+        }
     }
 }
