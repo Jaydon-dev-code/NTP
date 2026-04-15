@@ -1,7 +1,7 @@
 ﻿using Autofac;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
-using SL.MLineDataPrecisionTracking.Client.Middleware;
+using SL.MLineDataPrecisionTracking.Core.Middleware;
 using System;
 
 namespace UnitTestProject
