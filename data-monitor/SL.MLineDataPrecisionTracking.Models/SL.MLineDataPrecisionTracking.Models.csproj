@@ -45,6 +45,8 @@
     <Compile Include="Domain\MenuItem.cs" />
     <Compile Include="Domain\PaginationPage.cs" />
     <Compile Include="Domain\RefinedSearchCriteria.cs" />
+    <Compile Include="Domain\Result.cs" />
+    <Compile Include="Domain\ScanRecord.cs" />
     <Compile Include="Dtos\DevPlcPointMcDto.cs" />
     <Compile Include="Dtos\DevPlcPointMcReadDto.cs" />
     <Compile Include="Dtos\PlcPointImportDto.cs" />
@@ -55,6 +57,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm">
+      <Version>8.4.2</Version>
+    </PackageReference>
     <PackageReference Include="McpX">
       <Version>0.6.0</Version>
     </PackageReference>

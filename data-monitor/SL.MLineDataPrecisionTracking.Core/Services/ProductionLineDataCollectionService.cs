@@ -32,7 +32,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                 try
                 {
                     await InitPlcAddre();
-                  var readValue=   await _mcpCommunication.ReadAsync(_lineReadPlcInfo);
+                  //var readValue=   await _mcpCommunication.ReadAsync(_lineReadPlcInfo);
                    
 
                 }

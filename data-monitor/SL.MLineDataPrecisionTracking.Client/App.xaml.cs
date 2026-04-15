@@ -40,7 +40,17 @@ namespace SL.MLineDataPrecisionTracking.Client
             Container = builder.Build();
 
             // 5. 从容器解析主窗口（关键！这样才能自动注入）
+
             var mainWindow = Container.Resolve<MainWindow>();
+           //调试模式强行顶置会 卡
+#if DEBUG
+            mainWindow.Topmost = false;
+
+#else
+            mainWindow.Topmost = true;
+
+#endif
+
             mainWindow.Closing += MainWindow_Closing;
             mainWindow.Show();
         }
@@ -69,12 +79,12 @@ namespace SL.MLineDataPrecisionTracking.Client
         {
             e.Handled = true; // 关键：标记已处理，程序不闪退
 
-            HandyControl.Controls.MessageBox.Show(
-                $"UI异常，请联系管理员。",
-                "错误",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error
-            );
+            //HandyControl.Controls.MessageBox.Show(
+            //    $"UI异常，请联系管理员。",
+            //    "错误",
+            //    MessageBoxButton.OK,
+            //    MessageBoxImage.Error
+            //);
             Log.Error("UI异常，请联系管理员。\r\n{e}", e);
         }
 
@@ -89,7 +99,7 @@ namespace SL.MLineDataPrecisionTracking.Client
                     MessageBoxButton.OK,
                     MessageBoxImage.Stop
                 );
-             Log.Error("全局异常，请联系管理员。\r\n{ex}", ex );
+                Log.Error("全局异常，请联系管理员。\r\n{ex}", ex);
             }
 
             // 这里可以加日志保存

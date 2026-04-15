@@ -156,6 +156,9 @@
     <PackageReference Include="SqlSugar">
       <Version>5.1.4.207</Version>
     </PackageReference>
+    <PackageReference Include="ValueConverters">
+      <Version>3.1.22</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Image\ProductionRecord.png">

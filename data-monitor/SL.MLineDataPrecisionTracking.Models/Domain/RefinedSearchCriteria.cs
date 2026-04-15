@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace SL.MLineDataPrecisionTracking.Models.Domain
 {
-    public class RefinedSearchCriteria
+    public class RefinedSearchCriteria 
     {
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
@@ -21,5 +23,6 @@ namespace SL.MLineDataPrecisionTracking.Models.Domain
         public string Op { get; set; }
         public string Result { get; set; }
         public string MarkingNo { get; set; }
+        public bool IsScanCode { get; set; }
     }
 }
