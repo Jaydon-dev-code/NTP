@@ -65,8 +65,6 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Middleware\LogMiddleware.cs" />
-    <Compile Include="Middleware\SqlSugerMiddleware.cs" />
     <Compile Include="Middleware\ViewMiddleware.cs" />
     <Compile Include="ViewModel\Control\DeviceCollectionConfigViewModel.cs" />
     <Compile Include="ViewModel\Control\MeticulousPursuitViewModel.cs" />
@@ -82,8 +80,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Middleware\CoreMiddleware.cs" />
-    <Compile Include="Middleware\InfrastructureMiddleware.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

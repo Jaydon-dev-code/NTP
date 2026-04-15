@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Autofac;
 using Serilog;
 
-namespace SL.MLineDataPrecisionTracking.Client.Middleware
+namespace SL.MLineDataPrecisionTracking.Core.Middleware
 {
     public static class LogMiddleware
     {

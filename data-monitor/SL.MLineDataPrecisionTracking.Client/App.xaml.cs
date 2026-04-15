@@ -79,12 +79,12 @@ namespace SL.MLineDataPrecisionTracking.Client
         {
             e.Handled = true; // 关键：标记已处理，程序不闪退
 
-            //HandyControl.Controls.MessageBox.Show(
-            //    $"UI异常，请联系管理员。",
-            //    "错误",
-            //    MessageBoxButton.OK,
-            //    MessageBoxImage.Error
-            //);
+            HandyControl.Controls.MessageBox.Show(
+                $"UI异常，请联系管理员。",
+                "错误",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
             Log.Error("UI异常，请联系管理员。\r\n{e}", e);
         }
 

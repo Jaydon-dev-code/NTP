@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="SL.MLineDataPrecisionTracking.Api.Tests/SL.MLineDataPrecisionTracking.Api.Tests.csproj" Id="591de4b7-f418-492c-9df0-a4edcff762d8" />
+  <Project Path="SL.MLineDataPrecisionTracking.Api/SL.MLineDataPrecisionTracking.Api.csproj" Id="f5e372b0-7e73-4095-be12-f69cd02a3a2f" />
   <Project Path="SL.MLineDataPrecisionTracking.Client/SL.MLineDataPrecisionTracking.Client.csproj" Id="63bae626-1915-4b19-acbd-bd8100c857ca" />
   <Project Path="SL.MLineDataPrecisionTracking.Core/SL.MLineDataPrecisionTracking.Core.csproj" Id="c6e4debd-0906-4151-8c22-478c0d5328ec" />
   <Project Path="SL.MLineDataPrecisionTracking.Infrastructure/SL.MLineDataPrecisionTracking.Infrastructure.csproj" Id="de4bbdb9-afdf-4418-be33-93c52cf53764" />
