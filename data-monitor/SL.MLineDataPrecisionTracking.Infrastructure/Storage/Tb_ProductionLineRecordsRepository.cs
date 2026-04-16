@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
 {
-    public class Tb_ProductionLineRecordsRepository : BaseRepository<Tb_ProductionLineRecords>
-    {
-        public Tb_ProductionLineRecordsRepository(ISqlSugarClient db) : base(db)
-        {
-        }
-    }
+    //public class Tb_ProductionLineRecordsRepository : BaseRepository<Tb_ProductionLineRecords>
+    //{
+    //    public Tb_ProductionLineRecordsRepository(ISqlSugarClient db) : base(db)
+    //    {
+    //    }
+    //}
 }

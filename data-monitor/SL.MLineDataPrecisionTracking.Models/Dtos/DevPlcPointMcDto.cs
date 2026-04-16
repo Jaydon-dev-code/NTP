@@ -11,7 +11,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
     {
   
 
-        public DevPlcPointMcDto(string deviceName, string pointName, string ipAddress, int port, Prefix prefix, TypeCode typeCode, int address, int length)
+        public DevPlcPointMcDto(string deviceName, string pointName, string ipAddress, int port, Prefix prefix, TypeCode typeCode, int address, int length,List<object> value=null)
         {
             DeviceName = deviceName;
             PointName= pointName;
@@ -21,6 +21,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
             DataType= typeCode;
             Address = address;
             Length = length;
+            Value = value;
         }
 
      
