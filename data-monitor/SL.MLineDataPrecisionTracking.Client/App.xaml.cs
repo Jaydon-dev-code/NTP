@@ -11,6 +11,8 @@ using Serilog;
 using SL.MLineDataPrecisionTracking.Client.Middleware;
 using SL.MLineDataPrecisionTracking.Client.View;
 using SL.MLineDataPrecisionTracking.Core.Middleware;
+using SL.MLineDataPrecisionTracking.Core.Services;
+using SqlSugar;
 
 namespace SL.MLineDataPrecisionTracking.Client
 {
@@ -40,6 +42,8 @@ namespace SL.MLineDataPrecisionTracking.Client
             Container = builder.Build();
 
             // 5. 从容器解析主窗口（关键！这样才能自动注入）
+
+            //Container.Resolve<ProLineDataCollectionService>().ExecuteAsync(new System.Threading.CancellationToken());
 
             var mainWindow = Container.Resolve<MainWindow>();
            //调试模式强行顶置会 卡

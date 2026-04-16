@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -37,6 +38,14 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
                     throw new NotSupportedException($"不支持的数据类型: {type.Name}");
             }
             return typeSize;
+        }
+
+        static DataTable _dataTable = new DataTable();
+
+        public static object StringCompute(this string expression, params string[] param)
+        {
+            var format = string.Format(expression, param);
+            return _dataTable.Compute(format, string.Empty);
         }
 
         public static int GetTypeOfShortOffset(this TypeCode type)
@@ -159,14 +168,19 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
         /// <param name="type">数据类型</param>
         /// <param name="length">数组长度（几个元素）</param>
         /// <returns>对应类型的数组（object装着）</returns>
-        public static List<object> ConvertToValues(this byte[] buffer, int startIndex, TypeCode type, int length = 1)
+        public static List<object> ConvertToValues(
+            this byte[] buffer,
+            int startIndex,
+            TypeCode type,
+            int length = 1
+        )
         {
             switch (type)
             {
                 case TypeCode.Boolean:
                     return ParseArray(buffer, startIndex, length, GetTypeByteLength(type), type);
                 case TypeCode.Byte:
-                    return ParseArray(buffer, startIndex, length, GetTypeByteLength(type),type);
+                    return ParseArray(buffer, startIndex, length, GetTypeByteLength(type), type);
                 case TypeCode.Int16:
                     return ParseArray(buffer, startIndex, length, GetTypeByteLength(type), type);
                 case TypeCode.UInt16:
@@ -187,10 +201,16 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
         /// <summary>
         /// 通用数组解析（自动步进字节）
         /// </summary>
-        private static List<object> ParseArray(byte[] buffer, int startIndex, int count, int typeByteSize, TypeCode type)
+        private static List<object> ParseArray(
+            byte[] buffer,
+            int startIndex,
+            int count,
+            int typeByteSize,
+            TypeCode type
+        )
         {
-            List<object> list=new List<object>();
-      
+            List<object> list = new List<object>();
+
             for (int i = 0; i < count; i++)
             {
                 int index = startIndex + i * typeByteSize;
@@ -223,7 +243,6 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
                 default:
                     throw new NotSupportedException($"不支持解析类型: {type}");
             }
-       
         }
 
         /// <summary>
@@ -247,6 +266,5 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
                 throw new NotSupportedException($"不支持解析类型: {result}");
             }
         }
-
     }
 }

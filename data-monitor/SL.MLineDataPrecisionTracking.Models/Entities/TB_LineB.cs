@@ -16,42 +16,42 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// <summary>
         /// 型号
         /// </summary>
-        public string Model { get; set; }
+        public int Model { get; set; }
 
         /// <summary>
         /// 屏蔽工位
         /// </summary>
-        public string ShieldStation { get; set; }
+        public int ShieldStation { get; set; }
 
         /// <summary>
         /// NG代码
         /// </summary>
-        public string NgCode { get; set; }
+        public int NgCode { get; set; }
 
         /// <summary>
         /// A线托盘编号
         /// </summary>
-        public string LineATrayNo { get; set; }
+        public int LineATrayNo { get; set; }
 
         /// <summary>
         /// 识别代码
         /// </summary>
-        public string IdentificationCode { get; set; }
+        public int IdentificationCode { get; set; }
 
         /// <summary>
         /// 正游隙检测值
         /// </summary>
-        public decimal? PositiveClearanceValue { get; set; }
+        public int PositiveClearanceValue { get; set; }
 
         /// <summary>
         /// 位移量
         /// </summary>
-        public decimal? DisplacementValue { get; set; }
+        public int DisplacementValue { get; set; }
 
         /// <summary>
         /// 负游隙检测值
         /// </summary>
-        public decimal? NegativeClearanceValue { get; set; }
+        public int NegativeClearanceValue { get; set; }
 
         /// <summary>
         /// 铆接前成型高度

@@ -35,7 +35,6 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         /// </summary>
         public async Task<bool> ImportPlcPointsAsync(string excelPath)
         {
-           
             try
             {
                 var list = ReadExcel(excelPath);
@@ -54,18 +53,20 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                     int port = group.Key.Port;
 
                     // 1. 找设备，没有就新增
-                    var device = await _equipmentRepository.QueryableFirstAsync(x => x.DeviceName == deviceName);
+                    var device = await _equipmentRepository.QueryableFirstAsync(x =>
+                        x.DeviceName == deviceName
+                    );
 
                     if (device == null)
                     {
-                        device = new Tb_Equipment (){  DeviceName=deviceName };
-                      await  _equipmentRepository.InsertableAsync(device);
+                        device = new Tb_Equipment() { DeviceName = deviceName };
+                        await _equipmentRepository.InsertableAsync(device);
                     }
 
                     // 2. 找PLC连接，没有就新增
-                    var plc  = await _plcConnectionRepository.QueryableFirstAsync(x =>
-                            x.EquipmentId == device.Id && x.IpAddress == ip && x.Port == port
-                        );
+                    var plc = await _plcConnectionRepository.QueryableFirstAsync(x =>
+                        x.EquipmentId == device.Id && x.IpAddress == ip && x.Port == port
+                    );
 
                     if (plc == null)
                     {
@@ -77,7 +78,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                             PlcType = "三菱",
                             NetworkType = "MC",
                         };
-                     await   _plcConnectionRepository.InsertableAsync(plc);
+                        await _plcConnectionRepository.InsertableAsync(plc);
                     }
 
                     // 3. 批量插入点位
@@ -91,10 +92,12 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                             Address = x.Address,
                             DataType = x.DataType,
                             Length = x.Length,
+                            WriteFormula = x.WriteFormula,
+                            ReadFormula = x.ReadFormula,
                         })
                         .ToList();
 
-                    await  _plcPointRepository.InsertableAsync(points);
+                    await _plcPointRepository.InsertableAsync(points);
                 }
             }
             catch (Exception ex)
@@ -107,11 +110,13 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         /// <summary>
         /// 读取Excel
         /// </summary>
-         List<PlcPointImportDto> ReadExcel(string path)
+        List<PlcPointImportDto> ReadExcel(string path)
         {
             var list = new List<PlcPointImportDto>();
 
-            using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (
+                var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
+            )
             {
                 IWorkbook workbook = new XSSFWorkbook(fs);
                 ISheet sheet = workbook.GetSheetAt(0);
@@ -134,6 +139,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                         Address = int.TryParse(row.GetCell(6)?.ToString(), out int addr) ? addr : 0,
                         DataType = row.GetCell(7)?.ToString()?.Trim(),
                         Length = int.TryParse(row.GetCell(8)?.ToString(), out int len) ? len : 1,
+                        ReadFormula = row.GetCell(9)?.ToString()?.Trim(),
+                        WriteFormula = row.GetCell(10)?.ToString()?.Trim(),
                     };
 
                     if (!string.IsNullOrEmpty(dto.PointName) && !string.IsNullOrEmpty(dto.Area))
@@ -142,7 +149,6 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
 
                 return list;
             }
-         
         }
     }
 }

@@ -1,9 +1,9 @@
-﻿using SqlSugar;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SqlSugar;
 
 namespace SL.MLineDataPrecisionTracking.Models.Entities
 {
@@ -37,6 +37,12 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         public int Length { get; set; } = 1;
 
         public int Sort { get; set; }
+
+        /// <summary>
+        /// 下发公式
+        /// </summary>
+        public string WriteFormula { get; set; } = "";
+        public string ReadFormula { get; set; } = "";
         public string Remark { get; set; } = "";
     }
 }

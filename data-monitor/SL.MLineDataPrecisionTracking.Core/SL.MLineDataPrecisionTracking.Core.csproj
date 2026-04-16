@@ -137,8 +137,10 @@
     <Compile Include="Middleware\LogMiddleware.cs" />
     <Compile Include="Middleware\SqlSugerMiddleware.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\A_ProLineDataCollectionService.cs" />
+    <Compile Include="Services\B_ProLineDataCollectionService.cs" />
     <Compile Include="Services\PlcAddressExcelImportService.cs" />
-    <Compile Include="Services\ProductionLineDataCollectionService.cs" />
+    <Compile Include="Services\ProLineDataCollectionServiceAbstract.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SL.MLineDataPrecisionTracking.Infrastructure\SL.MLineDataPrecisionTracking.Infrastructure.csproj">

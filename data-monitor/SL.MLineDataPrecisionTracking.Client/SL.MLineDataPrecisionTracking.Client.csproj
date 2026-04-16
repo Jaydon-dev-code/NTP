@@ -146,8 +146,8 @@
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf">
       <Version>1.1.142</Version>
     </PackageReference>
-    <PackageReference Include="MySql.Data">
-      <Version>9.6.0</Version>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>13.0.4</Version>
     </PackageReference>
     <PackageReference Include="SqlSugar">
       <Version>5.1.4.207</Version>
@@ -168,6 +168,11 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Common\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Packages\Npgsql.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

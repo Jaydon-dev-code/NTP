@@ -18,5 +18,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         public int Address { get; set; }          // 地址
         public string DataType { get; set; }      // Int16/Float/Bool
         public int Length { get; set; }
+        public string WriteFormula { get; set; } = "";
+        public string ReadFormula { get; set; } = "";
     }
 }

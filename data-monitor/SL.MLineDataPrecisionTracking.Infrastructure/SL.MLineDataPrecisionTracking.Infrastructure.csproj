@@ -47,6 +47,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Storage\BaseRepository.cs" />
     <Compile Include="Storage\Tb_EquipmentRepository.cs" />
+    <Compile Include="Storage\Tb_LineARepository.cs" />
+    <Compile Include="Storage\Tb_LineBRepository.cs" />
     <Compile Include="Storage\Tb_PlcConnectionRepository.cs" />
     <Compile Include="Storage\Tb_PlcPointRepository.cs" />
     <Compile Include="Storage\Tb_ProductionLineRecordsRepository.cs" />
