@@ -47,10 +47,10 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         }
         public DateTime RecordTime { get; set; } = DateTime.Now;
 
-        [SugarColumn(ColumnDescription = "型号名称A")]
+        [Description( "型号名称A")]
         public string ModelNameA { get; set; }
 
-        [SugarColumn(ColumnDescription = "型号名称B")]
+        [Description("型号名称B")]
         public string ModelNameB { get; set; }
 
         /// <summary>
