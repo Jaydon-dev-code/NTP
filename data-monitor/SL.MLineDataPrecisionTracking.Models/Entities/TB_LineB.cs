@@ -16,10 +16,15 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         public DateTime RecordTime { get; set; } = DateTime.Now;
 
         /// <summary>
+        /// 托盘号
+        /// </summary>
+        [SugarColumn(ColumnDescription = "托盘号B")]
+        public int TrayNoB { get; set; }
+        /// <summary>
         /// 型号
         /// </summary>
-        [SugarColumn(ColumnDescription = "型号")]
-        public int ModelNo { get; set; }
+        [SugarColumn(ColumnDescription = "型号B")]
+        public int ModelNoB { get; set; }
 
         /// <summary>
         /// 屏蔽工位
@@ -67,37 +72,37 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// 铆接前成型高度
         /// </summary>
         [SugarColumn(ColumnDescription = "铆接前成型高度")]
-        public decimal PreRivetingHeight { get; set; }
+        public float PreRivetingHeight { get; set; }
 
         /// <summary>
         /// 铆接成型力
         /// </summary>
         [SugarColumn(ColumnDescription = "铆接成型力")]
-        public decimal RivetingForce { get; set; }
+        public float RivetingForce { get; set; }
 
         /// <summary>
         /// 铆接成型位移
         /// </summary>
         [SugarColumn(ColumnDescription = "铆接成型位移")]
-        public decimal RivetingDisplacement { get; set; }
+        public float RivetingDisplacement { get; set; }
 
         /// <summary>
         /// 铆接后成型高度
         /// </summary>
         [SugarColumn(ColumnDescription = "铆接后成型高度")]
-        public decimal PostRivetingHeight { get; set; }
+        public float PostRivetingHeight { get; set; }
 
         /// <summary>
         /// 铆接后成型形状
         /// </summary>
         [SugarColumn(ColumnDescription = "铆接后成型形状")]
-        public string PostRivetingShape { get; set; }
+        public float PostRivetingShape { get; set; }
 
         /// <summary>
         /// 铆接后成型外径
         /// </summary>
         [SugarColumn(ColumnDescription = "铆接后成型外径")]
-        public decimal PostRivetingOuterDiameter { get; set; }
+        public float PostRivetingOuterDiameter { get; set; }
 
         /// <summary>
         /// 二维码打标内容
@@ -109,31 +114,31 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// 径跳值
         /// </summary>
         [SugarColumn(ColumnDescription = "径跳值")]
-        public decimal RadialRunout { get; set; }
+        public float RadialRunout { get; set; }
 
         /// <summary>
         /// 端跳值
         /// </summary>
         [SugarColumn(ColumnDescription = "端跳值")]
-        public decimal EndRunout { get; set; }
+        public float EndRunout { get; set; }
 
         /// <summary>
         /// 扭矩检测值
         /// </summary>
         [SugarColumn(ColumnDescription = "扭矩检测值")]
-        public decimal TorqueValue { get; set; }
+        public float TorqueValue { get; set; }
 
         /// <summary>
         /// ABS检测峰值
         /// </summary>
         [SugarColumn(ColumnDescription = "ABS检测峰值")]
-        public decimal AbsPeakValue { get; set; }
+        public float AbsPeakValue { get; set; }
 
         /// <summary>
         /// ABS检测谷值
         /// </summary>
         [SugarColumn(ColumnDescription = "ABS检测谷值")]
-        public decimal AbsValleyValue { get; set; }
+        public float AbsValleyValue { get; set; }
 
         /// <summary>
         /// ABS检测齿数
@@ -145,96 +150,96 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// 密封圈压装压力
         /// </summary>
         [SugarColumn(ColumnDescription = "密封圈压装压力")]
-        public decimal SealRingPressPressure { get; set; }
+        public float SealRingPressPressure { get; set; }
 
         /// <summary>
         /// 密封圈压装位移
         /// </summary>
         [SugarColumn(ColumnDescription = "密封圈压装位移B")]
-        public decimal SealRingPressDisplacementB { get; set; }
+        public float SealRingPressDisplacementB { get; set; }
 
         /// <summary>
         /// 齿圈压装压力
         /// </summary>
         [SugarColumn(ColumnDescription = "齿圈压装压力")]
-        public decimal GearRingPressPressure { get; set; }
+        public float GearRingPressPressure { get; set; }
 
         /// <summary>
         /// 齿圈压装位移
         /// </summary>
         [SugarColumn(ColumnDescription = "齿圈压装位移")]
-        public decimal GearRingPressDisplacement { get; set; }
+        public float GearRingPressDisplacement { get; set; }
 
         /// <summary>
         /// 防尘盖压装压力
         /// </summary>
         [SugarColumn(ColumnDescription = "防尘盖压装压力")]
-        public decimal DustCoverPressPressure { get; set; }
+        public float DustCoverPressPressure { get; set; }
 
         /// <summary>
         /// 防尘盖压装位移
         /// </summary>
         [SugarColumn(ColumnDescription = "防尘盖压装位移")]
-        public decimal DustCoverPressDisplacement { get; set; }
+        public float DustCoverPressDisplacement { get; set; }
 
         /// <summary>
         /// 磁性圈平行差检测传感器1
         /// </summary>
         [SugarColumn(ColumnDescription = "磁性圈平行差检测传感器1")]
-        public decimal MagneticRingParallelSensor1 { get; set; }
+        public float MagneticRingParallelSensor1 { get; set; }
 
         /// <summary>
         /// 磁性圈平行差检测传感器2
         /// </summary>
         [SugarColumn(ColumnDescription = "磁性圈平行差检测传感器2")]
-        public decimal MagneticRingParallelSensor2 { get; set; }
+        public float MagneticRingParallelSensor2 { get; set; }
 
         /// <summary>
         /// 磁性圈平行差检测传感器3
         /// </summary>
         [SugarColumn(ColumnDescription = "磁性圈平行差检测传感器3")]
-        public decimal MagneticRingParallelSensor3 { get; set; }
+        public float MagneticRingParallelSensor3 { get; set; }
 
         /// <summary>
         /// 磁性圈平行差
         /// </summary>
         [SugarColumn(ColumnDescription = "磁性圈平行差")]
-        public decimal MagneticRingParallelDiff { get; set; }
+        public float MagneticRingParallelDiff { get; set; }
 
         /// <summary>
         /// 振动下LOAD
         /// </summary>
         [SugarColumn(ColumnDescription = "振动下LOAD")]
-        public decimal VibrationLowerLOAD { get; set; }
+        public float VibrationLowerLOAD { get; set; }
 
         /// <summary>
         /// 振动下LH
         /// </summary>
         [SugarColumn(ColumnDescription = "振动下LH")]
-        public decimal VibrationLowerLH { get; set; }
+        public float VibrationLowerLH { get; set; }
 
         /// <summary>
         /// 振动下RH
         /// </summary>
         [SugarColumn(ColumnDescription = "振动下RH")]
-        public decimal VibrationLowerRH { get; set; }
+        public float VibrationLowerRH { get; set; }
 
         /// <summary>
         /// 振动上LOAD
         /// </summary>
         [SugarColumn(ColumnDescription = "振动上LOAD")]
-        public decimal VibrationUpperLOAD { get; set; }
+        public float VibrationUpperLOAD { get; set; }
 
         /// <summary>
         /// 振动上LH
         /// </summary>
         [SugarColumn(ColumnDescription = "振动上LH")]
-        public decimal VibrationUpperLH { get; set; }
+        public float VibrationUpperLH { get; set; }
 
         /// <summary>
         /// 振动上RH
         /// </summary>
         [SugarColumn(ColumnDescription = "振动上RH")]
-        public decimal VibrationUpperRH { get; set; }
+        public float VibrationUpperRH { get; set; }
     }
 }
