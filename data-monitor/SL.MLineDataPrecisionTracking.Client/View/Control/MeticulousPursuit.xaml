@@ -170,7 +170,7 @@
                 Style="{StaticResource DataGridEditingTextColumnStyle.Small}"
                 Text="{Binding QueryConditions.ModelName, Mode=TwoWay}" />
 
-            <TextBlock
+            <!--<TextBlock
                 Grid.Row="4"
                 Grid.Column="4"
                 Text="OP" />
@@ -201,9 +201,9 @@
                 <ComboBoxItem>1500</ComboBoxItem>
                 <ComboBoxItem>1600</ComboBoxItem>
                 <ComboBoxItem>1700</ComboBoxItem>
-            </ComboBox>
+            </ComboBox>-->
 
-            <TextBlock
+            <!--<TextBlock
                 Grid.Row="6"
                 Grid.Column="4"
                 Text="结果" />
@@ -217,7 +217,7 @@
                 <ComboBoxItem>ALL</ComboBoxItem>
                 <ComboBoxItem>OK</ComboBoxItem>
                 <ComboBoxItem>NG</ComboBoxItem>
-            </ComboBox>
+            </ComboBox>-->
 
 
 
@@ -230,7 +230,13 @@
                 Grid.Row="8"
                 Grid.Column="1"
                 Grid.ColumnSpan="3"
+                hc:InfoElement.Necessary="True"
+                hc:TitleElement.Title="The title is on the left"
+                hc:TitleElement.TitlePlacement="Left"
+                hc:TitleElement.TitleWidth="120"
                 Text="{Binding QueryConditions.MarkingNo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+
+
 
                 <TextBox.InputBindings>
                     <KeyBinding
@@ -259,6 +265,7 @@
                 Grid.Row="8"
                 Grid.Column="6"
                 Width="150"
+                hc:Poptip.Content="①扫描数据不对：请将输入切换为英文。 ②扫描没有数据：请将鼠标点击到序列码内。"
                 Command="{Binding OpenScanCodeModelCommand}"
                 CommandParameter="{Binding ElementName=MarkingNo}"
                 Content="扫码查询"
@@ -310,10 +317,7 @@
 
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" Orientation="Horizontal">
-                                    <TextBlock
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        Text="扫码记录（近100条）" />
+                                    <TextBlock VerticalAlignment="Center" Text="扫码记录（近100条）" />
                                     <Button Content="导出" Style="{StaticResource ButtonInfo.Small}" />
 
                                 </StackPanel>
@@ -374,6 +378,7 @@
 
 
         </hc:TransitioningContentControl>
+
 
         <hc:Pagination
             Grid.Row="2"
