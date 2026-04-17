@@ -117,8 +117,13 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                         //    break;
                         //case TypeCode.DBNull:
                         //    break;
-                        //case TypeCode.Boolean:
-                        //    break;
+                        case TypeCode.Boolean:
+                            await mcp.BatchWriteBoolAsync(
+                              prefix,
+                              address.ToString(),
+                              value.Select(x => bool.Parse(x?.ToString())).ToArray()
+                          );
+                            break;
                         //case TypeCode.Char:
                         //    break;
                         //case TypeCode.SByte:
