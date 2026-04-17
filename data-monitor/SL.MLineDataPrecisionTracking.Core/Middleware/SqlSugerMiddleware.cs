@@ -22,7 +22,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Middleware
                     new ConnectionConfig()
                     {
                         ConnectionString = connString,
-                        DbType = SqlSugar.DbType.Sqlite,
+                        DbType = SqlSugar.DbType.PostgreSQL,
                         IsAutoCloseConnection = true,
                     }
                 );
