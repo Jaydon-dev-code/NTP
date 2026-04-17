@@ -318,7 +318,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                         foreach (DevPlcPointMcReadDto item in group)
                         {
                             item.Value = readValue.Data.ConvertToValues(
-                                (item.Address - startAddre) * item.ShortOffset,
+                               ((item.Address - startAddre) * 2),
                                 item.DataType,
                                 item.Length
                             );
@@ -429,6 +429,8 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             {
                 try
                 {
+                 var a=await   GetMcp(ipAddress, port)
+                       .ReadBoolAsync(prefix, currentAddress.ToString());
                     // 调用纯业务方法
                     return await GetMcp(ipAddress, port)
                         .BatchReadByteAsync(prefix, currentAddress.ToString(), readLen);
