@@ -1,18 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using NPOI.SS.Formula.Functions;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
+using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Dtos;
+using SL.MLineDataPrecisionTracking.Models.Entities;
+using SqlSugar;
 using SqlSugar.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services
 {
-    public abstract class ProLineDataCollectionServiceAbstract
+    public abstract class ProLineDataCollectionServiceAbstract<T> where T : class, new()
     {
         Tb_EquipmentRepository _equipmentRepository;
 
@@ -49,18 +54,28 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                 {
                     try
                     {
-                        if (await CanCollection() is false)
+                        //if (await CanCollection() is false)
+                        //{
+                        //    continue;
+                        //}
+                        var isStrart = await CanCollection();
+                        Serilog.Log.Debug("[采集开始点位数据读取]【{_lineName}】{isStrart}", _lineName, isStrart);
+                     
+
+                        var colRe= await CollectionData();
+                        if (colRe.IsSuccess )
                         {
-                            continue;
-                        }
-                        if (await CollectionData())
-                        {
-                            await CallPlcCollectionOK();
+                            Serilog.Log.Debug("[采集开始点位数据读取]【{_lineName}】{@Data}", _lineName, colRe.Data);
+                            if (await InsterCollectionData(colRe.Data))
+                            {
+                                //await CallPlcCollectionOK();
+                            }
+
                         }
                     }
                     catch (Exception ex)
                     {
-                        throw;
+                        Serilog.Log.Warning("[点位数据初始化]{_lineName}数据读失败:{ex.Message}", _lineName, ex.Message);
                     }
                     finally
                     {
@@ -70,22 +85,61 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             }
             catch (Exception ex)
             {
-                throw;
+                Serilog.Log.Warning("[点位数据初始化]{_lineName}数据初始化失败:{ex.Message}", _lineName,ex.Message);
             }
         }
 
-        protected abstract Task<bool> CollectionData();
+        protected abstract  Task<bool> InsterCollectionData(T data);
+    
+
+        protected virtual async Task<Result<T>> CollectionData()
+        {
+            var readValue = await _mcp.ReadAsync(_lineReadPlcInfo);
+            if (readValue.IsSuccess is false)
+            {
+                return Result<T>.Fail(readValue.Message);
+            }
+            T t = new T();
+            var props = typeof(T).GetProperties();
+            foreach (var prop in props)
+            {
+                var attr = prop.GetCustomAttribute<SugarColumn>();
+                var columnDescription = attr?.ColumnDescription;
+                if (attr?.ColumnDescription == null || attr?.ColumnDescription is null)
+                {
+                    continue;
+                }
+                var readInfo = readValue.Data.First(x => x.PointName == attr?.ColumnDescription);
+
+                if (readInfo.Length == 1 && readInfo.DataType != TypeCode.String)
+                {
+                    if (readInfo.ReadFormula == null || readInfo.ReadFormula.Length == 0)
+                    {
+                        prop.SetValue(t, readInfo.Value[0]);
+                    }
+                    else
+                    {
+                        var val = readInfo.ReadFormula.StringCompute(readInfo.Value[0].ToString());
+                        prop.SetValue(t, val);
+                    }
+                }
+                else { }
+            }
+
+
+            return Result<T>.Success(t);
+        }
 
         protected virtual async Task CallPlcCollectionOK()
         {
-            _pcCallPlcCollctionOk.Value = new List<object>() { 0 };
+            _pcCallPlcCollctionOk.Value = new List<object>() { 1 };
             await _mcp.WriteAsync(_pcCallPlcCollctionOk);
         }
 
         protected virtual async Task<bool> CanCollection()
         {
             var re = await _mcp.ReadAsync(_plcCallPCCanCollectionPoint);
-            if (re.IsSuccess is false || re.Data.Value[0].ObjToInt() == 0)
+            if (re.IsSuccess is false || re.Data.Value[0].ObjToBool())
             {
                 return false;
             }

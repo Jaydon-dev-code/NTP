@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -56,36 +57,45 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                     var device = await _equipmentRepository.QueryableFirstAsync(x =>
                         x.DeviceName == deviceName
                     );
-
+                    int deviceId = 0;
                     if (device == null)
                     {
                         device = new Tb_Equipment() { DeviceName = deviceName };
-                        await _equipmentRepository.InsertableAsync(device);
+                        deviceId= await _equipmentRepository.ExecuteReturnIdentityAsync(device);
                     }
-
+                    else
+                    {
+                        deviceId = device.Id;
+                    }
+                  
                     // 2. 找PLC连接，没有就新增
                     var plc = await _plcConnectionRepository.QueryableFirstAsync(x =>
-                        x.EquipmentId == device.Id && x.IpAddress == ip && x.Port == port
+                        x.EquipmentId ==deviceId && x.IpAddress == ip && x.Port == port
                     );
 
+                    int plcId = 0;
                     if (plc == null)
                     {
                         plc = new Tb_PlcConnection
                         {
-                            EquipmentId = device.Id,
+                            EquipmentId = deviceId,
                             IpAddress = ip,
                             Port = port,
                             PlcType = "三菱",
                             NetworkType = "MC",
                         };
-                        await _plcConnectionRepository.InsertableAsync(plc);
+                        plcId= await _plcConnectionRepository.ExecuteReturnIdentityAsync(plc);
+                    }
+                    else
+                    {
+                        plcId = plc.Id;
                     }
 
                     // 3. 批量插入点位
                     var points = group
                         .Select(x => new Tb_PlcPoint
                         {
-                            PlcConnectionId = plc.Id,
+                            PlcConnectionId = plcId,
                             PointName = x.PointName,
                             Description = x.Description,
                             Area = x.Area,
@@ -97,7 +107,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                         })
                         .ToList();
 
-                    await _plcPointRepository.InsertableAsync(points);
+               var insternumber=    await _plcPointRepository.InsertableAsync(points);
                 }
             }
             catch (Exception ex)

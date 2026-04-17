@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using SL.MLineDataPrecisionTracking.Core.Services;
+using SL.MLineDataPrecisionTracking.Models.Entities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -37,7 +38,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Middleware
             //{
             //    services.RegisterType(type).SingleInstance();
             //}
-            services.RegisterType<PlcAddressExcelImportService>();
+            services.RegisterType<PlcAddressExcelImportService>().SingleInstance();
+            services.RegisterType<A_ProLineDataCollectionService>().As<ProLineDataCollectionServiceAbstract<Tb_LineA>>().SingleInstance();
+            services.RegisterType<B_ProLineDataCollectionService>().As<ProLineDataCollectionServiceAbstract<Tb_LineB>>().SingleInstance();
 
         }
     }
