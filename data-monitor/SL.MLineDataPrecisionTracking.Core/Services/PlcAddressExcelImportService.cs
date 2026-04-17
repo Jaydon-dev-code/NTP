@@ -38,6 +38,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         {
             try
             {
+                await _equipmentRepository.DeleteableAsync(x => true);
+                await _plcConnectionRepository.DeleteableAsync(x => true);
+                await _plcPointRepository.DeleteableAsync(x => true);
                 var list = ReadExcel(excelPath);
                 // 按【设备+IP】分组导入
                 var groups = list.GroupBy(x => new
@@ -61,16 +64,16 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                     if (device == null)
                     {
                         device = new Tb_Equipment() { DeviceName = deviceName };
-                        deviceId= await _equipmentRepository.ExecuteReturnIdentityAsync(device);
+                        deviceId = await _equipmentRepository.ExecuteReturnIdentityAsync(device);
                     }
                     else
                     {
                         deviceId = device.Id;
                     }
-                  
+
                     // 2. 找PLC连接，没有就新增
                     var plc = await _plcConnectionRepository.QueryableFirstAsync(x =>
-                        x.EquipmentId ==deviceId && x.IpAddress == ip && x.Port == port
+                        x.EquipmentId == deviceId && x.IpAddress == ip && x.Port == port
                     );
 
                     int plcId = 0;
@@ -84,7 +87,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                             PlcType = "三菱",
                             NetworkType = "MC",
                         };
-                        plcId= await _plcConnectionRepository.ExecuteReturnIdentityAsync(plc);
+                        plcId = await _plcConnectionRepository.ExecuteReturnIdentityAsync(plc);
                     }
                     else
                     {
@@ -107,7 +110,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                         })
                         .ToList();
 
-               var insternumber=    await _plcPointRepository.InsertableAsync(points);
+                    var insternumber = await _plcPointRepository.InsertableAsync(points);
                 }
             }
             catch (Exception ex)
