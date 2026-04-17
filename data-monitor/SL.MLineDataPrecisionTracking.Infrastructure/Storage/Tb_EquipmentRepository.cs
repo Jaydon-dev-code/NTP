@@ -28,6 +28,12 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
                 .ToListAsync();
         }
 
+        public async Task<int> DeleteableAsync(Expression<Func<Tb_Equipment, bool>> expression)
+        {
+            return await _db.Deleteable<Tb_Equipment>().Where(expression).ExecuteCommandAsync();
+             
+        }
+
         public async Task<Tb_Equipment> GetEquipmentAllAsync(
             Expression<Func<Tb_Equipment, bool>> expression
         )

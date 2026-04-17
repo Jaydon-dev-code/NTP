@@ -17,7 +17,11 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
         public Tb_PlcPointRepository(ISqlSugarClient db) : base(db)
         {
         }
+        public async Task<int> DeleteableAsync(Expression<Func<Tb_PlcPoint, bool>> expression)
+        {
+            return await _db.Deleteable<Tb_PlcPoint>().Where(expression).ExecuteCommandAsync();
 
+        }
         public async Task<int> InsertableAsync(Tb_PlcPoint device)
         {
             return await _db.Insertable<Tb_PlcPoint>(device).ExecuteCommandAsync();
