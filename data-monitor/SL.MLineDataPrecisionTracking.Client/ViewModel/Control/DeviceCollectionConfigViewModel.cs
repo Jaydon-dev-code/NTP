@@ -19,14 +19,14 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 
         PlcAddressExcelImportService _plcAddressExcelImportService;
 
-        private RelayCommand _importAsyncCommand;
-        public IRelayCommand ImportAsyncCommand
+        private AsyncRelayCommand _importAsyncCommand;
+        public AsyncRelayCommand ImportAsyncCommand
         {
             get
             {
                 if (_importAsyncCommand == null)
                 {
-                    _importAsyncCommand = new RelayCommand(async () => await ImportAsync());
+                    _importAsyncCommand = new AsyncRelayCommand( ImportAsync);
                 }
                 return _importAsyncCommand;
             }

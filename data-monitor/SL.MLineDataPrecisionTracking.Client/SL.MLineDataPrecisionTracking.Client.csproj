@@ -128,6 +128,10 @@
       <Project>{c6e4debd-0906-4151-8c22-478c0d5328ec}</Project>
       <Name>SL.MLineDataPrecisionTracking.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SL.MLineDataPrecisionTracking.Infrastructure\SL.MLineDataPrecisionTracking.Infrastructure.csproj">
+      <Project>{DE4BBDB9-AFDF-4418-BE33-93C52CF53764}</Project>
+      <Name>SL.MLineDataPrecisionTracking.Infrastructure</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SL.MLineDataPrecisionTracking.Models\SL.MLineDataPrecisionTracking.Models.csproj">
       <Project>{292117F3-5422-4C4F-86C6-12DE0CF50BDE}</Project>
       <Name>SL.MLineDataPrecisionTracking.Models</Name>
@@ -152,6 +156,9 @@
     <PackageReference Include="SqlSugar">
       <Version>5.1.4.207</Version>
     </PackageReference>
+    <PackageReference Include="System.Data.SQLite.Core">
+      <Version>1.0.119</Version>
+    </PackageReference>
     <PackageReference Include="ValueConverters">
       <Version>3.1.22</Version>
     </PackageReference>
@@ -173,6 +180,9 @@
     <None Include="Resources\Packages\Npgsql.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\Packages\System.Data.SQLite.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -12,6 +12,7 @@ using SL.MLineDataPrecisionTracking.Client.Middleware;
 using SL.MLineDataPrecisionTracking.Client.View;
 using SL.MLineDataPrecisionTracking.Core.Middleware;
 using SL.MLineDataPrecisionTracking.Core.Services;
+using SL.MLineDataPrecisionTracking.Models.Entities;
 using SqlSugar;
 
 namespace SL.MLineDataPrecisionTracking.Client
@@ -46,7 +47,7 @@ namespace SL.MLineDataPrecisionTracking.Client
             //Container.Resolve<ProLineDataCollectionService>().ExecuteAsync(new System.Threading.CancellationToken());
 
             var mainWindow = Container.Resolve<MainWindow>();
-           //调试模式强行顶置会 卡
+            //调试模式强行顶置会 卡
 #if DEBUG
             mainWindow.Topmost = false;
 
@@ -57,6 +58,18 @@ namespace SL.MLineDataPrecisionTracking.Client
 
             mainWindow.Closing += MainWindow_Closing;
             mainWindow.Show();
+            Task.Run(() =>
+            {
+                Container
+                    .Resolve<ProLineDataCollectionServiceAbstract<Tb_LineA>>()
+                    .ExecuteAsync(new System.Threading.CancellationToken());
+            });
+            Task.Run(() =>
+                {
+                    Container
+                        .Resolve<ProLineDataCollectionServiceAbstract<Tb_LineB>>()
+                        .ExecuteAsync(new System.Threading.CancellationToken());
+                });
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -89,7 +102,7 @@ namespace SL.MLineDataPrecisionTracking.Client
                 MessageBoxButton.OK,
                 MessageBoxImage.Error
             );
-            Log.Error("UI异常，请联系管理员。\r\n{e}", e);
+            Log.Error($"UI异常，请联系管理员。\r\n{ e.Exception.Message}");
         }
 
         // 非UI线程 / 后台异常
