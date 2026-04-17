@@ -429,8 +429,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             {
                 try
                 {
-                 var a=await   GetMcp(ipAddress, port)
-                       .ReadBoolAsync(prefix, currentAddress.ToString());
+      
                     // 调用纯业务方法
                     return await GetMcp(ipAddress, port)
                         .BatchReadByteAsync(prefix, currentAddress.ToString(), readLen);
