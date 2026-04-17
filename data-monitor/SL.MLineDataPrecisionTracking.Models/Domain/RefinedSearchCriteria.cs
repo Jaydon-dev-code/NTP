@@ -8,11 +8,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace SL.MLineDataPrecisionTracking.Models.Domain
 {
-    public class RefinedSearchCriteria 
+    public class RefinedSearchCriteria
     {
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public string APalletNo { get; set; }
