@@ -136,12 +136,14 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel
                     Icon =   $"{ AppDomain.CurrentDomain.BaseDirectory}Resources\\Image\\ProductionRecord.png",
                     Page = App.Container.Resolve<MeticulousPursuit>(),
                 },
-                //new MenuItems()
-                //{
-                //    Header = "设置",
-                //    Icon = $"{ AppDomain.CurrentDomain.BaseDirectory}Resources\\Image\\Setting.png",
-                //    Page = App.Container.Resolve<DeviceCollectionConfig>(),
-                //},
+#if DEBUG
+                new MenuItems()
+                {
+                    Header = "设置",
+                    Icon = $"{ AppDomain.CurrentDomain.BaseDirectory}Resources\\Image\\Setting.png",
+                    Page = App.Container.Resolve<DeviceCollectionConfig>(),
+                },
+#endif
             };
         }
 
