@@ -18,8 +18,8 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
             TypeCode typeCode,
             int address,
             int length,
-            string readFormula,
-            string writeFormula,
+            string readFormula="",
+            string writeFormula="",
             List<object> value = null
         )
         {

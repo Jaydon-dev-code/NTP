@@ -53,6 +53,9 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
             int result;
             switch (type)
             {
+                case TypeCode.Boolean:
+                    result = 1;
+                    break;
                 case TypeCode.Int16:
                     result = 1;
                     break;

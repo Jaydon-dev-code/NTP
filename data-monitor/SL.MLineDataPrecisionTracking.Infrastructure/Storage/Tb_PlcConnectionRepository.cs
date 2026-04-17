@@ -23,9 +23,13 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
             return await _db.Insertable<Tb_PlcConnection>(device).ExecuteCommandAsync();
         }
 
+        public async Task<int> ExecuteReturnIdentityAsync(Tb_PlcConnection device)
+        {
+            return await _db.Insertable<Tb_PlcConnection>(device).ExecuteReturnIdentityAsync();
+        }
 
 
-
+        
         public async Task<Tb_PlcConnection> QueryableFirstAsync(Expression<Func<Tb_PlcConnection, bool>> expression)
         {
             return await _db.Queryable<Tb_PlcConnection>().FirstAsync(expression);

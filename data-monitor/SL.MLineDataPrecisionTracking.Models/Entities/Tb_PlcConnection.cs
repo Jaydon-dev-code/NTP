@@ -35,7 +35,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         public DateTime CreateTime { get; set; } = DateTime.Now;
 
         // 导航
-        [SugarColumn(IsIgnore = true)]
+        [Navigate(NavigateType.OneToMany, nameof(Tb_PlcPoint.PlcConnectionId))]
         public List<Tb_PlcPoint> Points { get; set; }
     }
 }

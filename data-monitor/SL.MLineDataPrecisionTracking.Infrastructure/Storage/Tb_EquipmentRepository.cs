@@ -33,8 +33,8 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
         )
         {
             return await _db.Queryable<Tb_Equipment>()
-                .Includes(e => e.PlcConnections) // 加载PLC
-                .Includes(e => e.PlcConnections.First().Points)
+                .Includes(e =>e.PlcConnections,p=>p.Points) // 加载PLC
+               
                 .FirstAsync(
                     expression
                 ) // 加载点位
@@ -44,6 +44,11 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
         public async Task<int> InsertableAsync(Tb_Equipment device)
         {
             return await _db.Insertable<Tb_Equipment>(device).ExecuteCommandAsync();
+        }
+
+        public async Task<int> ExecuteReturnIdentityAsync(Tb_Equipment device)
+        {
+            return await _db.Insertable<Tb_Equipment>(device).ExecuteReturnIdentityAsync();
         }
 
         public async Task<Tb_Equipment> QueryableFirstAsync(

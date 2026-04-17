@@ -26,7 +26,8 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         public DateTime CreateTime { get; set; } = DateTime.Now;
 
         // 导航：一个设备 → 多个PLC连接
-        [SugarColumn(IsIgnore = true)]
+        [Navigate(NavigateType.OneToMany, nameof(Tb_PlcConnection.EquipmentId))]
+   
         public List<Tb_PlcConnection> PlcConnections { get; set; }
     }
 }

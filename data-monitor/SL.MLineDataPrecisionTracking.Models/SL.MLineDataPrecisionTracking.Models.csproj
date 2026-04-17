@@ -53,7 +53,9 @@
     <Compile Include="Dtos\PlcPointImportDto.cs" />
     <Compile Include="Entities\Tb_Equipment.cs" />
     <Compile Include="Entities\Tb_LineA.cs" />
-    <Compile Include="Entities\TB_LineB.cs" />
+    <Compile Include="Entities\Tb_LineB.cs" />
+    <Compile Include="Entities\Tb_LineSummary.cs" />
+    <Compile Include="Entities\Tb_ModelNoToName.cs" />
     <Compile Include="Entities\Tb_PlcConnection.cs" />
     <Compile Include="Entities\Tb_PlcPoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
