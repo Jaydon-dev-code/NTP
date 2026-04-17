@@ -1,4 +1,5 @@
-﻿using NPOI.SS.Formula.Functions;
+﻿using NPOI.SS.Formula.Eval;
+using NPOI.SS.Formula.Functions;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
@@ -54,13 +55,13 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                 {
                     try
                     {
-                        //if (await CanCollection() is false)
-                        //{
-                        //    continue;
-                        //}
-                        var isStrart = await CanCollection();
-                        Serilog.Log.Debug("[采集开始点位数据读取]【{_lineName}】{isStrart}", _lineName, isStrart);
-                     
+                        if (await CanCollection() is false)
+                        {
+                            continue;
+                        }
+                        //var isStrart = await CanCollection();
+                        //Serilog.Log.Debug("[采集开始点位数据读取]【{_lineName}】{isStrart}", _lineName, isStrart);
+
 
                         var colRe= await CollectionData();
                         if (colRe.IsSuccess )
@@ -68,7 +69,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                             Serilog.Log.Debug("[采集开始点位数据读取]【{_lineName}】{@Data}", _lineName, colRe.Data);
                             if (await InsterCollectionData(colRe.Data))
                             {
-                                //await CallPlcCollectionOK();
+                                await CallPlcCollectionOK();
                             }
 
                         }
@@ -109,21 +110,31 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                 {
                     continue;
                 }
-                var readInfo = readValue.Data.First(x => x.PointName == attr?.ColumnDescription);
-
-                if (readInfo.Length == 1 && readInfo.DataType != TypeCode.String)
+                try
                 {
-                    if (readInfo.ReadFormula == null || readInfo.ReadFormula.Length == 0)
+                    var readInfo = readValue.Data.First(x => x.PointName == attr?.ColumnDescription);
+
+                    if (readInfo.Length == 1 && readInfo.DataType != TypeCode.String)
                     {
-                        prop.SetValue(t, readInfo.Value[0]);
+                        if (readInfo.ReadFormula == null || readInfo.ReadFormula.Length == 0)
+                        {
+                            prop.SetValue(t, readInfo.Value[0]);
+                        }
+                        else
+                        {
+                            var val = readInfo.ReadFormula.StringCompute(readInfo.Value[0].ToString());
+                            prop.SetValue(t, val);
+                        }
                     }
-                    else
-                    {
-                        var val = readInfo.ReadFormula.StringCompute(readInfo.Value[0].ToString());
-                        prop.SetValue(t, val);
-                    }
+                    else { prop.SetValue(t, readInfo.Value.ToString()); }
                 }
-                else { }
+                catch (Exception  ex)
+                {
+
+                    Serilog.Log.Warning("[点位数据初始化]{_lineName}反射数据失败:{ex.Message}", _lineName, ex.Message);
+                    return Result<T>.Fail($"[点位数据初始化]{_lineName}反射数据失败:{ex.Message}");
+                }
+            
             }
 
 

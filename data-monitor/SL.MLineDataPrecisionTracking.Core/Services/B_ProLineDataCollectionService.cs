@@ -39,8 +39,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
 
         protected override async Task<bool> InsterCollectionData(Tb_LineB data)
         {
-            var aLineInfo = _lineARepository.QueryableFirstAsync(
-                x => x.TrayNo == data.LineATrayNo,
+            var aLineInfo = await _lineARepository.QueryableFirstAsync(
+                x => x.TrayNoA == data.LineATrayNo,
                 o => o.RecordTime
             );
             if (aLineInfo == null)
@@ -53,10 +53,18 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
 
                 ABToSummary(aLineInfo, data, tb_LineSummary, new List<string>() { "A线托盘编号" });
                 var models = await _modelNoToNameRepository.QueryabletAsync(x => true);
-                var modelName = models
-                    .FirstOrDefault(x => x.ModelNo == tb_LineSummary.ModelNo)
+
+                tb_LineSummary.ModelNoB = data.ModelNoB;
+                var modelNameB = models
+                    .FirstOrDefault(x => x.ModelNo == tb_LineSummary.ModelNoB)
                     ?.ModelName;
-                tb_LineSummary.ModelName = modelName == null ? "" : modelName;
+                tb_LineSummary.ModelNameB= modelNameB== null ? "" : modelNameB;
+
+                tb_LineSummary.ModelNoA = aLineInfo.ModelNoA;
+                var modelNameA = models
+                    .FirstOrDefault(x => x.ModelNo == tb_LineSummary.ModelNoA)
+                    ?.ModelName;
+                tb_LineSummary.ModelNameA = modelNameA == null ? "" : modelNameA;
                 return await _lineSummaryRepository.InsertableAsync(tb_LineSummary) > 0;
             }
         }
