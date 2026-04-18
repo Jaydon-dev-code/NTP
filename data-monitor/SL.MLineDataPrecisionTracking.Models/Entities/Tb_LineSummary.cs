@@ -12,13 +12,11 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
     {
         [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
         public int Id { get; set; }
+
         public DateTime RecordTime { get; set; } = DateTime.Now;
 
-        [SugarColumn(ColumnDescription = "型号名称A")]
-        public string ModelNameA { get; set; }
-
-        [SugarColumn(ColumnDescription = "型号名称B")]
-        public string ModelNameB { get; set; }
+        [SugarColumn(ColumnDescription = "型号名称")]
+        public string ModelName { get; set; }
 
         /// <summary>
         /// 托盘号
@@ -48,106 +46,103 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// 小内圈分选数据
         /// </summary>
         [SugarColumn(ColumnDescription = "小内圈分选数据")]
-        public float SmallInnerRingSortingData { get; set; }
+        public int SmallInnerRingSortingData { get; set; }
 
         /// <summary>
         /// 外法兰分选数据
         /// </summary>
         [SugarColumn(ColumnDescription = "外法兰分选数据")]
-        public float OuterFlangeSortingData { get; set; }
+        public int OuterFlangeSortingData { get; set; }
 
         /// <summary>
         /// 内法兰分选数据
         /// </summary>
         [SugarColumn(ColumnDescription = "内法兰分选数据")]
-        public float InnerFlangeSortingData { get; set; }
+        public int InnerFlangeSortingData { get; set; }
 
         /// <summary>
         /// A面钢球组差
         /// </summary>
         [SugarColumn(ColumnDescription = "A面钢球组差")]
-        public float ASideSteelBallGroupDiff { get; set; }
+        public int ASideSteelBallGroupDiff { get; set; }
 
         /// <summary>
         /// B面钢球组差
         /// </summary>
         [SugarColumn(ColumnDescription = "B面钢球组差")]
-        public float BSideSteelBallGroupDiff { get; set; }
+        public int BSideSteelBallGroupDiff { get; set; }
 
         /// <summary>
         /// B面钢球注脂量
         /// </summary>
         [SugarColumn(ColumnDescription = "B面钢球注脂量")]
-        public float BSideSteelBallGreaseVolume { get; set; }
+        public int BSideSteelBallGreaseVolume { get; set; }
 
         /// <summary>
         /// 密封圈注脂量
         /// </summary>
         [SugarColumn(ColumnDescription = "密封圈注脂量")]
-        public float SealRingGreaseVolume { get; set; }
+        public int SealRingGreaseVolume { get; set; }
 
         /// <summary>
         /// A面钢球注脂量
         /// </summary>
         [SugarColumn(ColumnDescription = "A面钢球注脂量")]
-        public float ASideSteelBallGreaseVolume { get; set; }
+        public int ASideSteelBallGreaseVolume { get; set; }
 
         /// <summary>
         /// 密封圈压装力
         /// </summary>
         [SugarColumn(ColumnDescription = "密封圈压装力")]
-        public float SealRingPressForce { get; set; }
+        public int SealRingPressForce { get; set; }
 
         /// <summary>
         /// 密封圈压装位移
         /// </summary>
         [SugarColumn(ColumnDescription = "密封圈压装位移A")]
-        public float SealRingPressDisplacementA { get; set; }
+        public int SealRingPressDisplacementA { get; set; }
 
         /// <summary>
         /// 挡水环压装力
         /// </summary>
         [SugarColumn(ColumnDescription = "挡水环压装力")]
-        public float WaterBafflePressForce { get; set; }
+        public int WaterBafflePressForce { get; set; }
 
         /// <summary>
         /// 挡水环压装位移
         /// </summary>
         [SugarColumn(ColumnDescription = "挡水环压装位移")]
-        public float WaterBafflePressDisplacement { get; set; }
+        public int WaterBafflePressDisplacement { get; set; }
 
         /// <summary>
         /// 小内圈合套压力
         /// </summary>
         [SugarColumn(ColumnDescription = "小内圈合套压力")]
-        public float SmallInnerRingAssemblePressure { get; set; }
+        public int SmallInnerRingAssemblePressure { get; set; }
 
         /// <summary>
         /// 小内圈合套位移
         /// </summary>
         [SugarColumn(ColumnDescription = "小内圈合套位移")]
-        public float SmallInnerRingAssembleDisplacement { get; set; }
+        public int SmallInnerRingAssembleDisplacement { get; set; }
 
         /// <summary>
         /// 密封圈平行差
         /// </summary>
         [SugarColumn(ColumnDescription = "密封圈平行差")]
-        public float SealRingParallelDiff { get; set; }
+        public int SealRingParallelDiff { get; set; }
 
         /// <summary>
         /// 挡水环平行差
         /// </summary>
         [SugarColumn(ColumnDescription = "挡水环平行差")]
-        public float WaterBaffleParallelDiff { get; set; }
+        public int WaterBaffleParallelDiff { get; set; }
 
         /// <summary>
         /// 型号
         /// </summary>
-        [SugarColumn(ColumnDescription = "型号A")]
-        public int ModelNoA { get; set; }
-
-        [SugarColumn(ColumnDescription = "型号B")]
-        public int ModelNoB { get; set; }
+        [SugarColumn(ColumnDescription = "型号")]
+        public int ModelNo { get; set; }
 
         /// <summary>
         /// 屏蔽工位
@@ -177,91 +172,91 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// 正游隙检测值
         /// </summary>
         [SugarColumn(ColumnDescription = "正游隙检测值")]
-        public float PositiveClearanceValue { get; set; }
+        public int PositiveClearanceValue { get; set; }
 
         /// <summary>
         /// 位移量
         /// </summary>
         [SugarColumn(ColumnDescription = "位移量")]
-        public float DisplacementValue { get; set; }
+        public int DisplacementValue { get; set; }
 
         /// <summary>
         /// 负游隙检测值
         /// </summary>
         [SugarColumn(ColumnDescription = "负游隙检测值")]
-        public float NegativeClearanceValue { get; set; }
+        public int NegativeClearanceValue { get; set; }
 
         /// <summary>
         /// 铆接前成型高度
         /// </summary>
         [SugarColumn(ColumnDescription = "铆接前成型高度")]
-        public float PreRivetingHeight { get; set; }
+        public int PreRivetingHeight { get; set; }
 
         /// <summary>
         /// 铆接成型力
         /// </summary>
         [SugarColumn(ColumnDescription = "铆接成型力")]
-        public float RivetingForce { get; set; }
+        public int RivetingForce { get; set; }
 
         /// <summary>
         /// 铆接成型位移
         /// </summary>
         [SugarColumn(ColumnDescription = "铆接成型位移")]
-        public float RivetingDisplacement { get; set; }
+        public int RivetingDisplacement { get; set; }
 
         /// <summary>
         /// 铆接后成型高度
         /// </summary>
         [SugarColumn(ColumnDescription = "铆接后成型高度")]
-        public float PostRivetingHeight { get; set; }
+        public int PostRivetingHeight { get; set; }
 
         /// <summary>
         /// 铆接后成型形状
         /// </summary>
         [SugarColumn(ColumnDescription = "铆接后成型形状")]
-        public float PostRivetingShape { get; set; }
+        public int PostRivetingShape { get; set; }
 
         /// <summary>
         /// 铆接后成型外径
         /// </summary>
         [SugarColumn(ColumnDescription = "铆接后成型外径")]
-        public float PostRivetingOuterDiameter { get; set; }
+        public int PostRivetingOuterDiameter { get; set; }
 
         /// <summary>
         /// 二维码打标内容
         /// </summary>
         [SugarColumn(ColumnDescription = "二维码打标内容")]
-        public string QrCodeContent { get; set; }
+        public string MarkingNo { get; set; }
 
         /// <summary>
         /// 径跳值
         /// </summary>
         [SugarColumn(ColumnDescription = "径跳值")]
-        public float RadialRunout { get; set; }
+        public int RadialRunout { get; set; }
 
         /// <summary>
         /// 端跳值
         /// </summary>
         [SugarColumn(ColumnDescription = "端跳值")]
-        public float EndRunout { get; set; }
+        public int EndRunout { get; set; }
 
         /// <summary>
         /// 扭矩检测值
         /// </summary>
         [SugarColumn(ColumnDescription = "扭矩检测值")]
-        public float TorqueValue { get; set; }
+        public int TorqueValue { get; set; }
 
         /// <summary>
         /// ABS检测峰值
         /// </summary>
         [SugarColumn(ColumnDescription = "ABS检测峰值")]
-        public float AbsPeakValue { get; set; }
+        public int AbsPeakValue { get; set; }
 
         /// <summary>
         /// ABS检测谷值
         /// </summary>
         [SugarColumn(ColumnDescription = "ABS检测谷值")]
-        public float AbsValleyValue { get; set; }
+        public int AbsValleyValue { get; set; }
 
         /// <summary>
         /// ABS检测齿数
@@ -273,96 +268,96 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// 密封圈压装压力
         /// </summary>
         [SugarColumn(ColumnDescription = "密封圈压装压力")]
-        public float SealRingPressPressure { get; set; }
+        public int SealRingPressPressure { get; set; }
 
         /// <summary>
         /// 密封圈压装位移
         /// </summary>
         [SugarColumn(ColumnDescription = "密封圈压装位移B")]
-        public float SealRingPressDisplacementB { get; set; }
+        public int SealRingPressDisplacementB { get; set; }
 
         /// <summary>
         /// 齿圈压装压力
         /// </summary>
         [SugarColumn(ColumnDescription = "齿圈压装压力")]
-        public float GearRingPressPressure { get; set; }
+        public int GearRingPressPressure { get; set; }
 
         /// <summary>
         /// 齿圈压装位移
         /// </summary>
         [SugarColumn(ColumnDescription = "齿圈压装位移")]
-        public float GearRingPressDisplacement { get; set; }
+        public int GearRingPressDisplacement { get; set; }
 
         /// <summary>
         /// 防尘盖压装压力
         /// </summary>
         [SugarColumn(ColumnDescription = "防尘盖压装压力")]
-        public float DustCoverPressPressure { get; set; }
+        public int DustCoverPressPressure { get; set; }
 
         /// <summary>
         /// 防尘盖压装位移
         /// </summary>
         [SugarColumn(ColumnDescription = "防尘盖压装位移")]
-        public float DustCoverPressDisplacement { get; set; }
+        public int DustCoverPressDisplacement { get; set; }
 
         /// <summary>
         /// 磁性圈平行差检测传感器1
         /// </summary>
         [SugarColumn(ColumnDescription = "磁性圈平行差检测传感器1")]
-        public float MagneticRingParallelSensor1 { get; set; }
+        public int MagneticRingParallelSensor1 { get; set; }
 
         /// <summary>
         /// 磁性圈平行差检测传感器2
         /// </summary>
         [SugarColumn(ColumnDescription = "磁性圈平行差检测传感器2")]
-        public float MagneticRingParallelSensor2 { get; set; }
+        public int MagneticRingParallelSensor2 { get; set; }
 
         /// <summary>
         /// 磁性圈平行差检测传感器3
         /// </summary>
         [SugarColumn(ColumnDescription = "磁性圈平行差检测传感器3")]
-        public float MagneticRingParallelSensor3 { get; set; }
+        public int MagneticRingParallelSensor3 { get; set; }
 
         /// <summary>
         /// 磁性圈平行差
         /// </summary>
         [SugarColumn(ColumnDescription = "磁性圈平行差")]
-        public float MagneticRingParallelDiff { get; set; }
+        public int MagneticRingParallelDiff { get; set; }
 
         /// <summary>
         /// 振动下LOAD
         /// </summary>
         [SugarColumn(ColumnDescription = "振动下LOAD")]
-        public float VibrationLowerLOAD { get; set; }
+        public int VibrationLowerLOAD { get; set; }
 
         /// <summary>
         /// 振动下LH
         /// </summary>
         [SugarColumn(ColumnDescription = "振动下LH")]
-        public float VibrationLowerLH { get; set; }
+        public int VibrationLowerLH { get; set; }
 
         /// <summary>
         /// 振动下RH
         /// </summary>
         [SugarColumn(ColumnDescription = "振动下RH")]
-        public float VibrationLowerRH { get; set; }
+        public int VibrationLowerRH { get; set; }
 
         /// <summary>
         /// 振动上LOAD
         /// </summary>
         [SugarColumn(ColumnDescription = "振动上LOAD")]
-        public float VibrationUpperLOAD { get; set; }
+        public int VibrationUpperLOAD { get; set; }
 
         /// <summary>
         /// 振动上LH
         /// </summary>
         [SugarColumn(ColumnDescription = "振动上LH")]
-        public float VibrationUpperLH { get; set; }
+        public int VibrationUpperLH { get; set; }
 
         /// <summary>
         /// 振动上RH
         /// </summary>
         [SugarColumn(ColumnDescription = "振动上RH")]
-        public float VibrationUpperRH { get; set; }
+        public int VibrationUpperRH { get; set; }
     }
 }

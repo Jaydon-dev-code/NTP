@@ -44,96 +44,96 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// 小内圈分选数据
         /// </summary>
         [SugarColumn(ColumnDescription = "小内圈分选数据")]
-        public float SmallInnerRingSortingData { get; set; }
+        public int SmallInnerRingSortingData { get; set; }
 
         /// <summary>
         /// 外法兰分选数据
         /// </summary>
         [SugarColumn(ColumnDescription = "外法兰分选数据")]
-        public float OuterFlangeSortingData { get; set; }
+        public int OuterFlangeSortingData { get; set; }
 
         /// <summary>
         /// 内法兰分选数据
         /// </summary>
         [SugarColumn(ColumnDescription = "内法兰分选数据")]
-        public float InnerFlangeSortingData { get; set; }
+        public int InnerFlangeSortingData { get; set; }
 
         /// <summary>
         /// A面钢球组差
         /// </summary>
         [SugarColumn(ColumnDescription = "A面钢球组差")]
-        public float ASideSteelBallGroupDiff { get; set; }
+        public int ASideSteelBallGroupDiff { get; set; }
 
         /// <summary>
         /// B面钢球组差
         /// </summary>
         [SugarColumn(ColumnDescription = "B面钢球组差")]
-        public float BSideSteelBallGroupDiff { get; set; }
+        public int BSideSteelBallGroupDiff { get; set; }
 
         /// <summary>
         /// B面钢球注脂量
         /// </summary>
         [SugarColumn(ColumnDescription = "B面钢球注脂量")]
-        public float BSideSteelBallGreaseVolume { get; set; }
+        public int BSideSteelBallGreaseVolume { get; set; }
 
         /// <summary>
         /// 密封圈注脂量
         /// </summary>
         [SugarColumn(ColumnDescription = "密封圈注脂量")]
-        public float SealRingGreaseVolume { get; set; }
+        public int SealRingGreaseVolume { get; set; }
 
         /// <summary>
         /// A面钢球注脂量
         /// </summary>
         [SugarColumn(ColumnDescription = "A面钢球注脂量")]
-        public float ASideSteelBallGreaseVolume { get; set; }
+        public int ASideSteelBallGreaseVolume { get; set; }
 
         /// <summary>
         /// 密封圈压装力
         /// </summary>
         [SugarColumn(ColumnDescription = "密封圈压装力")]
-        public float SealRingPressForce { get; set; }
+        public int SealRingPressForce { get; set; }
 
         /// <summary>
         /// 密封圈压装位移
         /// </summary>
         [SugarColumn(ColumnDescription = "密封圈压装位移A")]
-        public float SealRingPressDisplacementA { get; set; }
+        public int SealRingPressDisplacementA { get; set; }
 
         /// <summary>
         /// 挡水环压装力
         /// </summary>
         [SugarColumn(ColumnDescription = "挡水环压装力")]
-        public float WaterBafflePressForce { get; set; }
+        public int WaterBafflePressForce { get; set; }
 
         /// <summary>
         /// 挡水环压装位移
         /// </summary>
         [SugarColumn(ColumnDescription = "挡水环压装位移")]
-        public float WaterBafflePressDisplacement { get; set; }
+        public int WaterBafflePressDisplacement { get; set; }
 
         /// <summary>
         /// 小内圈合套压力
         /// </summary>
         [SugarColumn(ColumnDescription = "小内圈合套压力")]
-        public float SmallInnerRingAssemblePressure { get; set; }
+        public int SmallInnerRingAssemblePressure { get; set; }
 
         /// <summary>
         /// 小内圈合套位移
         /// </summary>
         [SugarColumn(ColumnDescription = "小内圈合套位移")]
-        public float SmallInnerRingAssembleDisplacement { get; set; }
+        public int SmallInnerRingAssembleDisplacement { get; set; }
 
         /// <summary>
         /// 密封圈平行差
         /// </summary>
         [SugarColumn(ColumnDescription = "密封圈平行差")]
-        public float SealRingParallelDiff { get; set; }
+        public int SealRingParallelDiff { get; set; }
 
         /// <summary>
         /// 挡水环平行差
         /// </summary>
         [SugarColumn(ColumnDescription = "挡水环平行差")]
-        public float WaterBaffleParallelDiff { get; set; }
+        public int WaterBaffleParallelDiff { get; set; }
     }
 }
