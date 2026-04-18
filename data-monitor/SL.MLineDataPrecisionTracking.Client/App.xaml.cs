@@ -52,7 +52,7 @@ namespace SL.MLineDataPrecisionTracking.Client
             mainWindow.Topmost = false;
 
 #else
-            mainWindow.Topmost = true;
+      //      mainWindow.Topmost = true;
 
 #endif
 
