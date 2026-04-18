@@ -54,17 +54,13 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                 ABToSummary(aLineInfo, data, tb_LineSummary, new List<string>() { "A线托盘编号" });
                 var models = await _modelNoToNameRepository.QueryabletAsync(x => true);
 
-                tb_LineSummary.ModelNoB = data.ModelNoB;
+                tb_LineSummary.ModelNo = data.ModelNoB;
                 var modelNameB = models
-                    .FirstOrDefault(x => x.ModelNo == tb_LineSummary.ModelNoB)
+                    .FirstOrDefault(x => x.ModelNo == tb_LineSummary.ModelNo)
                     ?.ModelName;
-                tb_LineSummary.ModelNameB= modelNameB== null ? "" : modelNameB;
+                tb_LineSummary.ModelName= modelNameB== null ? "" : modelNameB;
 
-                tb_LineSummary.ModelNoA = aLineInfo.ModelNoA;
-                var modelNameA = models
-                    .FirstOrDefault(x => x.ModelNo == tb_LineSummary.ModelNoA)
-                    ?.ModelName;
-                tb_LineSummary.ModelNameA = modelNameA == null ? "" : modelNameA;
+            
                 return await _lineSummaryRepository.InsertableAsync(tb_LineSummary) > 0;
             }
         }

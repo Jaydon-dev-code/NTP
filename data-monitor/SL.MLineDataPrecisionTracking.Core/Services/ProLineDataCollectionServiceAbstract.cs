@@ -1,4 +1,11 @@
-﻿using NPOI.SS.Formula.Eval;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using NPOI.SS.Formula.Eval;
 using NPOI.SS.Formula.Functions;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
@@ -8,17 +15,11 @@ using SL.MLineDataPrecisionTracking.Models.Dtos;
 using SL.MLineDataPrecisionTracking.Models.Entities;
 using SqlSugar;
 using SqlSugar.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services
 {
-    public abstract class ProLineDataCollectionServiceAbstract<T> where T : class, new()
+    public abstract class ProLineDataCollectionServiceAbstract<T>
+        where T : class, new()
     {
         Tb_EquipmentRepository _equipmentRepository;
 
@@ -62,21 +63,27 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                         //var isStrart = await CanCollection();
                         //Serilog.Log.Debug("[采集开始点位数据读取]【{_lineName}】{isStrart}", _lineName, isStrart);
 
-
-                        var colRe= await CollectionData();
-                        if (colRe.IsSuccess )
+                        var colRe = await CollectionData();
+                        if (colRe.IsSuccess)
                         {
-                            Serilog.Log.Debug("[采集开始点位数据读取]【{_lineName}】{@Data}", _lineName, colRe.Data);
+                            Serilog.Log.Debug(
+                                "[采集开始点位数据读取]【{_lineName}】{@Data}",
+                                _lineName,
+                                colRe.Data
+                            );
                             if (await InsterCollectionData(colRe.Data))
                             {
                                 await CallPlcCollectionOK();
                             }
-
                         }
                     }
                     catch (Exception ex)
                     {
-                        Serilog.Log.Warning("[点位数据初始化]{_lineName}数据读失败:{ex.Message}", _lineName, ex.Message);
+                        Serilog.Log.Warning(
+                            "[点位数据初始化]{_lineName}数据读失败:{ex.Message}",
+                            _lineName,
+                            ex.Message
+                        );
                     }
                     finally
                     {
@@ -86,12 +93,15 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             }
             catch (Exception ex)
             {
-                Serilog.Log.Warning("[点位数据初始化]{_lineName}数据初始化失败:{ex.Message}", _lineName,ex.Message);
+                Serilog.Log.Warning(
+                    "[点位数据初始化]{_lineName}数据初始化失败:{ex.Message}",
+                    _lineName,
+                    ex.Message
+                );
             }
         }
 
-        protected abstract  Task<bool> InsterCollectionData(T data);
-    
+        protected abstract Task<bool> InsterCollectionData(T data);
 
         protected virtual async Task<Result<T>> CollectionData()
         {
@@ -112,9 +122,11 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                 }
                 try
                 {
-                    var readInfo = readValue.Data.First(x => x.PointName == attr?.ColumnDescription);
+                    var readInfo = readValue.Data.First(x =>
+                        x.PointName == attr?.ColumnDescription
+                    );
 
-                    if (readInfo.Length == 1 && readInfo.DataType != TypeCode.String)
+                    if (readInfo.Length == 1)
                     {
                         if (readInfo.ReadFormula == null || readInfo.ReadFormula.Length == 0)
                         {
@@ -122,21 +134,35 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                         }
                         else
                         {
-                            var val = readInfo.ReadFormula.StringCompute(readInfo.Value[0].ToString());
+                            var val = readInfo.ReadFormula.StringCompute(
+                                readInfo.Value[0].ToString()
+                            );
                             prop.SetValue(t, val);
                         }
                     }
-                    else { prop.SetValue(t, readInfo.Value.ToString()); }
+                    else
+                    {
+                        if (readInfo.DataType == TypeCode.String)
+                        {
+                            var val = string.Concat(readInfo.Value.Where(x => x is string));
+                            prop.SetValue(t, val);
+                        }
+                        else
+                        {
+                            prop.SetValue(t, readInfo.Value.ToString());
+                        }
+                    }
                 }
-                catch (Exception  ex)
+                catch (Exception ex)
                 {
-
-                    Serilog.Log.Warning("[点位数据初始化]{_lineName}反射数据失败:{ex.Message}", _lineName, ex.Message);
+                    Serilog.Log.Warning(
+                        "[点位数据初始化]{_lineName}反射数据失败:{ex.Message}",
+                        _lineName,
+                        ex.Message
+                    );
                     return Result<T>.Fail($"[点位数据初始化]{_lineName}反射数据失败:{ex.Message}");
                 }
-            
             }
-
 
             return Result<T>.Success(t);
         }
@@ -150,7 +176,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         protected virtual async Task<bool> CanCollection()
         {
             var re = await _mcp.ReadAsync(_plcCallPCCanCollectionPoint);
-            if (re.IsSuccess is false || re.Data.Value[0].ObjToBool())
+            if (re.IsSuccess is false || re.Data.Value[0].ObjToBool() is false)
             {
                 return false;
             }
