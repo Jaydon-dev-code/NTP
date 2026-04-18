@@ -14,10 +14,10 @@ namespace SL.MLineDataPrecisionTracking.Models.Domain
         public DateTime EndDate { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-        public string APalletNo { get; set; }
-        public string BPalletNo { get; set; }
-        public string ANGNo { get; set; }
-        public string BNGNo { get; set; }
+        public string TrayNoA { get; set; }
+        public string TrayNoB { get; set; }
+        public string NgCodeA { get; set; }
+        public string NgCodeB { get; set; }
         public string ModelName { get; set; }
         public string Op { get; set; }
         public string Result { get; set; }
