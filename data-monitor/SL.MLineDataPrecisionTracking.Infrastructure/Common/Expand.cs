@@ -12,6 +12,14 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
 {
     public static class Expand
     {
+        private static readonly Encoding sjisEncoding;
+         static Expand()
+        {
+#if !NETSTANDARD2_0
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+#endif
+            sjisEncoding = Encoding.GetEncoding("shift_jis");
+        }
         public static int GetTypeByteLength(this Type type)
         {
             int typeSize;
@@ -56,6 +64,9 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
                 case TypeCode.Boolean:
                     result = 1;
                     break;
+                case TypeCode.String:
+                    result = 1;
+                    break;
                 case TypeCode.Int16:
                     result = 1;
                     break;
@@ -92,6 +103,9 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
                     result = 1;
                     break;
                 case TypeCode.Byte:
+                    result = 1;
+                    break;
+                case TypeCode.String:
                     result = 1;
                     break;
                 case TypeCode.Int16:
@@ -196,6 +210,8 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
                     return ParseArray(buffer, startIndex, length, GetTypeByteLength(type), type);
                 case TypeCode.Double:
                     return ParseArray(buffer, startIndex, length, GetTypeByteLength(type), type);
+                case TypeCode.String:
+                    return ParseArray(buffer, startIndex, length, GetTypeByteLength(type), type);
                 default:
                     throw new NotSupportedException($"不支持解析类型数组: {type}");
             }
@@ -243,9 +259,24 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
                     return ToSingle(buffer, startIndex);
                 case TypeCode.Double:
                     return BitConverter.ToDouble(buffer, startIndex);
+                case TypeCode.String:
+                    return ConvertString(new byte[] { buffer[startIndex] } );
                 default:
                     throw new NotSupportedException($"不支持解析类型: {type}");
             }
+        }
+
+        internal static string ConvertString(byte[] bytes)
+        {
+            int length = Array.IndexOf(bytes, (byte)0x00);
+            if (length == -1)
+            {
+                length = bytes.Length;
+            }
+
+            return sjisEncoding.GetString(
+                bytes.Take(length).ToArray()
+            );
         }
 
         /// <summary>

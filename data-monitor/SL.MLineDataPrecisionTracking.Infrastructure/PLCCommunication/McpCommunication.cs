@@ -296,7 +296,8 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                     //mcpx 是按照short 也就是可读取最小寄存器 来解析的所以要加上shourt偏移
                     var lenght =
                         endAddressInfo.Address
-                        + (endAddressInfo.Length * endAddressInfo.ShortOffset)
+                        // string 的长度等于 byte 所以的 /2
+                        + (endAddressInfo.DataType == TypeCode.String ? (int)Math.Ceiling((double)endAddressInfo.Length / 2) : (endAddressInfo.Length * endAddressInfo.ShortOffset))
                         - startAddre;
 
                     var readValue = await PaginatedReading(
