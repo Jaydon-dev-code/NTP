@@ -1,22 +1,21 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using HandyControl.Controls;
-using Microsoft.Win32;
-using SL.MLineDataPrecisionTracking.Core.Services;
-using SL.MLineDataPrecisionTracking.Models.Domain;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using HandyControl.Controls;
+using Microsoft.Win32;
+using SL.MLineDataPrecisionTracking.Core.Services;
+using SL.MLineDataPrecisionTracking.Models.Domain;
 
 namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 {
     public partial class DeviceCollectionConfigViewModel : ObservableObject
     {
-
         PlcAddressExcelImportService _plcAddressExcelImportService;
 
         private AsyncRelayCommand _importAsyncCommand;
@@ -26,7 +25,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             {
                 if (_importAsyncCommand == null)
                 {
-                    _importAsyncCommand = new AsyncRelayCommand( ImportAsync);
+                    _importAsyncCommand = new AsyncRelayCommand(ImportAsync);
                 }
                 return _importAsyncCommand;
             }
@@ -44,33 +43,38 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 return _exportTemplateCommand;
             }
         }
-        public DeviceCollectionConfigViewModel(PlcAddressExcelImportService plcAddressExcelImportService)
+
+        public DeviceCollectionConfigViewModel(
+            PlcAddressExcelImportService plcAddressExcelImportService
+        )
         {
-            _plcAddressExcelImportService=plcAddressExcelImportService;
-
-
+            _plcAddressExcelImportService = plcAddressExcelImportService;
         }
 
-     
         async Task ImportAsync()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
                 Filter = "Excel文件 (*.xlsx)|*.xlsx",
                 Title = "导入点位信息",
-              
             };
 
             if (openFileDialog.ShowDialog() == true)
-            {                                               
-            var re=await _plcAddressExcelImportService.ImportPlcPointsAsync(openFileDialog.FileName);
+            {
+                var re = await _plcAddressExcelImportService.ImportPlcPointsAsync(
+                    openFileDialog.FileName
+                );
 
-
+                if (re)
+                {
+                    HandyControl.Controls.MessageBox.Success("导入成功！");
+                }
+                else
+                {
+                    HandyControl.Controls.MessageBox.Success("导入失败！");
+                }
             }
-        
-
-    }
-
+        }
 
         void ExportTemplate()
         {
@@ -78,9 +82,9 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             {
                 Filter = "Excel文件 (*.xlsx)|*.xlsx",
                 Title = "保存Excel文件",
-                FileName = $"数据导出_{DateTime.Now:yyyyMMddHHmmss}.xlsx"
+                FileName = $"数据导出_{DateTime.Now:yyyyMMddHHmmss}.xlsx",
             };
-            return ;
+            return;
 
             //if (saveFileDialog.ShowDialog() == true)
             //{
@@ -105,7 +109,5 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             //    MessageBox.Show("Excel导出成功！", "提示");
             //}
         }
-
     }
 }
-
