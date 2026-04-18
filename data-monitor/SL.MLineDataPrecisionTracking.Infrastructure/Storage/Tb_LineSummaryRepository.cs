@@ -19,6 +19,13 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
             return await _db.Insertable<Tb_LineSummary>(device).ExecuteCommandAsync();
         }
 
+        public async Task<List<Tb_LineSummary>> QueryableAsync(
+            Expression<Func<Tb_LineSummary, bool>> expression
+        )
+        {
+            return await _db.Queryable<Tb_LineSummary>().Where(expression).ToListAsync();
+        }
+
         public async Task<(
             List<Tb_LineSummary> List,
             int TotalCount,

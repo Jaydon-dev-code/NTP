@@ -1,12 +1,18 @@
-﻿using System;
+﻿using McpXLib.Enums;
+using NPOI.SS.UserModel;
+using NPOI.XSSF.UserModel;
+using SL.MLineDataPrecisionTracking.Models.Domain;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using McpXLib.Enums;
 
 namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
 {
@@ -19,6 +25,60 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 #endif
             sjisEncoding = Encoding.GetEncoding("shift_jis");
+        }
+
+        public static Result ExportToExcel<T>(List<T> dataList, string saveFileName)
+        {
+            try
+            {
+                IWorkbook workbook = new XSSFWorkbook();
+                ISheet sheet = workbook.CreateSheet("Sheet1");
+
+                // 1. 获取实体类所有属性
+                PropertyInfo[] properties = typeof(T).GetProperties();
+
+                // 2. 创建表头（读取 Description 中文）
+                IRow headerRow = sheet.CreateRow(0);
+                for (int i = 0; i < properties.Length; i++)
+                {
+                    var desc = properties[i].GetCustomAttribute<DescriptionAttribute>();
+                    string headerName = desc?.Description ?? properties[i].Name; // 自动取中文
+
+                    ICell cell = headerRow.CreateCell(i);
+                    cell.SetCellValue(headerName);
+                }
+
+                // 3. 写数据
+                for (int rowIndex = 0; rowIndex < dataList.Count; rowIndex++)
+                {
+                    IRow row = sheet.CreateRow(rowIndex + 1);
+                    var data = dataList[rowIndex];
+
+                    for (int colIndex = 0; colIndex < properties.Length; colIndex++)
+                    {
+                        object val = properties[colIndex].GetValue(data);
+                        row.CreateCell(colIndex).SetCellValue(val?.ToString() ?? "");
+                    }
+                }
+
+                // 4. 自动列宽
+                for (int i = 0; i < properties.Length; i++)
+                {
+                    sheet.AutoSizeColumn(i);
+                }
+
+                // 5. 保存文件
+                using (FileStream fs = new FileStream(saveFileName, FileMode.Create))
+                {
+                    workbook.Write(fs);
+                }
+
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                return Result.Fail(ex.Message);
+            }
         }
         public static int GetTypeByteLength(this Type type)
         {
