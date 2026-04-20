@@ -24,6 +24,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 {
     public partial class MeticulousPursuitViewModel : ObservableObject
     {
+      
         private static ObservableCollection<LineSummaryDto> _queryValue;
         public ObservableCollection<LineSummaryDto> QueryValue
         {
@@ -447,12 +448,14 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 // 统一公共条件
                 BuildIntCondition(QueryConditions.TrayNoA, ref exp, x => x.TrayNoA, "托盘号A");
                 BuildIntCondition(QueryConditions.TrayNoB, ref exp, x => x.TrayNoB, "托盘号B");
-                BuildIntCondition(QueryConditions.NgCodeA, ref exp, x => x.NgCodeA, "NG编码A");
-                BuildIntCondition(QueryConditions.NgCodeB, ref exp, x => x.NgCodeB, "NG编码B");
+                exp.And(x => x.NgCodeA == QueryConditions.NgCodeA);
+                exp.And(x => x.NgCodeB == QueryConditions.NgCodeB);
+
             }
 
             return true;
         }
+
 
         private bool BuildIntCondition<T>(
             string value,
