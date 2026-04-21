@@ -12,7 +12,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
     {
         [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
         public int Id { get; set; }
-        public int ModelNo { get; set; }
+        public string ModelNo { get; set; }
         public string ModelName { get; set; }
     }
 }

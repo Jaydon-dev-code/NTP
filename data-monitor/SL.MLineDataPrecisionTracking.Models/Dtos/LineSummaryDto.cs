@@ -59,7 +59,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         /// 托盘号
         /// </summary>
         [Description("托盘号A")]
-        public int TrayNoA { get; set; }
+        public string TrayNoA { get; set; }
 
         /// <summary>
         /// 屏蔽工位
@@ -77,103 +77,103 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         /// 小内圈分选数据
         /// </summary>
         [Description("小内圈分选数据")]
-        public double SmallInnerRingSortingData { get; set; }
+        public string SmallInnerRingSortingData { get; set; }
 
         /// <summary>
         /// 外法兰分选数据
         /// </summary>
         [Description("外法兰分选数据")]
-        public double OuterFlangeSortingData { get; set; }
+        public string OuterFlangeSortingData { get; set; }
 
         /// <summary>
         /// 内法兰分选数据
         /// </summary>
         [Description("内法兰分选数据")]
-        public double InnerFlangeSortingData { get; set; }
+        public string InnerFlangeSortingData { get; set; }
 
         /// <summary>
         /// A面钢球组差
         /// </summary>
         [Description("A面钢球组差")]
-        public int ASideSteelBallGroupDiff { get; set; }
+        public string ASideSteelBallGroupDiff { get; set; }
 
         /// <summary>
         /// B面钢球组差
         /// </summary>
         [Description("B面钢球组差")]
-        public int BSideSteelBallGroupDiff { get; set; }
+        public string BSideSteelBallGroupDiff { get; set; }
 
         /// <summary>
         /// B面钢球注脂量
         /// </summary>
         [Description("B面钢球注脂量")]
-        public double BSideSteelBallGreaseVolume { get; set; }
+        public string BSideSteelBallGreaseVolume { get; set; }
 
         /// <summary>
         /// 密封圈注脂量
         /// </summary>
         [Description("密封圈注脂量")]
-        public double SealRingGreaseVolume { get; set; }
+        public string SealRingGreaseVolume { get; set; }
 
         /// <summary>
         /// A面钢球注脂量
         /// </summary>
         [Description("A面钢球注脂量")]
-        public double ASideSteelBallGreaseVolume { get; set; }
+        public string ASideSteelBallGreaseVolume { get; set; }
 
         /// <summary>
         /// 密封圈压装力
         /// </summary>
         [Description("密封圈压装力")]
-        public double SealRingPressForce { get; set; }
+        public string SealRingPressForce { get; set; }
 
         /// <summary>
         /// 密封圈压装位移
         /// </summary>
         [Description("密封圈压装位移A")]
-        public double SealRingPressDisplacementA { get; set; }
+        public string SealRingPressDisplacementA { get; set; }
 
         /// <summary>
         /// 挡水环压装力
         /// </summary>
         [Description("挡水环压装力")]
-        public double WaterBafflePressForce { get; set; }
+        public string WaterBafflePressForce { get; set; }
 
         /// <summary>
         /// 挡水环压装位移
         /// </summary>
         [Description("挡水环压装位移")]
-        public double WaterBafflePressDisplacement { get; set; }
+        public string WaterBafflePressDisplacement { get; set; }
 
         /// <summary>
         /// 小内圈合套压力
         /// </summary>
         [Description("小内圈合套压力")]
-        public double SmallInnerRingAssemblePressure { get; set; }
+        public string SmallInnerRingAssemblePressure { get; set; }
 
         /// <summary>
         /// 小内圈合套位移
         /// </summary>
         [Description("小内圈合套位移")]
-        public double SmallInnerRingAssembleDisplacement { get; set; }
+        public string SmallInnerRingAssembleDisplacement { get; set; }
 
         /// <summary>
         /// 密封圈平行差
         /// </summary>
         [Description("密封圈平行差")]
-        public double SealRingParallelDiff { get; set; }
+        public string SealRingParallelDiff { get; set; }
 
         /// <summary>
         /// 挡水环平行差
         /// </summary>
         [Description("挡水环平行差")]
-        public double WaterBaffleParallelDiff { get; set; }
+        public string WaterBaffleParallelDiff { get; set; }
 
         /// <summary>
         /// 托盘号
         /// </summary>
         [Description("托盘号B")]
-        public int TrayNoB { get; set; }
+        public string TrayNoB { get; set; }
 
 
         /// <summary>
@@ -194,61 +194,61 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         /// 识别代码
         /// </summary>
         [Description("识别代码")]
-        public int IdentificationCode { get; set; }
+        public string IdentificationCode { get; set; }
 
         /// <summary>
         /// 正游隙检测值
         /// </summary>
         [Description("正游隙检测值")]
-        public double PositiveClearanceValue { get; set; }
+        public string PositiveClearanceValue { get; set; }
 
         /// <summary>
         /// 位移量
         /// </summary>
         [Description("位移量")]
-        public double DisplacementValue { get; set; }
+        public string DisplacementValue { get; set; }
 
         /// <summary>
         /// 负游隙检测值
         /// </summary>
         [Description("负游隙检测值")]
-        public double NegativeClearanceValue { get; set; }
+        public string NegativeClearanceValue { get; set; }
 
         /// <summary>
         /// 铆接前成型高度
         /// </summary>
         [Description("铆接前成型高度")]
-        public double PreRivetingHeight { get; set; }
+        public string PreRivetingHeight { get; set; }
 
         /// <summary>
         /// 铆接成型力
         /// </summary>
         [Description("铆接成型力")]
-        public int RivetingForce { get; set; }
+        public string RivetingForce { get; set; }
 
         /// <summary>
         /// 铆接成型位移
         /// </summary>
         [Description("铆接成型位移")]
-        public double RivetingDisplacement { get; set; }
+        public string RivetingDisplacement { get; set; }
 
         /// <summary>
         /// 铆接后成型高度
         /// </summary>
         [Description("铆接后成型高度")]
-        public double PostRivetingHeight { get; set; }
+        public string PostRivetingHeight { get; set; }
 
         /// <summary>
         /// 铆接后成型形状
         /// </summary>
         [Description("铆接后成型形状")]
-        public double PostRivetingShape { get; set; }
+        public string PostRivetingShape { get; set; }
 
         /// <summary>
         /// 铆接后成型外径
         /// </summary>
         [Description("铆接后成型外径")]
-        public double PostRivetingOuterDiameter { get; set; }
+        public string PostRivetingOuterDiameter { get; set; }
 
         /// <summary>
         /// 二维码打标内容
@@ -260,132 +260,132 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         /// 径跳值
         /// </summary>
         [Description("径跳值")]
-        public double RadialRunout { get; set; }
+        public string RadialRunout { get; set; }
 
         /// <summary>
         /// 端跳值
         /// </summary>
         [Description("端跳值")]
-        public double EndRunout { get; set; }
+        public string EndRunout { get; set; }
 
         /// <summary>
         /// 扭矩检测值
         /// </summary>
         [Description("扭矩检测值")]
-        public double TorqueValue { get; set; }
+        public string TorqueValue { get; set; }
 
         /// <summary>
         /// ABS检测峰值
         /// </summary>
         [Description("ABS检测峰值")]
-        public double AbsPeakValue { get; set; }
+        public string AbsPeakValue { get; set; }
 
         /// <summary>
         /// ABS检测谷值
         /// </summary>
         [Description("ABS检测谷值")]
-        public int AbsValleyValue { get; set; }
+        public string AbsValleyValue { get; set; }
 
         /// <summary>
         /// ABS检测齿数
         /// </summary>
         [Description("ABS检测齿数")]
-        public int? AbsToothCount { get; set; }
+        public string AbsToothCount { get; set; }
 
         /// <summary>
         /// 密封圈压装压力
         /// </summary>
         [Description("密封圈压装压力")]
-        public double SealRingPressPressure { get; set; }
+        public string SealRingPressPressure { get; set; }
 
         /// <summary>
         /// 密封圈压装位移
         /// </summary>
         [Description("密封圈压装位移B")]
-        public double SealRingPressDisplacementB { get; set; }
+        public string SealRingPressDisplacementB { get; set; }
 
         /// <summary>
         /// 齿圈压装压力
         /// </summary>
         [Description("齿圈压装压力")]
-        public double GearRingPressPressure { get; set; }
+        public string GearRingPressPressure { get; set; }
 
         /// <summary>
         /// 齿圈压装位移
         /// </summary>
         [Description("齿圈压装位移")]
-        public double GearRingPressDisplacement { get; set; }
+        public string GearRingPressDisplacement { get; set; }
 
         /// <summary>
         /// 防尘盖压装压力
         /// </summary>
         [Description("防尘盖压装压力")]
-        public double DustCoverPressPressure { get; set; }
+        public string DustCoverPressPressure { get; set; }
 
         /// <summary>
         /// 防尘盖压装位移
         /// </summary>
         [Description("防尘盖压装位移")]
-        public double DustCoverPressDisplacement { get; set; }
+        public string DustCoverPressDisplacement { get; set; }
 
         /// <summary>
         /// 磁性圈平行差检测传感器1
         /// </summary>
         [Description("磁性圈平行差检测传感器1")]
-        public double MagneticRingParallelSensor1 { get; set; }
+        public string MagneticRingParallelSensor1 { get; set; }
 
         /// <summary>
         /// 磁性圈平行差检测传感器2
         /// </summary>
         [Description("磁性圈平行差检测传感器2")]
-        public double MagneticRingParallelSensor2 { get; set; }
+        public string MagneticRingParallelSensor2 { get; set; }
 
         /// <summary>
         /// 磁性圈平行差检测传感器3
         /// </summary>
         [Description("磁性圈平行差检测传感器3")]
-        public double MagneticRingParallelSensor3 { get; set; }
+        public string MagneticRingParallelSensor3 { get; set; }
 
         /// <summary>
         /// 磁性圈平行差
         /// </summary>
         [Description("磁性圈平行差")]
-        public double MagneticRingParallelDiff { get; set; }
+        public string MagneticRingParallelDiff { get; set; }
 
         /// <summary>
         /// 振动下LOAD
         /// </summary>
         [Description("振动下LOAD")]
-        public double VibrationLowerLOAD { get; set; }
+        public string VibrationLowerLOAD { get; set; }
 
         /// <summary>
         /// 振动下LH
         /// </summary>
         [Description("振动下LH")]
-        public double VibrationLowerLH { get; set; }
+        public string VibrationLowerLH { get; set; }
 
         /// <summary>
         /// 振动下RH
         /// </summary>
         [Description("振动下RH")]
-        public double VibrationLowerRH { get; set; }
+        public string VibrationLowerRH { get; set; }
 
         /// <summary>
         /// 振动上LOAD
         /// </summary>
         [Description("振动上LOAD")]
-        public double VibrationUpperLOAD { get; set; }
+        public string VibrationUpperLOAD { get; set; }
 
         /// <summary>
         /// 振动上LH
         /// </summary>
         [Description("振动上LH")]
-        public double VibrationUpperLH { get; set; }
+        public string VibrationUpperLH { get; set; }
 
         /// <summary>
         /// 振动上RH
         /// </summary>
         [Description("振动上RH")]
-        public double VibrationUpperRH { get; set; }
+        public string VibrationUpperRH { get; set; }
     }
 }

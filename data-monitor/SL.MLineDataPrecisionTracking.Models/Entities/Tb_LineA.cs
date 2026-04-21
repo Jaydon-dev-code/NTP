@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.SymbolStore;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -20,13 +21,13 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// 托盘号
         /// </summary>
         [SugarColumn(ColumnDescription = "型号A")]
-        public int ModelNoA { get; set; }
+        public string ModelNoA { get; set; }
 
         /// <summary>
         /// 托盘号
         /// </summary>
         [SugarColumn(ColumnDescription = "托盘号A")]
-        public int TrayNoA { get; set; }
+        public string TrayNoA { get; set; }
 
         /// <summary>
         /// 屏蔽工位
@@ -44,96 +45,98 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// 小内圈分选数据
         /// </summary>
         [SugarColumn(ColumnDescription = "小内圈分选数据")]
-        public double SmallInnerRingSortingData { get; set; }
+        public string SmallInnerRingSortingData { get; set; }
 
         /// <summary>
         /// 外法兰分选数据
         /// </summary>
         [SugarColumn(ColumnDescription = "外法兰分选数据")]
-        public double OuterFlangeSortingData { get; set; }
+        public string OuterFlangeSortingData { get; set; }
 
         /// <summary>
         /// 内法兰分选数据
         /// </summary>
         [SugarColumn(ColumnDescription = "内法兰分选数据")]
-        public double InnerFlangeSortingData { get; set; }
+        public string InnerFlangeSortingData { get; set; }
 
         /// <summary>
         /// A面钢球组差
         /// </summary>
         [SugarColumn(ColumnDescription = "A面钢球组差")]
-        public int ASideSteelBallGroupDiff { get; set; }
+        public string ASideSteelBallGroupDiff { get; set; }
 
         /// <summary>
         /// B面钢球组差
         /// </summary>
         [SugarColumn(ColumnDescription = "B面钢球组差")]
-        public int BSideSteelBallGroupDiff { get; set; }
+        public string BSideSteelBallGroupDiff { get; set; }
 
         /// <summary>
         /// B面钢球注脂量
         /// </summary>
         [SugarColumn(ColumnDescription = "B面钢球注脂量")]
-        public double BSideSteelBallGreaseVolume { get; set; }
+        public string BSideSteelBallGreaseVolume { get; set; }
 
         /// <summary>
         /// 密封圈注脂量
         /// </summary>
         [SugarColumn(ColumnDescription = "密封圈注脂量")]
-        public double SealRingGreaseVolume { get; set; }
+        public string SealRingGreaseVolume { get; set; }
 
         /// <summary>
         /// A面钢球注脂量
         /// </summary>
         [SugarColumn(ColumnDescription = "A面钢球注脂量")]
-        public double ASideSteelBallGreaseVolume { get; set; }
+        public string ASideSteelBallGreaseVolume { get; set; }
 
         /// <summary>
         /// 密封圈压装力
         /// </summary>
         [SugarColumn(ColumnDescription = "密封圈压装力")]
-        public double SealRingPressForce { get; set; }
+        public string SealRingPressForce { get; set; }
 
         /// <summary>
         /// 密封圈压装位移
         /// </summary>
         [SugarColumn(ColumnDescription = "密封圈压装位移A")]
-        public double SealRingPressDisplacementA { get; set; }
+        public string SealRingPressDisplacementA { get; set; }
 
         /// <summary>
         /// 挡水环压装力
         /// </summary>
         [SugarColumn(ColumnDescription = "挡水环压装力")]
-        public double WaterBafflePressForce { get; set; }
+        public string WaterBafflePressForce { get; set; }
 
         /// <summary>
         /// 挡水环压装位移
         /// </summary>
         [SugarColumn(ColumnDescription = "挡水环压装位移")]
-        public double WaterBafflePressDisplacement { get; set; }
+        public string WaterBafflePressDisplacement { get; set; }
 
         /// <summary>
         /// 小内圈合套压力
         /// </summary>
         [SugarColumn(ColumnDescription = "小内圈合套压力")]
-        public double SmallInnerRingAssemblePressure { get; set; }
+        public string SmallInnerRingAssemblePressure { get; set; }
 
         /// <summary>
         /// 小内圈合套位移
         /// </summary>
         [SugarColumn(ColumnDescription = "小内圈合套位移")]
-        public double SmallInnerRingAssembleDisplacement { get; set; }
+        public string SmallInnerRingAssembleDisplacement { get; set; }
 
         /// <summary>
         /// 密封圈平行差
         /// </summary>
         [SugarColumn(ColumnDescription = "密封圈平行差")]
-        public double SealRingParallelDiff { get; set; }
+        public string SealRingParallelDiff { get; set; }
 
         /// <summary>
         /// 挡水环平行差
         /// </summary>
         [SugarColumn(ColumnDescription = "挡水环平行差")]
-        public double WaterBaffleParallelDiff { get; set; }
+        public string WaterBaffleParallelDiff { get; set; }
+
+        public bool IsUsing { get; set; }
     }
 }

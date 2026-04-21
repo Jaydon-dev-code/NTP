@@ -59,6 +59,7 @@
     <Compile Include="Entities\Tb_ModelNoToName.cs" />
     <Compile Include="Entities\Tb_PlcConnection.cs" />
     <Compile Include="Entities\Tb_PlcPoint.cs" />
+    <Compile Include="Enum\ResultEnum.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
