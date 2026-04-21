@@ -71,7 +71,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 }
                 else
                 {
-                    HandyControl.Controls.MessageBox.Success("导入失败！");
+                    HandyControl.Controls.MessageBox.Warning("导入失败！");
                 }
             }
         }
