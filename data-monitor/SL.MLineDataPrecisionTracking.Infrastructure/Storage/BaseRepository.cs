@@ -6,22 +6,22 @@ using System.Threading.Tasks;
 
 namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
 {
-    using SqlSugar;
     using System.Linq.Expressions;
+    using SqlSugar;
 
     /// <summary>
     /// SqlSugar 通用仓储层
     /// </summary>
     /// <typeparam name="T">实体</typeparam>
-        public class BaseRepository<T> where T : class, new()
+    public class BaseRepository<T>
+        where T : class, new()
+    {
+        protected  ISqlSugarClient _db=>dbs.CopyNew();
+        ISqlSugarClient dbs;
+
+        public BaseRepository(ISqlSugarClient db)
         {
-            protected readonly ISqlSugarClient _db;
-
-            public BaseRepository(ISqlSugarClient db)
-            {
-                _db = db; 
-            }
-
-  
+            dbs = db;
         }
+    }
 }

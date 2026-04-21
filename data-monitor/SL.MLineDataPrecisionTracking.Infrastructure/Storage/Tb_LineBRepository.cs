@@ -17,5 +17,9 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
         {
             return await _db.Insertable<Tb_LineB>(device).ExecuteCommandAsync();
         }
+        public async Task<int> UpdateableAsync(Tb_LineB device)
+        {
+            return await _db.Updateable<Tb_LineB>(device).ExecuteCommandAsync();
+        }
     }
 }

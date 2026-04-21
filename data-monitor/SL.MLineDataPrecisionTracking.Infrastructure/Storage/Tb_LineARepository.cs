@@ -18,6 +18,10 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
         {
             return await _db.Insertable<Tb_LineA>(device).ExecuteCommandAsync();
         }
+        public async Task<int> UpdateableAsync(Tb_LineA device)
+        {
+            return await _db.Updateable<Tb_LineA>(device).ExecuteCommandAsync();
+        }
         public async Task<Tb_LineA> QueryableFirstAsync(Expression<Func<Tb_LineA, bool>> expression, Expression<Func<Tb_LineA, object>> oderby)
         {
             return await _db.Queryable<Tb_LineA>().OrderByDescending(oderby).FirstAsync(expression);
