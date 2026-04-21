@@ -125,7 +125,7 @@ namespace UnitTestProject
                     length: 2
                 ),
             };
-            var result = await mcpCommunication.ReadAsync(re);
+            var result =  mcpCommunication.Read(re);
             Assert.AreEqual(result.Data[0].Value[0].ObjToBool(),true);
            // 一个寄存器 有 16个 bol 后续优化，单点ok 多点ng
          //   Assert.AreEqual(result.Data[1].Value[0].ObjToBool(),true);
