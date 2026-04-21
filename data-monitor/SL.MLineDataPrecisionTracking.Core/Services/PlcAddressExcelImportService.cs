@@ -152,8 +152,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                         Address = int.TryParse(row.GetCell(6)?.ToString(), out int addr) ? addr : 0,
                         DataType = row.GetCell(7)?.ToString()?.Trim(),
                         Length = int.TryParse(row.GetCell(8)?.ToString(), out int len) ? len : 1,
-                        ReadFormula = row.GetCell(9)?.ToString()?.Trim(),
-                        WriteFormula = row.GetCell(10)?.ToString()?.Trim(),
+                        ReadFormula = row.GetCell(9)?.ToString()?.Trim()??"",
+                        WriteFormula = row.GetCell(10)?.ToString()?.Trim()??"",
                     };
 
                     if (!string.IsNullOrEmpty(dto.PointName) && !string.IsNullOrEmpty(dto.Area))

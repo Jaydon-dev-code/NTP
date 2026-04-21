@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using NPOI.SS.Formula.Functions;
+using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Entities;
@@ -40,92 +41,33 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         protected override async Task<bool> InsterCollectionData(Tb_LineB data)
         {
             var aLineInfo = await _lineARepository.QueryableFirstAsync(
-                x => x.TrayNoA == data.LineATrayNo,
+                x => x.TrayNoA == data.LineATrayNo && x.IsUsing == false,
                 o => o.RecordTime
             );
-            if (aLineInfo == null)
+            Tb_LineSummary tb_LineSummary = new Tb_LineSummary() { Result = ResultEnum.OK };
+            //找不到A 托盘或者 自己 ng了就是ng
+            if (aLineInfo == null || data.NgCodeB != "0")
             {
-                return await _lineBRepository.InsertableAsync(data) > 0;
+                tb_LineSummary.Result = ResultEnum.NG;
             }
-            else
+            await _lineBRepository.InsertableAsync(data);
+            //通过 a托盘号 找到 a的信息 后生成记录
+            ABToSummary(aLineInfo, data, tb_LineSummary, new List<string>() { "A线托盘编号" });
+            //查询模型对应的信息
+            var models = await _modelNoToNameRepository.QueryabletAsync(x => true);
+            //给模型名称
+            tb_LineSummary.ModelNo = data.ModelNoB;
+            var modelNameB = models
+                .FirstOrDefault(x => x.ModelNo == tb_LineSummary.ModelNo)
+                ?.ModelName;
+            tb_LineSummary.ModelName = modelNameB == null ? "" : modelNameB;
+            if (aLineInfo != null)
             {
-                Tb_LineSummary tb_LineSummary = new Tb_LineSummary();
-
-                ABToSummary(aLineInfo, data, tb_LineSummary, new List<string>() { "A线托盘编号" });
-                var models = await _modelNoToNameRepository.QueryabletAsync(x => true);
-
-                tb_LineSummary.ModelNo = data.ModelNoB;
-                var modelNameB = models
-                    .FirstOrDefault(x => x.ModelNo == tb_LineSummary.ModelNo)
-                    ?.ModelName;
-                tb_LineSummary.ModelName= modelNameB== null ? "" : modelNameB;
-
-            
-                return await _lineSummaryRepository.InsertableAsync(tb_LineSummary) > 0;
-            }
-        }
-
-        /// <summary>
-        /// 把 Tb_LineA + Tb_LineB 的值 赋值给 Tb_LineSummary
-        /// 只赋值带 [SugarColumn] 的字段
-        /// 支持过滤字段
-        /// </summary>
-        public void ABToSummary(
-            object sourceA,
-            object sourceB,
-            object summary,
-            List<string> ignoreFields = null
-        )
-        {
-            if (ignoreFields == null)
-            {
-                ignoreFields = new List<string>();
+                aLineInfo.IsUsing = true;
+                await _lineARepository.UpdateableAsync(aLineInfo);
             }
 
-            // 拿到汇总类所有带 SugarColumn 的属性
-            var summaryProperties = summary
-                .GetType()
-                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(p => p.CanWrite && p.IsDefined(typeof(SugarColumn), true))
-                .ToList();
-
-            foreach (var prop in summaryProperties)
-            {
-                var fieldName = prop.Name;
-
-                // 过滤字段
-                if (
-                    ignoreFields.Any(ig => ig.Equals(fieldName, StringComparison.OrdinalIgnoreCase))
-                )
-                    continue;
-
-                // 先从 A 类取值
-                object value = GetValue(sourceA, fieldName);
-
-                // A 类没有，再从 B 类取值
-                if (value == null)
-                {
-                    value = GetValue(sourceB, fieldName);
-                }
-
-                // 赋值给汇总类
-                if (value != null)
-                {
-                    prop.SetValue(summary, value);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 从对象中根据字段名取值
-        /// </summary>
-        private static object GetValue(object obj, string fieldName)
-        {
-            if (obj == null)
-                return null;
-
-            var prop = obj.GetType().GetProperty(fieldName);
-            return prop?.CanRead == true ? prop.GetValue(obj) : null;
+            return await _lineSummaryRepository.InsertableAsync(tb_LineSummary) > 0;
         }
     }
 }

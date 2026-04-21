@@ -17,20 +17,43 @@ using SqlSugar;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services
 {
-    public class A_ProLineDataCollectionService: ProLineDataCollectionServiceAbstract<Tb_LineA>
+    public class A_ProLineDataCollectionService : ProLineDataCollectionServiceAbstract<Tb_LineA>
     {
         protected override string _lineName { get; set; } = "A线";
         Tb_LineARepository _lineARepository;
+        Tb_LineSummaryRepository _ineSummaryRepository;
+        Tb_ModelNoToNameRepository _modelNoToNameRepository;
+
         public A_ProLineDataCollectionService(
             Tb_EquipmentRepository equipmentRepositor,
-            McpCommunication mcp,Tb_LineARepository tb_LineARepository
+            McpCommunication mcp,
+            Tb_LineARepository tb_LineARepository,
+            Tb_LineSummaryRepository tb_LineSummaryRepository,
+            Tb_ModelNoToNameRepository tb_ModelNoToNameRepository
         )
-            : base(equipmentRepositor, mcp) {
+            : base(equipmentRepositor, mcp)
+        {
             _lineARepository = tb_LineARepository;
+            _ineSummaryRepository = tb_LineSummaryRepository;
+            _modelNoToNameRepository = tb_ModelNoToNameRepository;
         }
 
         protected override async Task<bool> InsterCollectionData(Tb_LineA data)
         {
+            if (data.NgCodeA != "0")
+            {
+                Tb_LineSummary tb_LineSummary = new Tb_LineSummary() { Result = ResultEnum.NG };
+                ABToSummary(data, null, tb_LineSummary); //查询模型对应的信息
+                var models = await _modelNoToNameRepository.QueryabletAsync(x => true);
+                //给模型名称
+                tb_LineSummary.ModelNo = data.ModelNoA;
+                var modelNameB = models
+                    .FirstOrDefault(x => x.ModelNo == tb_LineSummary.ModelNo)
+                    ?.ModelName;
+                tb_LineSummary.ModelName = modelNameB == null ? "" : modelNameB;
+                await _ineSummaryRepository.InsertableAsync(tb_LineSummary);
+                data.IsUsing = true;
+            }
             return await _lineARepository.InsertableAsync(data) > 0;
         }
     }

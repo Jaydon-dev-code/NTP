@@ -38,7 +38,68 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             _equipmentRepository = equipmentRepositor;
             _mcp = mcp;
         }
+        /// <summary>
+        /// 把 Tb_LineA + Tb_LineB 的值 赋值给 Tb_LineSummary
+        /// 只赋值带 [SugarColumn] 的字段
+        /// 支持过滤字段
+        /// </summary>
+        protected void ABToSummary(
+            object sourceA,
+            object sourceB,
+            object summary,
+            List<string> ignoreFields = null
+        )
+        {
+            if (ignoreFields == null)
+            {
+                ignoreFields = new List<string>();
+            }
 
+            // 拿到汇总类所有带 SugarColumn 的属性
+            var summaryProperties = summary
+                .GetType()
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.CanWrite && p.IsDefined(typeof(SugarColumn), true))
+                .ToList();
+
+            foreach (var prop in summaryProperties)
+            {
+                var fieldName = prop.Name;
+
+                // 过滤字段
+                if (
+                    ignoreFields.Any(ig => ig.Equals(fieldName, StringComparison.OrdinalIgnoreCase))
+                )
+                    continue;
+
+                // 先从 A 类取值
+                object value = GetValue(sourceA, fieldName);
+
+                // A 类没有，再从 B 类取值
+                if (value == null)
+                {
+                    value = GetValue(sourceB, fieldName);
+                }
+
+                // 赋值给汇总类
+                if (value != null)
+                {
+                    prop.SetValue(summary, value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 从对象中根据字段名取值
+        /// </summary>
+        private static object GetValue(object obj, string fieldName)
+        {
+            if (obj == null)
+                return null;
+
+            var prop = obj.GetType().GetProperty(fieldName);
+            return prop?.CanRead == true ? prop.GetValue(obj) : null;
+        }
         public async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             try
@@ -87,7 +148,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                     }
                     finally
                     {
-                        await Task.Delay(1000);
+                        await Task.Delay(500);
                     }
                 }
             }
@@ -105,7 +166,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
 
         protected virtual async Task<Result<T>> CollectionData()
         {
-            var readValue = await _mcp.ReadAsync(_lineReadPlcInfo);
+            var readValue =  _mcp.Read(_lineReadPlcInfo);
             if (readValue.IsSuccess is false)
             {
                 return Result<T>.Fail(readValue.Message);
@@ -130,21 +191,21 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                     {
                         if (readInfo.ReadFormula == null || readInfo.ReadFormula.Length == 0)
                         {
-                            prop.SetValue(t, readInfo.Value[0]);
+                            prop.SetValue(t, readInfo.Value[0].ToString());
                         }
                         else
                         {
                             var val = readInfo.ReadFormula.StringCompute(
                                 readInfo.Value[0].ToString()
                             );
-                            prop.SetValue(t, val);
+                            prop.SetValue(t, val.ToString());
                         }
                     }
                     else
                     {
                         if (readInfo.DataType == TypeCode.String)
                         {
-                            var val = string.Concat(readInfo.Value.Where(x => x is string));
+                            var val = string.Concat(readInfo.Value);
                             prop.SetValue(t, val);
                         }
                         else
@@ -169,13 +230,13 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
 
         protected virtual async Task CallPlcCollectionOK()
         {
-            _pcCallPlcCollctionOk.Value = new List<object>() { 1 };
+            _pcCallPlcCollctionOk.Value = new List<object>() { true };
             await _mcp.WriteAsync(_pcCallPlcCollctionOk);
         }
 
         protected virtual async Task<bool> CanCollection()
         {
-            var re = await _mcp.ReadAsync(_plcCallPCCanCollectionPoint);
+            var re =  _mcp.Read(_plcCallPCCanCollectionPoint);
             if (re.IsSuccess is false || re.Data.Value[0].ObjToBool() is false)
             {
                 return false;
