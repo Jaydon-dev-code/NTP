@@ -24,7 +24,6 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 {
     public partial class MeticulousPursuitViewModel : ObservableObject
     {
-      
         private static ObservableCollection<LineSummaryDto> _queryValue;
         public ObservableCollection<LineSummaryDto> QueryValue
         {
@@ -370,7 +369,6 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             return true;
         }
 
-
         async Task SaveQueryAsync()
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog
@@ -380,7 +378,8 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 FileName = $"数据导出_{DateTime.Now:yyyyMMddHHmmss}.xlsx",
             };
 
-            if (saveFileDialog.ShowDialog() != true) return;
+            if (saveFileDialog.ShowDialog() != true)
+                return;
 
             var exp = Expressionable.Create<Tb_LineSummary>();
 
@@ -413,11 +412,9 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             else
             {
                 HandyControl.Controls.MessageBox.Warning($"导出失败！/r/n{ex.Message}");
-
             }
-
-           
         }
+
         /// <summary>
         /// 统一构建查询条件（Query + Save 共用）
         /// </summary>
@@ -434,7 +431,8 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             // 时间 + 普通条件模式
             else
             {
-                var startTime = QueryConditions.StartDate.Date + QueryConditions.StartTime.TimeOfDay;
+                var startTime =
+                    QueryConditions.StartDate.Date + QueryConditions.StartTime.TimeOfDay;
                 var endTime = QueryConditions.EndDate.Date + QueryConditions.EndTime.TimeOfDay;
 
                 if (startTime > endTime)
@@ -446,39 +444,12 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 exp.And(x => x.RecordTime >= startTime && x.RecordTime <= endTime);
 
                 // 统一公共条件
-                BuildIntCondition(QueryConditions.TrayNoA, ref exp, x => x.TrayNoA, "托盘号A");
-                BuildIntCondition(QueryConditions.TrayNoB, ref exp, x => x.TrayNoB, "托盘号B");
+                exp.And(x => x.TrayNoA == QueryConditions.TrayNoA);
+                exp.And(x => x.TrayNoB == QueryConditions.TrayNoB);
                 exp.And(x => x.NgCodeA == QueryConditions.NgCodeA);
                 exp.And(x => x.NgCodeB == QueryConditions.NgCodeB);
-
             }
 
-            return true;
-        }
-
-
-        private bool BuildIntCondition<T>(
-            string value,
-            ref Expressionable<T> exp,
-            Expression<Func<T, int>> fieldExp,
-            string fieldName
-        )
-            where T : class, new()
-        {
-            if (string.IsNullOrWhiteSpace(value))
-                return true;
-            if (!int.TryParse(value, out int num))
-            {
-                HandyControl.Controls.MessageBox.Warning($"{fieldName} 格式不正确！");
-                return false;
-            }
-            var parameter = fieldExp.Parameters[0];
-            var body = System.Linq.Expressions.Expression.Equal(
-                fieldExp.Body,
-                System.Linq.Expressions.Expression.Constant(num)
-            );
-            var lambda = System.Linq.Expressions.Expression.Lambda<Func<T, bool>>(body, parameter);
-            exp.And(lambda);
             return true;
         }
 
