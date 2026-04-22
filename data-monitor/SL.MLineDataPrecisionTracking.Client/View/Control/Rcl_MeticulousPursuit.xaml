@@ -326,78 +326,73 @@
                                 IsReadOnly="True" />
                             <DataGridTextColumn
                                 MinWidth="160"
-                                Binding="{Binding QrCodeMarkContent}"
-                                Header="二维码打标内容"
+                                Binding="{Binding MarkingNo}"
+                                Header="序列码"
                                 IsReadOnly="True" />
                             <!--  加热时间  -->
                             <DataGridTextColumn
                                 MinWidth="100"
                                 Binding="{Binding HeatingTime}"
-                                Header="加热时间"
+                                Header="加热时间（秒）"
                                 IsReadOnly="True" />
 
                             <!--  冷却开始时间  -->
                             <DataGridTextColumn
                                 MinWidth="130"
-                                Binding="{Binding CoolingStartTime, StringFormat=\{0:yyyy-MM-dd HH:mm:ss\}}"
-                                Header="冷却开始时间"
+                                Binding="{Binding CoolingStartTime}"
+                                Header="冷却开始时间（秒）"
                                 IsReadOnly="True" />
 
                             <!--  冷却时间  -->
                             <DataGridTextColumn
                                 MinWidth="100"
                                 Binding="{Binding CoolingTime}"
-                                Header="冷却时间"
+                                Header="冷却时间（秒）"
                                 IsReadOnly="True" />
 
                             <!--  输出功率  -->
                             <DataGridTextColumn
                                 MinWidth="100"
                                 Binding="{Binding OutputPower}"
-                                Header="输出功率"
+                                Header="输出功率（kw）"
                                 IsReadOnly="True" />
 
                             <!--  输出电压  -->
                             <DataGridTextColumn
                                 MinWidth="100"
                                 Binding="{Binding OutputVoltage}"
-                                Header="输出电压"
+                                Header="输出电压（V）"
                                 IsReadOnly="True" />
 
                             <!--  输出频率  -->
                             <DataGridTextColumn
                                 MinWidth="100"
                                 Binding="{Binding OutputFrequency}"
-                                Header="输出频率"
+                                Header="输出频率（kHz）"
                                 IsReadOnly="True" />
 
                             <!--  外喷冷却水量  -->
                             <DataGridTextColumn
                                 MinWidth="120"
                                 Binding="{Binding ExternalSprayCoolingWater}"
-                                Header="外喷冷却水量"
+                                Header="外喷冷却水量（L/分）"
                                 IsReadOnly="True" />
 
                             <!--  辅喷冷却水量  -->
                             <DataGridTextColumn
                                 MinWidth="120"
                                 Binding="{Binding AuxiliarySprayCoolingWater}"
-                                Header="辅喷冷却水量"
+                                Header="辅喷冷却水量（L/分）"
                                 IsReadOnly="True" />
 
                             <!--  内喷冷却水量  -->
                             <DataGridTextColumn
                                 MinWidth="120"
                                 Binding="{Binding InternalSprayCoolingWater}"
-                                Header="内喷冷却水量"
+                                Header="内喷冷却水量（L/分）"
                                 IsReadOnly="True" />
 
-                            <!--  二维码打标内容  -->
-                            <DataGridTextColumn
-                                MinWidth="160"
-                                Binding="{Binding QrCodeMarkContent}"
-                                Header="二维码打标内容"
-                                IsReadOnly="True" />
+
                         </DataGrid.Columns>
                     </DataGrid>
                     <hc:Drawer
