@@ -167,6 +167,8 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 HistoryScanMarkingNos = new ObservableCollection<ScanRecord>();
             }
             _heatTreatmentDatatRepository = heatTreatmentDatatRepository;
+            _mkNoQuValues = new List<HeatTreatmentDataDto>();
+            _quValues = new List<HeatTreatmentDataDto>();
             QueryValue = new ObservableCollection<HeatTreatmentDataDto>();
             PageSoure = new ObservableCollection<int>() { 100, 200, 500 };
             PaginationPages.DataCountPerPage = 100;
