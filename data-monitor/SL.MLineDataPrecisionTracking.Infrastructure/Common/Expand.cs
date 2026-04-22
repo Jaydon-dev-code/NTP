@@ -276,6 +276,18 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
                     throw new NotSupportedException($"不支持解析类型数组: {type}");
             }
         }
+        public static bool[] ByteToBits(this byte value)
+        {
+            bool[] bits = new bool[8];
+
+            for (int i = 0; i < 8; i++)
+            {
+                // 依次取出第 0~7 位
+                bits[i] = (value & (1 << i)) != 0;
+            }
+
+            return bits;
+        }
 
         /// <summary>
         /// 通用数组解析（自动步进字节）
@@ -304,7 +316,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
             switch (type)
             {
                 case TypeCode.Boolean:
-                    return buffer[startIndex] != 0;
+                    return buffer[startIndex].ByteToBits()[0];
                 case TypeCode.Byte:
                     return buffer[startIndex];
                 case TypeCode.Int16:
