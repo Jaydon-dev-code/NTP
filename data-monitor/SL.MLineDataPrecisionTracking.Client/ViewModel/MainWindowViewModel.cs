@@ -1,15 +1,7 @@
-﻿using Autofac;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using HandyControl.Controls;
-using HandyControl.Data;
-using SL.MLineDataPrecisionTracking.Client.View.Control;
-using SL.MLineDataPrecisionTracking.Client.ViewModel.Control;
-using SL.MLineDataPrecisionTracking.Models.Domain;
-using SqlSugar.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,6 +11,15 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Autofac;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using HandyControl.Controls;
+using HandyControl.Data;
+using SL.MLineDataPrecisionTracking.Client.View.Control;
+using SL.MLineDataPrecisionTracking.Client.ViewModel.Control;
+using SL.MLineDataPrecisionTracking.Models.Domain;
+using SqlSugar.Extensions;
 using Window = System.Windows.Window;
 
 namespace SL.MLineDataPrecisionTracking.Client.ViewModel
@@ -28,15 +29,21 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel
         string lastMenuName;
 
         List<MenuItems> _menus;
+
         /// <summary>
         /// 中间的控件
         /// </summary>
-
         private object _currentContent;
         public object CurrentContent
         {
             get => _currentContent;
             set => SetProperty(ref _currentContent, value);
+        }
+        private string _softwareName;
+        public string SoftwareName
+        {
+            get => _softwareName;
+            set => SetProperty(ref _softwareName, value);
         }
 
         private string _versionInfo;
@@ -51,7 +58,6 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel
             get => _tbTime;
             set => SetProperty(ref _tbTime, value);
         }
-
 
         private RelayCommand<SideMenu> _loadedCommand;
         public IRelayCommand<SideMenu> LoadedCommand
@@ -73,7 +79,9 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel
             {
                 if (_selectionChangedCommand == null)
                 {
-                    _selectionChangedCommand = new RelayCommand<FunctionEventArgs<object>>(SelectionChanged);
+                    _selectionChangedCommand = new RelayCommand<FunctionEventArgs<object>>(
+                        SelectionChanged
+                    );
                 }
                 return _selectionChangedCommand;
             }
@@ -128,23 +136,28 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel
 
         public MainWindowViewModel()
         {
-            VersionInfo= System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            SoftwareName = string.IsNullOrEmpty(ConfigurationManager.AppSettings["SoftwareName"])
+                ? "双林轴承数字追溯管理系统"
+                : ConfigurationManager.AppSettings["SoftwareName"];
+            VersionInfo = System
+                .Reflection.Assembly.GetExecutingAssembly()
+                .GetName()
+                .Version.ToString();
             _menus = new List<MenuItems>
             {
                 new MenuItems()
                 {
                     Header = "数据查询",
-                    Icon =   $"{ AppDomain.CurrentDomain.BaseDirectory}Resources\\Image\\ProductionRecord.png",
-                    Page = App.Container.Resolve<Rcl_MeticulousPursuit>(),
+                    Icon =
+                        $"{AppDomain.CurrentDomain.BaseDirectory}Resources\\Image\\ProductionRecord.png",
+                    Page = App.Container.Resolve<MeticulousPursuit>(),
                 },
-
                 new MenuItems()
                 {
                     Header = "设置",
-                    Icon = $"{ AppDomain.CurrentDomain.BaseDirectory}Resources\\Image\\Setting.png",
+                    Icon = $"{AppDomain.CurrentDomain.BaseDirectory}Resources\\Image\\Setting.png",
                     Page = App.Container.Resolve<DeviceCollectionConfig>(),
                 },
-
             };
         }
 
@@ -187,7 +200,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel
                     {
                         Header = item.Header,
                         IsSelected = isFirst,
-                        Icon =new Image() {Source = LoadImageFromPath(item.Icon) } ,
+                        Icon = new Image() { Source = LoadImageFromPath(item.Icon) },
                     }
                 );
                 if (isFirst)
@@ -199,7 +212,6 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel
             }
         }
 
-  
         void SelectionChanged(FunctionEventArgs<object> e)
         {
             if (e.Info is SideMenuItem menu && menu.Header != lastMenuName)

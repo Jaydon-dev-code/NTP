@@ -31,7 +31,7 @@
                     Width="120"
                     HorizontalAlignment="Left"
                     Source="pack://application:,,,/Resources/Image/CompanyLogo.jpg" />
-                <TextBlock Style="{StaticResource TextBlockTitle}" Text="双林轴承数字追溯管理系统" />
+                <TextBlock Style="{StaticResource TextBlockTitle}" Text="{Binding SoftwareName}" />
                 <StackPanel
                     Margin="0,0,10,0"
                     HorizontalAlignment="Right"
