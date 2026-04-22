@@ -49,6 +49,22 @@ namespace UnitTestProject
         }
 
         [TestMethod]
+        public async Task A_DataCollectionTest()
+        {
+            var a = Container.Resolve<ProLineDataCollectionServiceAbstract<Tb_LineA>>();
+            await a.ExecuteAsync(new System.Threading.CancellationToken());
+            await Task.Delay(20000 * 1000);
+        }
+
+        [TestMethod]
+        public async Task B_DataCollectionTest()
+        {
+            var b = Container.Resolve<ProLineDataCollectionServiceAbstract<Tb_LineB>>();
+            await b.ExecuteAsync(new System.Threading.CancellationToken());
+            await Task.Delay(20000 * 1000);
+        }
+
+        [TestMethod]
         public async Task DataCollectionTest()
         {
             await Task.Delay(1000);
@@ -73,13 +89,13 @@ namespace UnitTestProject
                         if (aPallPoint != null)
                         {
                             aPallPoint.Value = new List<object>() { aPallNo[index] };
-                            await mcp.WriteAsync(aPallPoint);
+                            mcp.Write(aPallPoint);
                         }
                     }
                 )
             );
             await Task.WhenAll(task1, task2);
-            await Task.Delay(20000*10);
+            await Task.Delay(20000 * 10);
         }
 
         async Task RunAsync<T>(
@@ -111,14 +127,14 @@ namespace UnitTestProject
             var mcp = Container.Resolve<McpCommunication>();
             lineInfo.Remove(modelNoPoint);
 
-            await mcp.WriteAsync(modelNoPoint);
-            await mcp.WriteAsync(ngCodeoPoint);
+            mcp.Write(modelNoPoint);
+            mcp.Write(ngCodeoPoint);
             EndServer(endPoint, startPoint, mcp);
 
             int val = 1;
             for (int i = 0; i < pallNo.Length; i++)
             {
-                if (( mcp.Read(startPoint)).Data.Value[0].ObjToBool() is false)
+                if ((mcp.Read(startPoint)).Data.Value[0].ObjToBool() is false)
                 {
                     val = await WirteVale(lineInfo, pallNotPoint, mcp, val, pallNo[i]);
                     if (func != null)
@@ -126,7 +142,7 @@ namespace UnitTestProject
                         await func(lineInfo, i);
                     }
                     startPoint.Value = new List<object>() { true };
-                    await mcp.WriteAsync(startPoint);
+                    mcp.Write(startPoint);
                 }
                 else
                 {
@@ -145,12 +161,12 @@ namespace UnitTestProject
         )
         {
             pallNotPoint.Value = new List<object>() { item };
-            await mcp.WriteAsync(pallNotPoint);
+            mcp.Write(pallNotPoint);
             for (int i = 0; i < lineInfo.Count; i++)
             {
                 lineInfo[i].Value = new List<object>() { val };
                 val++;
-                await mcp.WriteAsync(lineInfo[i]);
+                mcp.Write(lineInfo[i]);
             }
 
             return val;
@@ -168,13 +184,13 @@ namespace UnitTestProject
                 {
                     try
                     {
-                        var endValue =  mcp.Read(endPoint);
+                        var endValue = mcp.Read(endPoint);
                         if (endValue.Data.Value[0].ObjToBool())
                         {
                             startPoint.Value = new List<object>() { false };
                             endPoint.Value = new List<object>() { false };
-                            await mcp.WriteAsync(startPoint);
-                            await mcp.WriteAsync(endPoint);
+                            mcp.Write(startPoint);
+                            mcp.Write(endPoint);
                         }
                     }
                     finally
