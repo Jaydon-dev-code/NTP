@@ -1,4 +1,5 @@
 ﻿
+using CommunityToolkit.Mvvm.ComponentModel;
 using SL.MLineDataPrecisionTracking.Models.Entities;
 using SL.MLineDataPrecisionTracking.Models.Enum;
 using SqlSugar;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace SL.MLineDataPrecisionTracking.Models.Dtos
 {
-    public class LineSummaryDto
+    public class LineSummaryDto : ObservableObject
     {
         public LineSummaryDto(Tb_LineSummary tb_LineSummary)
         {
@@ -58,6 +59,11 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
 
         [Description("检测结果")]
         public ResultEnum Result { get; set; }
+        /// <summary>
+        /// 二维码打标内容
+        /// </summary>
+        [Description("二维码打标内容")]
+        public string MarkingNo { get; set; }
 
         /// <summary>
         /// 托盘号
@@ -254,11 +260,6 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         [Description("铆接后成型外径")]
         public string PostRivetingOuterDiameter { get; set; }
 
-        /// <summary>
-        /// 二维码打标内容
-        /// </summary>
-        [Description("二维码打标内容")]
-        public string MarkingNo { get; set; }
 
         /// <summary>
         /// 径跳值
@@ -391,5 +392,12 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         /// </summary>
         [Description("振动上RH")]
         public string VibrationUpperRH { get; set; }
+
+        private bool _isHave = true;
+        public bool IsHave
+        {
+            get => _isHave;
+            set => SetProperty(ref _isHave, value);
+        }
     }
 }
