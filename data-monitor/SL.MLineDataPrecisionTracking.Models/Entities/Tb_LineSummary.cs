@@ -52,6 +52,18 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         public string NgCodeA { get; set; } = "";
 
         /// <summary>
+        /// 二维码打标内容
+        /// </summary>
+        [SugarColumn(ColumnDescription = "序列码A")]
+        public string MarkingNoA { get; set; } = "";
+
+        /// <summary>
+        /// 二维码打标内容
+        /// </summary>
+        [SugarColumn(ColumnDescription = "序列码")]
+        public string MarkingNo{ get; set; } = "";
+
+        /// <summary>
         /// 小内圈分选数据
         /// </summary>
         [SugarColumn(ColumnDescription = "小内圈分选数据")]
@@ -231,11 +243,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         [SugarColumn(ColumnDescription = "铆接后成型外径")]
         public string PostRivetingOuterDiameter { get; set; } = "";
 
-        /// <summary>
-        /// 二维码打标内容
-        /// </summary>
-        [SugarColumn(ColumnDescription = "二维码打标内容")]
-        public string MarkingNo { get; set; } = "";
+
 
         /// <summary>
         /// 径跳值

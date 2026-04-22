@@ -29,6 +29,9 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         [SugarColumn(ColumnDescription = "托盘号A")]
         public string TrayNoA { get; set; }
 
+        [SugarColumn(ColumnDescription = "序列码A")]
+        public string MarkingNoA { get; set; }
+
         /// <summary>
         /// 屏蔽工位
         /// </summary>
