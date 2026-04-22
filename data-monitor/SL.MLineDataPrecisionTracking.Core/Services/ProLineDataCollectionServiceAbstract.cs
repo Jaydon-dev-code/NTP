@@ -117,7 +117,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                 {
                     try
                     {
-                        if (await CanCollection() is false)
+                        if (await CanCollection() is false)  
                         {
                             continue;
                         }

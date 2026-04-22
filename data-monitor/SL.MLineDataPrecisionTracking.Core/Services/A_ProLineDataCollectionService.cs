@@ -13,6 +13,7 @@ using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Entities;
+using SL.MLineDataPrecisionTracking.Models.Enum;
 using SqlSugar;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services
