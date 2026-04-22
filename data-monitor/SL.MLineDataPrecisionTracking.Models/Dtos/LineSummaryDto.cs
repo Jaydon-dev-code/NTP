@@ -1,12 +1,14 @@
-﻿using System;
+﻿
+using SL.MLineDataPrecisionTracking.Models.Entities;
+using SL.MLineDataPrecisionTracking.Models.Enum;
+using SqlSugar;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using SL.MLineDataPrecisionTracking.Models.Entities;
-using SqlSugar;
 
 namespace SL.MLineDataPrecisionTracking.Models.Dtos
 {
@@ -51,9 +53,11 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
 
         [Description("型号名称")]
         public string ModelName { get; set; }
+        [Description("型号名称")]
+        public string ModelNo{ get; set; }
 
         [Description("检测结果")]
-        public string Result { get; set; }
+        public ResultEnum Result { get; set; }
 
         /// <summary>
         /// 托盘号

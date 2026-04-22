@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 
+using SL.MLineDataPrecisionTracking.Models.Enum;
+
 namespace SL.MLineDataPrecisionTracking.Models.Domain
 {
     public class RefinedSearchCriteria
@@ -20,7 +22,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Domain
         public string NgCodeB { get; set; }
         public string ModelName { get; set; }
         public string Op { get; set; }
-        public string Result { get; set; }
+        public ResultEnum Result { get; set; }
         public string MarkingNo { get; set; }
         public bool IsScanCode { get; set; }
     }

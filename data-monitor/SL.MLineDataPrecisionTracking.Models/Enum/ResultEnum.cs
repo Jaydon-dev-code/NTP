@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
+namespace SL.MLineDataPrecisionTracking.Models.Enum
 {
     public enum ResultEnum
     {
-        OK,NG
+        ALL,
+        OK,
+        NG,
     }
 }

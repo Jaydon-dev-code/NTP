@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SL.MLineDataPrecisionTracking.Infrastructure.Common;
+using SL.MLineDataPrecisionTracking.Models.Enum;
 using SqlSugar;
 using SqlSugar.DbConvert;
 
