@@ -36,7 +36,12 @@ namespace UnitTestProject
             builder.AddLogMiddleware();
             Container = builder.Build();
             //-------------------------------------------------
-            foreach (var item in new int[] { 2000, 6000 })
+            foreach (
+                var item in new int[]
+                {  2000, 6000,
+                    4990,
+                }
+            )
             {
                 MelsecMcServer server = new HslCommunication.Profinet.Melsec.MelsecMcServer();
                 server.IsBinary = true;
@@ -49,11 +54,89 @@ namespace UnitTestProject
         }
 
         [TestMethod]
+        public async Task Rcl_DataCollectionTest()
+        {
+            var rcl = Container.Resolve<
+                ProLineDataCollectionServiceAbstract<Tb_HeatTreatmentData>
+            >();
+            rcl.ExecuteAsync(new System.Threading.CancellationToken());
+            //await RclRunAsync("热处理");
+            await Task.Delay(20000 * 1000);
+        }
+
+        [TestMethod]
         public async Task A_DataCollectionTest()
         {
-            var a = Container.Resolve<ProLineDataCollectionServiceAbstract<Tb_LineA>>();
-            await a.ExecuteAsync(new System.Threading.CancellationToken());
+            var rcl = Container.Resolve<ProLineDataCollectionServiceAbstract<Tb_LineA>>();
+            await rcl.ExecuteAsync(new System.Threading.CancellationToken());
+
             await Task.Delay(20000 * 1000);
+        }
+
+        private async Task RclRunAsync(string lineName)
+        {
+            var lineInfo = await InitPlcAddre(lineName);
+            var endPoint = lineInfo.FirstOrDefault(x => x.PointName == "采集结束");
+            var startPoint = lineInfo.FirstOrDefault(x => x.PointName == "采集开始");
+            lineInfo.Remove(endPoint);
+            lineInfo.Remove(startPoint);
+            var mcp = Container.Resolve<McpCommunication>();
+            RclEndServer(endPoint, startPoint, mcp);
+            int val = 1000;
+            for (int i = 0; i < 10; i++)
+            {
+                if ((mcp.Read(startPoint)).Data.Value[0].ObjToBool() is false)
+                {
+                    foreach (var item in lineInfo)
+                    {
+                        item.Value = new List<object>() { val };
+                        if (item.DataType == TypeCode.String)
+                        {
+                            item.Value = new List<object>() { val.ToString() };
+                        }
+
+                         mcp.Write(item);
+                        val++;
+                    }
+
+                    startPoint.Value = new List<object>() { true };
+                     mcp.Write(startPoint);
+                }
+                else
+                {
+                    i--;
+                    await Task.Delay(200);
+                }
+            }
+        }
+
+        private void RclEndServer(
+            DevPlcPointMcDto endPoint,
+            DevPlcPointMcDto startPoint,
+            McpCommunication mcp
+        )
+        {
+            Task.Run(async () =>
+            {
+                while (true)
+                {
+                    try
+                    {
+                        var endValue = mcp.Read(endPoint);
+                        if (endValue.Data.Value[0].ObjToBool())
+                        {
+                            startPoint.Value = new List<object>() { false };
+                            endPoint.Value = new List<object>() { false };
+                            mcp.Write(startPoint);
+                            mcp.Write(endPoint);
+                        }
+                    }
+                    finally
+                    {
+                        await Task.Delay(200);
+                    }
+                }
+            });
         }
 
         [TestMethod]
@@ -68,7 +151,6 @@ namespace UnitTestProject
         public async Task DataCollectionTest()
         {
             await Task.Delay(1000);
-            var equipmentRepository = Container.Resolve<Tb_EquipmentRepository>();
             var a = Container.Resolve<ProLineDataCollectionServiceAbstract<Tb_LineA>>();
             var b = Container.Resolve<ProLineDataCollectionServiceAbstract<Tb_LineB>>();
             int[] aPallNo = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
