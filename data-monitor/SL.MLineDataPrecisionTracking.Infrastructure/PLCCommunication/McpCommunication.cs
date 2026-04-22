@@ -26,14 +26,16 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
 
         public McpCommunication() { }
 
-
         #region 同步读取方法
         /// <summary>
         /// 同步读取单个点位
         /// </summary>
         public Result<DevPlcPointMcDto> Read(DevPlcPointMcDto readPlcInfo)
         {
-            var readDto = new DevPlcPointMcReadDto(readPlcInfo, readPlcInfo.DataType.GetTypeOfShortOffset());
+            var readDto = new DevPlcPointMcReadDto(
+                readPlcInfo,
+                readPlcInfo.DataType.GetTypeOfShortOffset()
+            );
             var re = Read(readDto);
 
             if (!re.IsSuccess)
@@ -122,7 +124,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                 {
                     x.IpAddress,
                     x.Port,
-                    x.Prefix
+                    x.Prefix,
                 });
 
                 foreach (var group in groups)
@@ -130,10 +132,13 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                     var startAddre = group.Min(x => x.Address);
                     var endAddressInfo = group.OrderByDescending(x => x.Address).First();
 
-                    var length = endAddressInfo.Address
-                        + (endAddressInfo.DataType == TypeCode.String
-                            ? (int)Math.Ceiling((double)endAddressInfo.Length / 2)
-                            : endAddressInfo.Length * endAddressInfo.ShortOffset)
+                    var length =
+                        endAddressInfo.Address
+                        + (
+                            endAddressInfo.DataType == TypeCode.String
+                                ? (int)Math.Ceiling((double)endAddressInfo.Length / 2)
+                                : endAddressInfo.Length * endAddressInfo.ShortOffset
+                        )
                         - startAddre;
 
                     var readValue = PaginatedReadingSync(
@@ -186,7 +191,8 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             int port,
             Prefix prefix,
             int startAddre,
-            int length)
+            int length
+        )
         {
             Result<byte[]> result = new Result<byte[]> { IsSuccess = true };
             int currentAddress = startAddre;
@@ -216,7 +222,13 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                 {
                     Log.Warning(
                         "[Mcp通讯异常]同步读取信息：{ip}-{port}-{prefix}-{addr}-{len}\r\n{ex}",
-                        ipAddress, port, prefix, startAddre, length, ex);
+                        ipAddress,
+                        port,
+                        prefix,
+                        startAddre,
+                        length,
+                        ex
+                    );
 
                     allData.AddRange(new byte[readLen]);
                     result.IsSuccess = false;
@@ -240,14 +252,16 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             int currentAddress,
             ushort readLen,
             int maxRetry = 3,
-            int retryInterval = 300)
+            int retryInterval = 300
+        )
         {
             for (int i = 0; i < maxRetry; i++)
             {
                 try
                 {
                     // 同步调用McpX读取方法
-                    var data = GetMcp(ipAddress, port).BatchReadByte(prefix, currentAddress.ToString(), readLen);
+                    var data = GetMcp(ipAddress, port)
+                        .BatchReadByte(prefix, currentAddress.ToString(), readLen);
                     return data;
                 }
                 catch (Exception ex)
@@ -267,15 +281,20 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             throw new Exception($"同步重试{maxRetry}次后读取失败");
         }
         #endregion
-
+        #region 同步写
         public async Task<Result> WriteAsync(DevPlcPointMcDto devPlcPointMcDto)
         {
             return await WriteAsync(new DevPlcPointMcWriteDto(devPlcPointMcDto));
         }
 
-        private async Task<Result> WriteAsync(DevPlcPointMcWriteDto pointMcWriteDto)
+        public Result Write(DevPlcPointMcDto devPlcPointMcDto)
         {
-            return await PaginatedWriteing(
+            return Write(new DevPlcPointMcWriteDto(devPlcPointMcDto));
+        }
+
+        private  Result Write(DevPlcPointMcWriteDto pointMcWriteDto)
+        {
+            return PaginatedWriteing(
                 pointMcWriteDto.IpAddress,
                 pointMcWriteDto.Port,
                 pointMcWriteDto.Prefix,
@@ -285,7 +304,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             );
         }
 
-        async Task<Result> PaginatedWriteing(
+        Result PaginatedWriteing(
             string ipAddress,
             int port,
             Prefix prefix,
@@ -296,7 +315,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
         {
             try
             {
-                return await WriteWithRetry(ipAddress, port, prefix, typeCode, address, value);
+                return WriteWithRetry(ipAddress, port, prefix, typeCode, address, value);
             }
             catch (Exception ex)
             {
@@ -313,7 +332,158 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             }
         }
 
-        private async Task<Result> WriteWithRetry(
+        private Result WriteWithRetry(
+            string ipAddress,
+            int port,
+            Prefix prefix,
+            TypeCode typeCode,
+            int address,
+            List<object> value,
+            int maxRetry = 3, // 最多重试次数
+            int retryInterval = 300
+        )
+        {
+            for (int i = 0; i < maxRetry; i++)
+            {
+                try
+                {
+                    var mcp = GetMcp(ipAddress, port);
+                    switch (typeCode)
+                    {
+                        //case TypeCode.Empty:
+                        //    break;
+                        //case TypeCode.Object:
+                        //    break;
+                        //case TypeCode.DBNull:
+                        //    break;
+                        case TypeCode.Boolean:
+                            mcp.BatchWriteBool(
+                                prefix,
+                                address.ToString(),
+                                value.Select(x => bool.Parse(x?.ToString())).ToArray()
+                            );
+                            break;
+                        //case TypeCode.Char:
+                        //    break;
+                        //case TypeCode.SByte:
+                        //    break;
+                        //case TypeCode.Byte:
+                        //    break;
+                        case TypeCode.Int16:
+                            mcp.BatchWriteInt16(
+                                prefix,
+                                address.ToString(),
+                                value.Select(x => short.Parse(x?.ToString())).ToArray()
+                            );
+                            break;
+                        case TypeCode.UInt16:
+                            mcp.BatchWriteUInt16(
+                                prefix,
+                                address.ToString(),
+                                value.Select(x => ushort.Parse(x?.ToString())).ToArray()
+                            );
+                            break;
+                        case TypeCode.Int32:
+                            mcp.BatchWriteInt32(
+                                prefix,
+                                address.ToString(),
+                                value.Select(x => int.Parse(x?.ToString())).ToArray()
+                            );
+                            break;
+                        case TypeCode.UInt32:
+                            mcp.BatchWriteUInt32(
+                                prefix,
+                                address.ToString(),
+                                value.Select(x => UInt32.Parse(x?.ToString())).ToArray()
+                            );
+                            break;
+                        //case TypeCode.Int64:
+                        //    break;
+                        //case TypeCode.UInt64:
+                        //    break;
+                        case TypeCode.Single:
+                            mcp.BatchWriteSingle(
+                                prefix,
+                                address.ToString(),
+                                value.Select(x => float.Parse(x?.ToString())).ToArray()
+                            );
+                            break;
+                        case TypeCode.Double:
+                            mcp.BatchWriteDouble(
+                                prefix,
+                                address.ToString(),
+                                value.Select(x => double.Parse(x?.ToString())).ToArray()
+                            );
+                            break;
+                        //case TypeCode.Decimal:
+                        //    break;
+                        //case TypeCode.DateTime:
+                        //    break;
+                        case TypeCode.String:
+                            mcp.WriteString(prefix, address.ToString(), string.Concat(value));
+                            break;
+                        default:
+                            throw new NotSupportedException($"不支持的数据类型: {typeCode}");
+                    }
+                    return Result.Success();
+                }
+                catch (Exception ex)
+                {
+                    // 最后一次还失败 → 不重试了
+                    if (i == maxRetry - 1)
+                        throw new Exception($"写入失败，已重试{maxRetry}次：{ex.Message}", ex);
+
+                    // 出现异常 → 标记连接失效（下次自动新建）
+                    MarkMcpInvalid(ipAddress, port);
+
+                    Thread.Sleep(100);
+                }
+            }
+            throw new Exception("重试失败");
+        }
+
+        #endregion
+        private async Task<Result> WriteAsync(DevPlcPointMcWriteDto pointMcWriteDto)
+        {
+            return await PaginatedWriteingAsync(
+                pointMcWriteDto.IpAddress,
+                pointMcWriteDto.Port,
+                pointMcWriteDto.Prefix,
+                pointMcWriteDto.DataType,
+                pointMcWriteDto.Address,
+                pointMcWriteDto.Value
+            );
+        }
+
+        async Task<Result> PaginatedWriteingAsync(
+            string ipAddress,
+            int port,
+            Prefix prefix,
+            TypeCode typeCode,
+            int address,
+            List<object> value
+        )
+        {
+            try
+            {
+                return await WriteWithRetryAsync(ipAddress, port, prefix, typeCode, address, value);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(
+                    "[Mcp通讯异常]写入信息：{ipAddress}-{port}-{prefix}-{address}-{@value}。\r\n{ex.Message}",
+                    ipAddress,
+                    port,
+                    prefix,
+                    address,
+                    value,
+                    ex.Message
+                );
+                return Result.Fail(ex.Message);
+            }
+        }
+
+        private async Task<Result> WriteWithRetryAsync(
             string ipAddress,
             int port,
             Prefix prefix,
@@ -606,15 +776,16 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                         currentAddress,
                         readLen
                     );
-                    if (data.Length==0)
+                    if (data.Length == 0)
                     {
                         await Task.Delay(100);
                         data = await ReadWithRetry(
-                        ipAddress,
-                        port,
-                        prefix,
-                        currentAddress,
-                        readLen);
+                            ipAddress,
+                            port,
+                            prefix,
+                            currentAddress,
+                            readLen
+                        );
                     }
                     Log.Debug("读取结束。");
                     // 把读到的数据加入总结果
@@ -645,7 +816,6 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             return result;
         }
 
-
         /// <summary>
         /// 线程安全 + 自动释放 + 带超时 + 不会死锁的 PLC 读取方法
         /// </summary>
@@ -656,17 +826,16 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             int currentAddress,
             ushort readLen,
             int maxRetry = 3,
-            int retryInterval = 300)
+            int retryInterval = 300
+        )
         {
             for (int i = 0; i < maxRetry; i++)
             {
-   
-
                 try
                 {
-        
                     // 3. 读取（带超时）
-                    var data = await GetMcp(ipAddress, port).BatchReadByteAsync(prefix, currentAddress.ToString(), readLen);
+                    var data = await GetMcp(ipAddress, port)
+                        .BatchReadByteAsync(prefix, currentAddress.ToString(), readLen);
 
                     return data;
                 }
@@ -682,11 +851,11 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
 
                     await Task.Delay(retryInterval);
                 }
-             
             }
 
             throw new Exception($"重试{maxRetry}次后读取失败");
         }
+
         McpX GetMcp(string ipAddress, int port)
         {
             string key = $"{ipAddress}:{port}";
@@ -727,6 +896,5 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                 catch { }
             }
         }
-
     }
 }

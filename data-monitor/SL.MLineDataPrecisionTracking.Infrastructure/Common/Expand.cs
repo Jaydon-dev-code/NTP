@@ -28,9 +28,9 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
         }
 
         public static Result ExportToExcel<T>(List<T> dataList, string saveFileName)
-        {
+        { 
             try
-            {
+           {
                 IWorkbook workbook = new XSSFWorkbook();
                 ISheet sheet = workbook.CreateSheet("Sheet1");
 
