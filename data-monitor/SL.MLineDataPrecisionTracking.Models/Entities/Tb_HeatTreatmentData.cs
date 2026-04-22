@@ -24,7 +24,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// 冷却开始时间（yyyy-MM-dd HH:mm:ss 格式）
         /// </summary>
         [SugarColumn(ColumnDescription = "冷却时间")]
-        public DateTime CoolingStartTime { get; set; }
+        public string CoolingStartTime { get; set; }
 
         /// <summary>
         /// 冷却时间（单位：秒/分钟，根据业务定义）
