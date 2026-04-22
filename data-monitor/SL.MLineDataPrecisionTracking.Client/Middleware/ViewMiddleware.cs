@@ -29,7 +29,7 @@ namespace SL.MLineDataPrecisionTracking.Client.Middleware
                     !t.IsGenericType &&          // 不是泛型类
                     !t.IsInterface &&            // 不是接口
                     t.Namespace.Contains(targetNamespaceView) || t.Namespace.Contains(targetNamespaceViewModel)// 严格匹配命名空间
-                )
+                ).Where(t => !t.Name.StartsWith("<"))
                 .ToList();
 
             // 4. 批量单例注入（自身 → 自身）
