@@ -8,6 +8,9 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:SL.MLineDataPrecisionTracking.Client.View.Control"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:usconverters="clr-namespace:SL.MLineDataPrecisionTracking.Client.Common"
+    xmlns:usmodels="clr-namespace:SL.MLineDataPrecisionTracking.Models.Enum;assembly=SL.MLineDataPrecisionTracking.Models"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
@@ -16,6 +19,24 @@
         <ResourceDictionary>
             <converters:BoolInverter x:Key="BoolInverter" />
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+            <usconverters:EnumToStringtConverter x:Key="EnumToStringtConverter" />
+            <converters:ValueConverterGroup x:Key="InverterBoolToVisibilityConverter">
+                <converters:BoolInverter />
+                <converters:BoolToVisibilityConverter />
+            </converters:ValueConverterGroup>
+
+            <ObjectDataProvider
+                x:Key="ResultEnum"
+                MethodName="GetNames"
+                ObjectType="{x:Type sys:Enum}">
+
+                <ObjectDataProvider.MethodParameters>
+
+                    <x:Type TypeName="usmodels:ResultEnum" />
+
+                </ObjectDataProvider.MethodParameters>
+
+            </ObjectDataProvider>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -200,21 +221,18 @@
                 <ComboBoxItem>1700</ComboBoxItem>
             </ComboBox>-->
 
-            <!--<TextBlock
+            <TextBlock
                 Grid.Row="6"
                 Grid.Column="4"
-                Text="结果" />
+                Text="检测结果" />
             <ComboBox
                 Grid.Row="6"
                 Grid.Column="5"
                 Width="150"
                 IsEnabled="{Binding QueryConditions.IsScanCode, Converter={StaticResource BoolInverter}}"
+                ItemsSource="{Binding Source={StaticResource ResultEnum}}"
                 SelectedIndex="0"
-                SelectedValue="{Binding QueryConditions.Result, Mode=TwoWay}">
-                <ComboBoxItem>ALL</ComboBoxItem>
-                <ComboBoxItem>OK</ComboBoxItem>
-                <ComboBoxItem>NG</ComboBoxItem>
-            </ComboBox>-->
+                SelectedValue="{Binding QueryConditions.Result, Mode=TwoWay}" />
 
 
 
@@ -280,304 +298,325 @@
                     </Grid.ColumnDefinitions>
                     <DataGrid
                         Grid.Column="0"
+                        Margin="0,0,15,0"
                         hc:DataGridAttach.ShowRowNumber="True"
                         AutoGenerateColumns="False"
                         ItemsSource="{Binding QueryValue}"
                         ScrollViewer.CanContentScroll="True"
                         ScrollViewer.HorizontalScrollBarVisibility="Visible  "
                         ScrollViewer.VerticalScrollBarVisibility="Visible">
+                        <DataGrid.RowStyle>
+                            <Style BasedOn="{StaticResource DataGridRowStyle}" TargetType="DataGridRow">
+                                <!--  绑定模型里的 IsSpecial 字段，为 true 就变色  -->
+                                <Style.Triggers>
+                                    <!--  IsHave = false → 灰色  -->
+                                    <DataTrigger Binding="{Binding IsHave}" Value="False">
+                                        <Setter Property="Background" Value="Red" />
+                                    </DataTrigger>
 
+
+                                    <!--<DataTrigger Binding="{Binding IsHave}" Value="True">
+                                        <Setter Property="Background" Value="Transparent" />
+                                    </DataTrigger>-->
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
                         <DataGrid.Columns>
                             <DataGridTextColumn
-                                Width="200"
+                                MinWidth="200"
                                 Binding="{Binding RecordTime, StringFormat='yyyy-MM-dd HH:mm:ss'}"
                                 Header="时间"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="100"
+                                MinWidth="100"
                                 Binding="{Binding ModelName}"
                                 Header="型号名称"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="90"
+                                MinWidth="90"
                                 Binding="{Binding ModelNo}"
                                 Header="型号编号"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="150"
-                                Binding="{Binding QrCodeContent}"
+                                MinWidth="150"
+                                Binding="{Binding MarkingNo}"
                                 Header="序列号"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="100"
+                                MinWidth="60"
+                                Binding="{Binding Result, Converter={StaticResource EnumToStringtConverter}}"
+                                Header="检测结果"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                MinWidth="100"
                                 Binding="{Binding TrayNoA}"
                                 Header="托盘号A"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="100"
+                                MinWidth="100"
                                 Binding="{Binding TrayNoB}"
                                 Header="托盘号B"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="100"
+                                MinWidth="100"
                                 Binding="{Binding ShieldStationA}"
                                 Header="屏蔽工位A"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="100"
+                                MinWidth="100"
                                 Binding="{Binding NgCodeA}"
                                 Header="NG代码A"
                                 IsReadOnly="True" />
 
                             <DataGridTextColumn
-                                Width="120"
+                                MinWidth="120"
                                 Binding="{Binding SmallInnerRingSortingData}"
                                 Header="小内圈分选数据"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="120"
+                                MinWidth="120"
                                 Binding="{Binding OuterFlangeSortingData}"
                                 Header="外法兰分选数据"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="120"
+                                MinWidth="120"
                                 Binding="{Binding InnerFlangeSortingData}"
                                 Header="内法兰分选数据"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="110"
+                                MinWidth="110"
                                 Binding="{Binding ASideSteelBallGroupDiff}"
                                 Header="A面钢球组差"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="110"
+                                MinWidth="110"
                                 Binding="{Binding BSideSteelBallGroupDiff}"
                                 Header="B面钢球组差"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="120"
+                                MinWidth="120"
                                 Binding="{Binding BSideSteelBallGreaseVolume}"
                                 Header="B面钢球注脂量"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="110"
+                                MinWidth="110"
                                 Binding="{Binding SealRingGreaseVolume}"
                                 Header="密封圈注脂量"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="120"
+                                MinWidth="120"
                                 Binding="{Binding ASideSteelBallGreaseVolume}"
                                 Header="A面钢球注脂量"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="110"
+                                MinWidth="110"
                                 Binding="{Binding SealRingPressForce}"
                                 Header="密封圈压装力"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="130"
+                                MinWidth="130"
                                 Binding="{Binding SealRingPressDisplacementA}"
                                 Header="密封圈压装位移A"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="110"
+                                MinWidth="110"
                                 Binding="{Binding WaterBafflePressForce}"
                                 Header="挡水环压装力"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="130"
+                                MinWidth="130"
                                 Binding="{Binding WaterBafflePressDisplacement}"
                                 Header="挡水环压装位移"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="120"
+                                MinWidth="120"
                                 Binding="{Binding SmallInnerRingAssemblePressure}"
                                 Header="小内圈合套压力"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="130"
+                                MinWidth="130"
                                 Binding="{Binding SmallInnerRingAssembleDisplacement}"
                                 Header="小内圈合套位移"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="110"
+                                MinWidth="110"
                                 Binding="{Binding SealRingParallelDiff}"
                                 Header="密封圈平行差"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="110"
+                                MinWidth="110"
                                 Binding="{Binding WaterBaffleParallelDiff}"
                                 Header="挡水环平行差"
                                 IsReadOnly="True" />
 
                             <DataGridTextColumn
-                                Width="100"
+                                MinWidth="100"
                                 Binding="{Binding ShieldStationB}"
                                 Header="屏蔽工位B"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="100"
+                                MinWidth="100"
                                 Binding="{Binding NgCodeB}"
                                 Header="NG代码B"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="100"
+                                MinWidth="100"
                                 Binding="{Binding IdentificationCode}"
                                 Header="识别代码"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="120"
+                                MinWidth="120"
                                 Binding="{Binding PositiveClearanceValue}"
                                 Header="正游隙检测值"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="90"
+                                MinWidth="90"
                                 Binding="{Binding DisplacementValue}"
                                 Header="位移量"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="120"
+                                MinWidth="120"
                                 Binding="{Binding NegativeClearanceValue}"
                                 Header="负游隙检测值"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="120"
+                                MinWidth="120"
                                 Binding="{Binding PreRivetingHeight}"
                                 Header="铆接前成型高度"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="100"
+                                MinWidth="100"
                                 Binding="{Binding RivetingForce}"
                                 Header="铆接成型力"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="120"
+                                MinWidth="120"
                                 Binding="{Binding RivetingDisplacement}"
                                 Header="铆接成型位移"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="120"
+                                MinWidth="120"
                                 Binding="{Binding PostRivetingHeight}"
                                 Header="铆接后成型高度"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="120"
+                                MinWidth="120"
                                 Binding="{Binding PostRivetingShape}"
                                 Header="铆接后成型形状"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="130"
+                                MinWidth="130"
                                 Binding="{Binding PostRivetingOuterDiameter}"
                                 Header="铆接后成型外径"
                                 IsReadOnly="True" />
 
                             <DataGridTextColumn
-                                Width="90"
+                                MinWidth="90"
                                 Binding="{Binding RadialRunout}"
                                 Header="径跳值"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="90"
+                                MinWidth="90"
                                 Binding="{Binding EndRunout}"
                                 Header="端跳值"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="100"
+                                MinWidth="100"
                                 Binding="{Binding TorqueValue}"
                                 Header="扭矩检测值"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="110"
+                                MinWidth="110"
                                 Binding="{Binding AbsPeakValue}"
                                 Header="ABS检测峰值"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="110"
+                                MinWidth="110"
                                 Binding="{Binding AbsValleyValue}"
                                 Header="ABS检测谷值"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="110"
+                                MinWidth="110"
                                 Binding="{Binding AbsToothCount}"
                                 Header="ABS检测齿数"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="130"
+                                MinWidth="130"
                                 Binding="{Binding SealRingPressPressure}"
                                 Header="密封圈压装压力"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="130"
+                                MinWidth="130"
                                 Binding="{Binding SealRingPressDisplacementB}"
                                 Header="密封圈压装位移B"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="120"
+                                MinWidth="120"
                                 Binding="{Binding GearRingPressPressure}"
                                 Header="齿圈压装压力"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="120"
+                                MinWidth="120"
                                 Binding="{Binding GearRingPressDisplacement}"
                                 Header="齿圈压装位移"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="130"
+                                MinWidth="130"
                                 Binding="{Binding DustCoverPressPressure}"
                                 Header="防尘盖压装压力"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="130"
+                                MinWidth="130"
                                 Binding="{Binding DustCoverPressDisplacement}"
                                 Header="防尘盖压装位移"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="165"
+                                MinWidth="165"
                                 Binding="{Binding MagneticRingParallelSensor1}"
                                 Header="磁性圈平行差检测传感器1"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="165"
+                                MinWidth="165"
                                 Binding="{Binding MagneticRingParallelSensor2}"
                                 Header="磁性圈平行差检测传感器2"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="165"
+                                MinWidth="165"
                                 Binding="{Binding MagneticRingParallelSensor3}"
                                 Header="磁性圈平行差检测传感器3"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="120"
+                                MinWidth="120"
                                 Binding="{Binding MagneticRingParallelDiff}"
                                 Header="磁性圈平行差"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="110"
+                                MinWidth="110"
                                 Binding="{Binding VibrationLowerLOAD}"
                                 Header="振动下LOAD"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="100"
+                                MinWidth="100"
                                 Binding="{Binding VibrationLowerLH}"
                                 Header="振动下LH"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="100"
+                                MinWidth="100"
                                 Binding="{Binding VibrationLowerRH}"
                                 Header="振动下RH"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="110"
+                                MinWidth="110"
                                 Binding="{Binding VibrationUpperLOAD}"
                                 Header="振动上LOAD"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="100"
+                                MinWidth="100"
                                 Binding="{Binding VibrationUpperLH}"
                                 Header="振动上LH"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
-                                Width="100"
+                                MinWidth="100"
                                 Binding="{Binding VibrationUpperRH}"
                                 Header="振动上RH"
                                 IsReadOnly="True" />
@@ -629,13 +668,31 @@
                                                     <!--  按钮自适应宽度  -->
                                                 </Grid.ColumnDefinitions>
 
+
                                                 <!--  文字：靠左  -->
                                                 <TextBlock
                                                     Grid.Column="0"
+                                                    MinWidth="150"
                                                     Margin="2,0"
                                                     HorizontalAlignment="Left"
                                                     VerticalAlignment="Center"
-                                                    Text="{Binding MarkingNo}" />
+                                                    Text="{Binding MarkingNo}">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <!--  IsHave = false → 灰色  -->
+                                                                <DataTrigger Binding="{Binding IsHave}" Value="False">
+                                                                    <Setter Property="Foreground" Value="Red" />
+                                                                </DataTrigger>
+
+                                                                <!--  IsHave = true → 黑色（默认）  -->
+                                                                <DataTrigger Binding="{Binding IsHave}" Value="True">
+                                                                    <Setter Property="Foreground" Value="Black" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
 
                                                 <!--  按钮：靠右  -->
                                                 <Button
@@ -668,9 +725,13 @@
 
         </hc:TransitioningContentControl>
 
-        <WrapPanel Grid.Row="2" HorizontalAlignment="Center">
+        <WrapPanel
+            Grid.Row="2"
+            HorizontalAlignment="Center"
+            Visibility="{Binding ElementName=IsScanCode, Path=IsChecked, Converter={StaticResource InverterBoolToVisibilityConverter}}">
             <hc:Pagination
                 Name="Pagination"
+                AutoHiding="False"
                 DataCountPerPage="{Binding PaginationPages.DataCountPerPage}"
                 MaxPageCount="{Binding PaginationPages.MaxPageCount}"
                 PageIndex="{Binding PaginationPages.PageIndex, Mode=TwoWay}">
@@ -680,15 +741,15 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </hc:Pagination>
-            <WrapPanel Visibility="{Binding ElementName=Pagination, Path=Visibility}">
-                <TextBlock Margin="5,0,0,0" Text="每页：" />
-                <ComboBox
-                    Margin="5,0"
-                    ItemsSource="{Binding PageSoure}"
-                    SelectedItem="{Binding PaginationPages.DataCountPerPage, Mode=TwoWay}" />
-                <TextBlock Margin="0,0,5,0" Text="条" />
-                <TextBlock Text="{Binding PaginationPages.TotalCount, StringFormat=共：{0}条}" />
-            </WrapPanel>
+
+            <TextBlock Margin="5,0,0,0" Text="每页：" />
+            <ComboBox
+                Margin="5,0"
+                ItemsSource="{Binding PageSoure}"
+                SelectedItem="{Binding PaginationPages.DataCountPerPage, Mode=TwoWay}" />
+            <TextBlock Margin="0,0,5,0" Text="条" />
+            <TextBlock Text="{Binding PaginationPages.TotalCount, StringFormat=共：{0}条}" />
+
 
         </WrapPanel>
 

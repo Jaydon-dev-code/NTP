@@ -82,14 +82,14 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 return _saveQueryCommand;
             }
         }
-        private IRelayCommand<System.Windows.Controls.TextBox> _markingNoQueryCommand;
-        public IRelayCommand<System.Windows.Controls.TextBox> MarkingNoQueryCommand
+        private AsyncRelayCommand<System.Windows.Controls.TextBox> _markingNoQueryCommand;
+        public AsyncRelayCommand<System.Windows.Controls.TextBox> MarkingNoQueryCommand
         {
             get
             {
                 if (_markingNoQueryCommand == null)
                 {
-                    _markingNoQueryCommand = new RelayCommand<System.Windows.Controls.TextBox>(
+                    _markingNoQueryCommand = new AsyncRelayCommand<System.Windows.Controls.TextBox>(
                         MarkingNoQuery,
                         (x) => QueryConditions?.IsScanCode == true
                     );
@@ -148,6 +148,8 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 return _removeHistoryScanCommand;
             }
         }
+        List<LineSummaryDto> _quValues;
+        List<LineSummaryDto> _mkNoQuValues;
 
         Tb_LineSummaryRepository _lineSummaryRepository;
 
@@ -162,17 +164,18 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 StartTime = lastDay,
                 EndTime = lastDay.AddTicks(-1),
                 Op = "ALL",
-                Result = "ALL",
+                Result = Models.Enum.ResultEnum.ALL,
             };
             if (_historyScanMarkingNos == null)
             {
                 HistoryScanMarkingNos = new ObservableCollection<ScanRecord>();
             }
             _lineSummaryRepository = tb_LineSummaryRepository;
-
             QueryValue = new ObservableCollection<LineSummaryDto>();
             PageSoure = new ObservableCollection<int>() { 100, 200, 500 };
             PaginationPages.DataCountPerPage = 100;
+            _quValues = new List<LineSummaryDto>();
+            _mkNoQuValues = new List<LineSummaryDto>();
         }
 
         private void RemoveHistoryScan(ScanRecord record)
@@ -180,39 +183,97 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             if (record != null)
             {
                 HistoryScanMarkingNos.Remove(record);
+
+                QueryValue.Remove(QueryValue.FirstOrDefault(x => x.MarkingNo == record.MarkingNo));
             }
         }
 
         private void OpenScanCodeModel(System.Windows.Controls.TextBox textBox)
         {
-            Keyboard.Focus(textBox);
+            if (QueryConditions?.IsScanCode == true)
+            {
+                _quValues = QueryValue.ToList();
+                QueryValue.Clear();
+                foreach (var item in _mkNoQuValues)
+                {
+                    QueryValue.Add(item);
+                }
+                Keyboard.Focus(textBox);
+            }
+            else
+            { //无扫码模式
+                _mkNoQuValues = QueryValue.ToList();
+                QueryValue.Clear();
+                foreach (var item in _quValues)
+                {
+                    QueryValue.Add(item);
+                }
+            }
         }
 
         private void ClearHistoryMarkingNo()
         {
             HistoryScanMarkingNos.Clear();
+            _mkNoQuValues.Clear();
         }
 
-        private void MarkingNoQuery(System.Windows.Controls.TextBox textBox)
+        private async Task MarkingNoQuery(System.Windows.Controls.TextBox textBox)
         {
-            if (QueryConditions?.MarkingNo == null || QueryConditions.MarkingNo == string.Empty)
+            if (string.IsNullOrEmpty(QueryConditions?.MarkingNo))
             {
                 return;
             }
+            LineSummaryDto findValue = new LineSummaryDto(
+                await _lineSummaryRepository.QueryableFirstAsync(x =>
+                    x.MarkingNo == QueryConditions.MarkingNo
+                )
+            );
+            if (findValue?.MarkingNo == null)
+            {
+                findValue = new LineSummaryDto(
+                    new Tb_LineSummary()
+                    {
+                        MarkingNo = QueryConditions.MarkingNo,
+                        Result = Models.Enum.ResultEnum.NG,
+                    }
+                )
+                {
+                    IsHave = false,
+                };
+            }
+
             var historyScanMarkingNo = HistoryScanMarkingNos.FirstOrDefault(x =>
                 x.MarkingNo == QueryConditions.MarkingNo
             );
+
             if (historyScanMarkingNo != null)
             {
                 HistoryScanMarkingNos.Remove(historyScanMarkingNo);
                 HistoryScanMarkingNos.Insert(0, historyScanMarkingNo);
+                var tmp = QueryValue.FirstOrDefault(x => x.MarkingNo == QueryConditions.MarkingNo);
+                if (tmp != null)
+                {
+                    QueryValue.Remove(tmp);
+                }
             }
             else
             {
                 HistoryScanMarkingNos.Insert(
                     0,
-                    new ScanRecord() { MarkingNo = QueryConditions.MarkingNo }
+                    new ScanRecord()
+                    {
+                        MarkingNo = QueryConditions.MarkingNo,
+                        IsHave = findValue.IsHave,
+                    }
                 );
+            }
+
+            QueryValue.Insert(0, findValue);
+
+            for (int i = 0; i <= HistoryScanMarkingNos.Count - 101; i++)
+            {
+                HistoryScanMarkingNos.RemoveAt(HistoryScanMarkingNos.Count - 1);
+                QueryValue.RemoveAt(QueryValue.Count - 1);
             }
             textBox.Text = string.Empty;
         }
@@ -226,116 +287,6 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 return;
             }
         }
-
-        //async Task<bool> QuData(int pageIndex)
-        //{
-        //    //扫描模式关注 条码
-        //    List<LineSummaryDto> queryValue = new List<LineSummaryDto>();
-        //    var exp = Expressionable.Create<Tb_LineSummary>();
-        //    if (QueryConditions?.IsScanCode == true)
-        //    {
-        //        if (QueryConditions.MarkingNo.Length > 0)
-        //        {
-        //            exp.And(x => x.MarkingNo == QueryConditions.MarkingNo);
-        //        }
-        //        else
-        //        {
-        //            return false;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        if (
-        //            QueryConditions.StartDate.Date + QueryConditions.StartTime.TimeOfDay
-        //            > QueryConditions.EndDate.Date + QueryConditions.EndTime.TimeOfDay
-        //        )
-        //        {
-        //            HandyControl.Controls.MessageBox.Warning("起始时间不能大于结束时间！");
-        //            return false;
-        //        }
-        //        exp.And(x =>
-        //            x.RecordTime
-        //                >= QueryConditions.StartDate.Date + QueryConditions.StartTime.TimeOfDay
-        //            && x.RecordTime
-        //                <= QueryConditions.EndDate.Date + QueryConditions.EndTime.TimeOfDay
-        //        );
-        //        BuildIntCondition(QueryConditions.TrayNoA, ref exp, x => x.TrayNoA, "托盘号A");
-        //        BuildIntCondition(QueryConditions.TrayNoA, ref exp, x => x.TrayNoB, "托盘号B");
-        //        BuildIntCondition(QueryConditions.TrayNoA, ref exp, x => x.NgCodeA, "NG编码A");
-        //        BuildIntCondition(QueryConditions.TrayNoA, ref exp, x => x.NgCodeB, "VG编码B");
-        //    }
-        //    PaginationPages.PageIndex = pageIndex;
-        //    var re = await _lineSummaryRepository.QueryableAsync(
-        //        exp.ToExpression(),
-        //        x => x.RecordTime,
-        //        PaginationPages.PageIndex,
-        //        pageSize: PaginationPages.DataCountPerPage
-        //    );
-        //    PaginationPages.MaxPageCount = re.TotalPage;
-        //    PaginationPages.TotalCount = re.TotalCount;
-        //    Application.Current.Dispatcher.Invoke(() =>
-        //    {
-        //        QueryValue.Clear();
-        //        if (re.List.Count > 0)
-        //        {
-        //            foreach (var item in re.List)
-        //            {
-        //                QueryValue.Add(new LineSummaryDto(item));
-        //            }
-        //        }
-        //    });
-        //    return true;
-        //}
-
-        //async Task SaveQueryAsync()
-        //{
-        //    SaveFileDialog saveFileDialog = new SaveFileDialog
-        //    {
-        //        Filter = "Excel文件 (*.xlsx)|*.xlsx",
-        //        Title = "保存Excel文件",
-        //        FileName = $"数据导出_{DateTime.Now:yyyyMMddHHmmss}.xlsx",
-        //    };
-
-        //    var exp = Expressionable.Create<Tb_LineSummary>();
-        //    if (QueryConditions?.IsScanCode == true)
-        //    {
-        //        if (HistoryScanMarkingNos.Count == 0)
-        //        {
-        //            HandyControl.Controls.MessageBox.Warning("暂无可导出的扫码数据");
-        //        }
-        //        else
-        //        {
-        //            exp.And(x => HistoryScanMarkingNos.Any(h => h.MarkingNo == x.MarkingNo));
-        //        }
-        //    }
-        //    else
-        //    {
-        //        if (
-        //            QueryConditions.StartDate.Date + QueryConditions.StartTime.TimeOfDay
-        //            > QueryConditions.EndDate.Date + QueryConditions.EndTime.TimeOfDay
-        //        )
-        //        {
-        //            HandyControl.Controls.MessageBox.Warning("起始时间不能大于结束时间！");
-        //            return;
-        //        }
-        //        exp.And(x =>
-        //            x.RecordTime
-        //                >= QueryConditions.StartDate.Date + QueryConditions.StartTime.TimeOfDay
-        //            && x.RecordTime
-        //                <= QueryConditions.EndDate.Date + QueryConditions.EndTime.TimeOfDay
-        //        );
-        //        BuildIntCondition(QueryConditions.TrayNoA, ref exp, x => x.TrayNoA, "托盘号A");
-        //        BuildIntCondition(QueryConditions.TrayNoA, ref exp, x => x.TrayNoB, "托盘号B");
-        //        BuildIntCondition(QueryConditions.TrayNoA, ref exp, x => x.NgCodeA, "NG编码A");
-        //        BuildIntCondition(QueryConditions.TrayNoA, ref exp, x => x.NgCodeB, "VG编码B");
-        //    }
-
-        //    var re = await _lineSummaryRepository.QueryableAsync(exp.ToExpression());
-        //    Expand.ExportToExcel<LineSummaryDto>(
-        //        re.Select(x => new LineSummaryDto(x)).ToList(),
-        //        saveFileDialog.FileName
-        //    );
-        //}
 
         async Task<bool> QuData(int pageIndex)
         {
@@ -382,29 +333,36 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 return;
 
             var exp = Expressionable.Create<Tb_LineSummary>();
-
+            List<LineSummaryDto> re = new List<LineSummaryDto>();
             // 扫码模式单独判断
             if (QueryConditions?.IsScanCode == true)
             {
                 if (HistoryScanMarkingNos.Count == 0)
                 {
-                    HandyControl.Controls.MessageBox.Warning("暂无可导出的扫码数据");
+                    HandyControl.Controls.MessageBox.Warning("暂无可导出的扫码数据！");
                     return;
                 }
-                exp.And(x => HistoryScanMarkingNos.Any(h => h.MarkingNo == x.MarkingNo));
+
+                re = QueryValue.ToList();
             }
             else
             {
                 // 👇 普通条件：一行调用
                 if (!BuildCommonQueryCondition(ref exp))
                     return;
+                re = (await _lineSummaryRepository.QueryableAsync(exp.ToExpression()))
+                    .Select(x => new LineSummaryDto(x))
+                    .ToList();
             }
 
-            var re = await _lineSummaryRepository.QueryableAsync(exp.ToExpression());
-            var ex = Expand.ExportToExcel<LineSummaryDto>(
-                re.Select(x => new LineSummaryDto(x)).ToList(),
-                saveFileDialog.FileName
-            );
+            if (re?.Count == 0)
+            {
+                HandyControl.Controls.MessageBox.Warning(
+                    "未检测到导出的数据信息，请检测搜索条件后再次导出！"
+                );
+                return;
+            }
+            var ex = Expand.ExportToExcel<LineSummaryDto>(re, saveFileDialog.FileName);
             if (ex.IsSuccess)
             {
                 HandyControl.Controls.MessageBox.Success("导出完成！");
@@ -444,10 +402,34 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 exp.And(x => x.RecordTime >= startTime && x.RecordTime <= endTime);
 
                 // 统一公共条件
-                exp.And(x => x.TrayNoA == QueryConditions.TrayNoA);
-                exp.And(x => x.TrayNoB == QueryConditions.TrayNoB);
-                exp.And(x => x.NgCodeA == QueryConditions.NgCodeA);
-                exp.And(x => x.NgCodeB == QueryConditions.NgCodeB);
+                if (string.IsNullOrEmpty(QueryConditions.TrayNoA) is false)
+                {
+                    exp.And(x => x.TrayNoA == QueryConditions.TrayNoA);
+                }
+                if (string.IsNullOrEmpty(QueryConditions.TrayNoB) is false)
+                {
+                    exp.And(x => x.TrayNoB == QueryConditions.TrayNoB);
+                }
+                if (string.IsNullOrEmpty(QueryConditions.NgCodeA) is false)
+                {
+                    exp.And(x => x.NgCodeA == QueryConditions.NgCodeA);
+                }
+                if (string.IsNullOrEmpty(QueryConditions.NgCodeB) is false)
+                {
+                    exp.And(x => x.NgCodeB == QueryConditions.NgCodeB);
+                }
+                if (string.IsNullOrEmpty(QueryConditions.MarkingNo) is false)
+                {
+                    exp.And(x => x.MarkingNo == QueryConditions.MarkingNo);
+                }
+                if (string.IsNullOrEmpty(QueryConditions.ModelName) is false)
+                {
+                    exp.And(x => x.ModelName == QueryConditions.ModelName);
+                }
+                if (QueryConditions.Result != Models.Enum.ResultEnum.ALL)
+                {
+                    exp.And(x => x.Result == QueryConditions.Result);
+                }
             }
 
             return true;

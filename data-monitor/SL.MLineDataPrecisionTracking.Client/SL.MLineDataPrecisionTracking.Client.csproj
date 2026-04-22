@@ -94,6 +94,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Common\EnumDescriptionConverter.cs" />
+    <Compile Include="Common\EnumToStringtConverter.cs" />
     <Compile Include="Middleware\ViewMiddleware.cs" />
     <Compile Include="ViewModel\Control\DeviceCollectionConfigViewModel.cs" />
     <Compile Include="ViewModel\Control\MeticulousPursuitViewModel.cs" />
@@ -203,9 +205,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Common\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="Resources\Packages\Npgsql.dll" />
   </ItemGroup>
