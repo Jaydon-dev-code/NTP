@@ -59,10 +59,9 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
 
         [Description("检测结果")]
         public ResultEnum Result { get; set; }
-        /// <summary>
-        /// 二维码打标内容
-        /// </summary>
-        [Description("二维码打标内容")]
+
+
+        [Description("序列码")]
         public string MarkingNo { get; set; }
 
         /// <summary>
@@ -82,6 +81,12 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         /// </summary>
         [Description("NG代码A")]
         public string NgCodeA { get; set; }
+
+        /// <summary>
+        /// 二维码打标内容
+        /// </summary>
+        [Description("序列码A")]
+        public string MarkingNoA { get; set; }
 
         /// <summary>
         /// 小内圈分选数据
@@ -178,6 +183,8 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         /// </summary>
         [Description("挡水环平行差")]
         public string WaterBaffleParallelDiff { get; set; }
+
+
 
         /// <summary>
         /// 托盘号
@@ -394,6 +401,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         public string VibrationUpperRH { get; set; }
 
         private bool _isHave = true;
+        [Description("是否存在记录")]
         public bool IsHave
         {
             get => _isHave;
