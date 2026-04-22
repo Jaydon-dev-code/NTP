@@ -129,50 +129,54 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
 
                 foreach (var group in groups)
                 {
-                    var startAddre = group.Min(x => x.Address);
-                    var endAddressInfo = group.OrderByDescending(x => x.Address).First();
-
-                    var length =
-                        endAddressInfo.Address
-                        + (
-                            endAddressInfo.DataType == TypeCode.String
-                                ? (int)Math.Ceiling((double)endAddressInfo.Length / 2)
-                                : endAddressInfo.Length * endAddressInfo.ShortOffset
-                        )
-                        - startAddre;
-
-                    var readValue = PaginatedReadingSync(
-                        group.Key.IpAddress,
-                        group.Key.Port,
-                        group.Key.Prefix,
-                        startAddre,
-                        length
-                    );
-
-                    if (!readValue.IsSuccess)
+                    foreach (var groupAddre in GroupByAddress(group))
                     {
-                        byte[] bytes = new byte[length * 2];
-                        foreach (var item in group)
+                        var startAddre = groupAddre.Min(x => x.Address);
+                        var endAddressInfo = groupAddre.OrderByDescending(x => x.Address).First();
+
+                        var length =
+                            endAddressInfo.Address
+                            + (
+                                endAddressInfo.DataType == TypeCode.String
+                                    ? (int)Math.Ceiling((double)endAddressInfo.Length / 2)
+                                    : endAddressInfo.Length * endAddressInfo.ShortOffset
+                            )
+                            - startAddre;
+
+                        var readValue = PaginatedReadingSync(
+                            group.Key.IpAddress,
+                            group.Key.Port,
+                            group.Key.Prefix,
+                            startAddre,
+                            length
+                        );
+
+                        if (!readValue.IsSuccess)
                         {
-                            item.Value = bytes.ConvertToValues(
-                                (item.Address - startAddre) * item.ShortOffset,
-                                item.DataType,
-                                item.Length
-                            );
+                            byte[] bytes = new byte[length * 2];
+                            foreach (var item in groupAddre)
+                            {
+                                item.Value = bytes.ConvertToValues(
+                                    (item.Address - startAddre) * item.ShortOffset,
+                                    item.DataType,
+                                    item.Length
+                                );
+                            }
                         }
-                    }
-                    else
-                    {
-                        foreach (var item in group)
+                        else
                         {
-                            item.Value = readValue.Data.ConvertToValues(
-                                ((item.Address - startAddre) * 2),
-                                item.DataType,
-                                item.Length
-                            );
+                            foreach (var item in groupAddre)
+                            {
+                                item.Value = readValue.Data.ConvertToValues(
+                                    ((item.Address - startAddre) * 2),
+                                    item.DataType,
+                                    item.Length
+                                );
+                            }
                         }
                     }
                 }
+                 
 
                 return Result<List<DevPlcPointMcReadDto>>.Success(lineReadPlcInfo);
             }
@@ -181,6 +185,46 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                 Log.Warning("[Mcp通讯异常]同步批量解析数据错误：{Message}", ex.Message);
                 return Result<List<DevPlcPointMcReadDto>>.Fail(ex.Message);
             }
+        }
+
+        /// <summary>
+        /// PLC 地址分组工具（间隔 >128 断开）
+        /// </summary>
+        /// <summary>
+        /// 对 DevPlcPointMcReadDto 集合按 Address 连续分组
+        /// 规则：后地址 - 前地址 <= 128 → 同一组
+        ///      后地址 - 前地址 > 128 → 新组
+        /// </summary>
+        List<List<DevPlcPointMcReadDto>> GroupByAddress(IEnumerable<DevPlcPointMcReadDto> pointList)
+        {
+            // 1. 必须按地址从小到大排序
+            var sorted = pointList.OrderBy(p => p.Address).ToList();
+            var result = new List<List<DevPlcPointMcReadDto>>();
+
+            if (!sorted.Any())
+                return result;
+
+            // 2. 初始化第一组
+            var currentGroup = new List<DevPlcPointMcReadDto> { sorted[0] };
+            result.Add(currentGroup);
+
+            // 3. 遍历分组
+            for (int i = 1; i < sorted.Count; i++)
+            {
+                var prev = sorted[i - 1];
+                var curr = sorted[i];
+
+                // 地址差 > 128 → 断开，新建组
+                if (curr.Address - prev.Address > 128)
+                {
+                    currentGroup = new List<DevPlcPointMcReadDto>();
+                    result.Add(currentGroup);
+                }
+
+                currentGroup.Add(curr);
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -205,7 +249,6 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
 
                 try
                 {
-                    Log.Debug("同步读取开始。");
                     var data = ReadWithRetrySync(ipAddress, port, prefix, currentAddress, readLen);
 
                     // 空数据重试一次
@@ -215,7 +258,6 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                         data = ReadWithRetrySync(ipAddress, port, prefix, currentAddress, readLen);
                     }
 
-                    Log.Debug("同步读取结束。");
                     allData.AddRange(data);
                 }
                 catch (Exception ex)
@@ -292,7 +334,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             return Write(new DevPlcPointMcWriteDto(devPlcPointMcDto));
         }
 
-        private  Result Write(DevPlcPointMcWriteDto pointMcWriteDto)
+        private Result Write(DevPlcPointMcWriteDto pointMcWriteDto)
         {
             return PaginatedWriteing(
                 pointMcWriteDto.IpAddress,
