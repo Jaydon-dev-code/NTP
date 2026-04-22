@@ -17,15 +17,14 @@ using System.Windows.Shapes;
 namespace SL.MLineDataPrecisionTracking.Client.View.Control
 {
     /// <summary>
-    /// DeviceCollectionConfig.xaml 的交互逻辑
+    /// Rcl_MeticulousPursuit.xaml 的交互逻辑
     /// </summary>
-    public partial class DeviceCollectionConfig : UserControl
+    public partial class Rcl_MeticulousPursuit : UserControl
     {
-        public DeviceCollectionConfig(DeviceCollectionConfigViewModel deviceCollectionConfigViewModel)
+        public Rcl_MeticulousPursuit(Rcl_MeticulousPursuitViewModel rcl_MeticulousPursuitViewModel)
         {
-            this.DataContext = deviceCollectionConfigViewModel;
+            this.DataContext = rcl_MeticulousPursuitViewModel;
             InitializeComponent();
-          
         }
     }
 }

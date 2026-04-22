@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using HandyControl.Controls;
 using HandyControl.Data;
 using SL.MLineDataPrecisionTracking.Client.View.Control;
+using SL.MLineDataPrecisionTracking.Client.ViewModel.Control;
 using SL.MLineDataPrecisionTracking.Models.Domain;
 using SqlSugar.Extensions;
 using System;
@@ -134,16 +135,16 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel
                 {
                     Header = "数据查询",
                     Icon =   $"{ AppDomain.CurrentDomain.BaseDirectory}Resources\\Image\\ProductionRecord.png",
-                    Page = App.Container.Resolve<MeticulousPursuit>(),
+                    Page = App.Container.Resolve<Rcl_MeticulousPursuit>(),
                 },
-#if DEBUG
+
                 new MenuItems()
                 {
                     Header = "设置",
                     Icon = $"{ AppDomain.CurrentDomain.BaseDirectory}Resources\\Image\\Setting.png",
                     Page = App.Container.Resolve<DeviceCollectionConfig>(),
                 },
-#endif
+
             };
         }
 

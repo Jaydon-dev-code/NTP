@@ -1,0 +1,536 @@
+﻿<UserControl
+    x:Class="SL.MLineDataPrecisionTracking.Client.View.Control.Rcl_MeticulousPursuit"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="http://schemas.superdev.ch/valueconverters/2016/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:local="clr-namespace:SL.MLineDataPrecisionTracking.Client.View.Control"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:usconverters="clr-namespace:SL.MLineDataPrecisionTracking.Client.Common"
+    xmlns:usmodels="clr-namespace:SL.MLineDataPrecisionTracking.Models.Enum;assembly=SL.MLineDataPrecisionTracking.Models"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <converters:BoolInverter x:Key="BoolInverter" />
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+            <usconverters:EnumToStringtConverter x:Key="EnumToStringtConverter" />
+            <converters:ValueConverterGroup x:Key="InverterBoolToVisibilityConverter">
+                <converters:BoolInverter />
+                <converters:BoolToVisibilityConverter />
+            </converters:ValueConverterGroup>
+
+            <ObjectDataProvider
+                x:Key="ResultEnum"
+                MethodName="GetNames"
+                ObjectType="{x:Type sys:Enum}">
+
+                <ObjectDataProvider.MethodParameters>
+
+                    <x:Type TypeName="usmodels:ResultEnum" />
+
+                </ObjectDataProvider.MethodParameters>
+
+            </ObjectDataProvider>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+
+    <Grid Margin="0,5">
+        <Grid.Resources>
+            <Style TargetType="TextBlock">
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="30" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="5" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="5" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="5" />
+                <!--<RowDefinition Height="*" />
+                <RowDefinition Height="5" />
+                <RowDefinition Height="*" />-->
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="*" />
+
+            </Grid.ColumnDefinitions>
+            <TextBlock
+                Grid.Row="0"
+                Grid.Column="0"
+                Text="起始时间" />
+            <Grid
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="2"
+                IsEnabled="{Binding QueryConditions.IsScanCode, Converter={StaticResource BoolInverter}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <hc:DatePicker Grid.Column="0" SelectedDate="{Binding QueryConditions.StartDate, Mode=TwoWay}" />
+                <hc:TimePicker
+                    Grid.Column="1"
+                    SelectedTime="{Binding QueryConditions.StartTime, Mode=TwoWay}"
+                    Style="{StaticResource TimePickerPlus}">
+                    <hc:TimePicker.Clock>
+                        <hc:ListClock />
+                    </hc:TimePicker.Clock>
+                </hc:TimePicker>
+            </Grid>
+
+            <!--<hc:DateTimePicker SelectedDateTime="{Binding QueryConditions.StartTime, Mode=TwoWay}" Style="{StaticResource DateTimePickerPlus.Small}" />-->
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="0"
+                Text="结束时间" />
+            <Grid
+                Grid.Row="2"
+                Grid.Column="1"
+                Grid.ColumnSpan="2"
+                IsEnabled="{Binding QueryConditions.IsScanCode, Converter={StaticResource BoolInverter}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <hc:DatePicker Grid.Column="0" SelectedDate="{Binding QueryConditions.EndDate, Mode=TwoWay}" />
+                <hc:TimePicker
+                    Grid.Column="1"
+                    SelectedTime="{Binding QueryConditions.EndTime, Mode=TwoWay}"
+                    Style="{StaticResource TimePickerPlus}">
+                    <hc:TimePicker.Clock>
+                        <hc:ListClock />
+                    </hc:TimePicker.Clock>
+                </hc:TimePicker>
+            </Grid>
+
+
+            <!--<TextBlock
+                Grid.Row="4"
+                Grid.Column="0"
+                Text="A 托盘编号" />
+            <TextBox
+                Grid.Row="4"
+                Grid.Column="1"
+                Width="150"
+                IsEnabled="{Binding QueryConditions.IsScanCode, Converter={StaticResource BoolInverter}}"
+                Style="{StaticResource DataGridEditingTextColumnStyle.Small}"
+                Text="{Binding QueryConditions.TrayNoA, Mode=TwoWay}" />
+            <TextBlock
+                Grid.Row="4"
+                Grid.Column="2"
+                Text="B 托盘编号" />
+            <TextBox
+                Grid.Row="4"
+                Grid.Column="3"
+                Grid.ColumnSpan="2"
+                Width="150"
+                Height="32"
+                Margin="0,0,116,0"
+                VerticalAlignment="Top"
+                IsEnabled="{Binding QueryConditions.IsScanCode, Converter={StaticResource BoolInverter}}"
+                Style="{StaticResource DataGridEditingTextColumnStyle.Small}"
+                Text="{Binding QueryConditions.TrayNoB, Mode=TwoWay}" />
+            <TextBlock
+                Grid.Row="6"
+                Grid.Column="0"
+                Text="A NG编号" />
+            <TextBox
+                Grid.Row="6"
+                Grid.Column="1"
+                Width="150"
+                IsEnabled="{Binding QueryConditions.IsScanCode, Converter={StaticResource BoolInverter}}"
+                Style="{StaticResource DataGridEditingTextColumnStyle.Small}"
+                Text="{Binding QueryConditions.NgCodeA, Mode=TwoWay}" />
+            <TextBlock
+                Grid.Row="6"
+                Grid.Column="2"
+                Text="B NG编号" />
+            <TextBox
+                Grid.Row="6"
+                Grid.Column="3"
+                Width="150"
+                IsEnabled="{Binding QueryConditions.IsScanCode, Converter={StaticResource BoolInverter}}"
+                Style="{StaticResource DataGridEditingTextColumnStyle.Small}"
+                Text="{Binding QueryConditions.NgCodeB, Mode=TwoWay}" />
+
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="4"
+                Text="模型编号" />
+            <TextBox
+                Grid.Row="2"
+                Grid.Column="5"
+                Width="150"
+                IsEnabled="{Binding QueryConditions.IsScanCode, Converter={StaticResource BoolInverter}}"
+                Style="{StaticResource DataGridEditingTextColumnStyle.Small}"
+                Text="{Binding QueryConditions.ModelName, Mode=TwoWay}" />-->
+
+            <!--<TextBlock
+                Grid.Row="4"
+                Grid.Column="4"
+                Text="OP" />
+            <ComboBox
+                Grid.Row="4"
+                Grid.Column="5"
+                Width="150"
+                IsEnabled="{Binding QueryConditions.IsScanCode, Converter={StaticResource BoolInverter}}"
+                SelectedIndex="0"
+                SelectedValue="{Binding QueryConditions.OP, Mode=TwoWay}"
+                Style="{StaticResource ComboBox.Small}">
+                <ComboBoxItem>ALL</ComboBoxItem>
+                <ComboBoxItem>300</ComboBoxItem>
+                <ComboBoxItem>400</ComboBoxItem>
+                <ComboBoxItem>620</ComboBoxItem>
+                <ComboBoxItem>640</ComboBoxItem>
+                <ComboBoxItem>650</ComboBoxItem>
+                <ComboBoxItem>660</ComboBoxItem>
+                <ComboBoxItem>680</ComboBoxItem>
+                <ComboBoxItem>690</ComboBoxItem>
+                <ComboBoxItem>730</ComboBoxItem>
+                <ComboBoxItem>800</ComboBoxItem>
+                <ComboBoxItem>900</ComboBoxItem>
+                <ComboBoxItem>1000</ComboBoxItem>
+                <ComboBoxItem>1110</ComboBoxItem>
+                <ComboBoxItem>1310</ComboBoxItem>
+                <ComboBoxItem>1400</ComboBoxItem>
+                <ComboBoxItem>1500</ComboBoxItem>
+                <ComboBoxItem>1600</ComboBoxItem>
+                <ComboBoxItem>1700</ComboBoxItem>
+            </ComboBox>-->
+
+            <!--<TextBlock
+                Grid.Row="6"
+                Grid.Column="4"
+                Text="检测结果" />
+            <ComboBox
+                Grid.Row="6"
+                Grid.Column="5"
+                Width="150"
+                IsEnabled="{Binding QueryConditions.IsScanCode, Converter={StaticResource BoolInverter}}"
+                ItemsSource="{Binding Source={StaticResource ResultEnum}}"
+                SelectedIndex="0"
+                SelectedValue="{Binding QueryConditions.Result, Mode=TwoWay}" />-->
+
+
+
+            <TextBlock
+                Grid.Row="4"
+                Grid.Column="0"
+                Text="序列码" />
+            <TextBox
+                Name="MarkingNo"
+                Grid.Row="4 "
+                Grid.Column="1"
+                Grid.ColumnSpan="3"
+                hc:InfoElement.Necessary="True"
+                hc:TitleElement.Title="The title is on the left"
+                hc:TitleElement.TitlePlacement="Left"
+                hc:TitleElement.TitleWidth="120"
+                Text="{Binding QueryConditions.MarkingNo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+
+
+
+                <TextBox.InputBindings>
+                    <KeyBinding
+                        Key="Enter"
+                        Command="{Binding MarkingNoQueryCommand}"
+                        CommandParameter="{Binding ElementName=MarkingNo}" />
+                </TextBox.InputBindings>
+
+
+            </TextBox>
+            <Button
+                Grid.Row="0"
+                Grid.Column="4"
+                Command="{Binding QueryCommand}"
+                Content="查询"
+                IsEnabled="{Binding QueryConditions.IsScanCode, Converter={StaticResource BoolInverter}}" />
+            <Button
+                Grid.Row="0"
+                Grid.Column="5"
+                Command="{Binding SaveQueryValueCommand}"
+                Content="导出"
+                IsEnabled="{Binding QueryConditions.IsScanCode, Converter={StaticResource BoolInverter}}" />
+
+            <CheckBox
+                Name="IsScanCode"
+                Grid.Row="4"
+                Grid.Column="6"
+                Width="150"
+                hc:Poptip.Content="①扫描数据不对：请将输入切换为英文。 ②扫描没有数据：请将鼠标点击到序列码内。"
+                Command="{Binding OpenScanCodeModelCommand}"
+                CommandParameter="{Binding ElementName=MarkingNo}"
+                Content="扫码查询"
+                IsChecked="{Binding QueryConditions.IsScanCode, Mode=TwoWay}" />
+
+        </Grid>
+        <hc:TransitioningContentControl Grid.Row="1" Margin="0,5">
+            <hc:DrawerContainer>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <!--  左边：DataGrid 自动占满  -->
+                        <ColumnDefinition Width="Auto" />
+                        <!--  右边：Drawer 自动撑开/收缩  -->
+                    </Grid.ColumnDefinitions>
+                    <DataGrid
+                        Grid.Column="0"
+                        Margin="0,0,15,0"
+                        hc:DataGridAttach.ShowRowNumber="True"
+                        AutoGenerateColumns="False"
+                        ItemsSource="{Binding QueryValue}"
+                        ScrollViewer.CanContentScroll="True"
+                        ScrollViewer.HorizontalScrollBarVisibility="Visible  "
+                        ScrollViewer.VerticalScrollBarVisibility="Visible">
+                        <DataGrid.RowStyle>
+                            <Style BasedOn="{StaticResource DataGridRowStyle}" TargetType="DataGridRow">
+                                <!--  绑定模型里的 IsSpecial 字段，为 true 就变色  -->
+                                <Style.Triggers>
+                                    <!--  IsHave = false → 灰色  -->
+                                    <DataTrigger Binding="{Binding IsHave}" Value="False">
+                                        <Setter Property="Background" Value="Red" />
+                                    </DataTrigger>
+
+
+                                    <!--<DataTrigger Binding="{Binding IsHave}" Value="True">
+                                        <Setter Property="Background" Value="Transparent" />
+                                    </DataTrigger>-->
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn
+                                MinWidth="200"
+                                Binding="{Binding RecordTime, StringFormat='yyyy-MM-dd HH:mm:ss'}"
+                                Header="时间"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                MinWidth="160"
+                                Binding="{Binding QrCodeMarkContent}"
+                                Header="二维码打标内容"
+                                IsReadOnly="True" />
+                            <!--  加热时间  -->
+                            <DataGridTextColumn
+                                MinWidth="100"
+                                Binding="{Binding HeatingTime}"
+                                Header="加热时间"
+                                IsReadOnly="True" />
+
+                            <!--  冷却开始时间  -->
+                            <DataGridTextColumn
+                                MinWidth="130"
+                                Binding="{Binding CoolingStartTime, StringFormat=\{0:yyyy-MM-dd HH:mm:ss\}}"
+                                Header="冷却开始时间"
+                                IsReadOnly="True" />
+
+                            <!--  冷却时间  -->
+                            <DataGridTextColumn
+                                MinWidth="100"
+                                Binding="{Binding CoolingTime}"
+                                Header="冷却时间"
+                                IsReadOnly="True" />
+
+                            <!--  输出功率  -->
+                            <DataGridTextColumn
+                                MinWidth="100"
+                                Binding="{Binding OutputPower}"
+                                Header="输出功率"
+                                IsReadOnly="True" />
+
+                            <!--  输出电压  -->
+                            <DataGridTextColumn
+                                MinWidth="100"
+                                Binding="{Binding OutputVoltage}"
+                                Header="输出电压"
+                                IsReadOnly="True" />
+
+                            <!--  输出频率  -->
+                            <DataGridTextColumn
+                                MinWidth="100"
+                                Binding="{Binding OutputFrequency}"
+                                Header="输出频率"
+                                IsReadOnly="True" />
+
+                            <!--  外喷冷却水量  -->
+                            <DataGridTextColumn
+                                MinWidth="120"
+                                Binding="{Binding ExternalSprayCoolingWater}"
+                                Header="外喷冷却水量"
+                                IsReadOnly="True" />
+
+                            <!--  辅喷冷却水量  -->
+                            <DataGridTextColumn
+                                MinWidth="120"
+                                Binding="{Binding AuxiliarySprayCoolingWater}"
+                                Header="辅喷冷却水量"
+                                IsReadOnly="True" />
+
+                            <!--  内喷冷却水量  -->
+                            <DataGridTextColumn
+                                MinWidth="120"
+                                Binding="{Binding InternalSprayCoolingWater}"
+                                Header="内喷冷却水量"
+                                IsReadOnly="True" />
+
+                            <!--  二维码打标内容  -->
+                            <DataGridTextColumn
+                                MinWidth="160"
+                                Binding="{Binding QrCodeMarkContent}"
+                                Header="二维码打标内容"
+                                IsReadOnly="True" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <hc:Drawer
+                        Grid.Column="1"
+                        Width="160"
+                        Margin="1"
+                        IsOpen="{Binding ElementName=IsScanCode, Path=IsChecked, Mode=OneWay}"
+                        MaskCanClose="False"
+                        ShowMask="False"
+                        Visibility="{Binding ElementName=IsScanCode, Path=IsChecked, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Border
+                            HorizontalAlignment="Stretch"
+                            Background="{DynamicResource RegionBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}">
+                            <Grid HorizontalAlignment="Stretch">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="20" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="20" />
+
+                                </Grid.RowDefinitions>
+                                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                    <TextBlock VerticalAlignment="Center" Text="扫码记录（近100条）" />
+                                    <Button
+                                        Command="{Binding SaveQueryValueCommand}"
+                                        Content="导出"
+                                        Style="{StaticResource ButtonInfo.Small}" />
+
+                                </StackPanel>
+                                <ListBox
+                                    Grid.Row="1"
+                                    HorizontalContentAlignment="Stretch"
+                                    ItemsSource="{Binding HistoryScanMarkingNos}"
+                                    Style="{StaticResource InputElementBaseStyle}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <!--  一行布局：左边文字自动填满，右边固定按钮  -->
+                                            <Grid
+                                                Height="24"
+                                                Margin="0"
+                                                VerticalAlignment="Center">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <!--  文字占满剩余空间  -->
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <!--  按钮自适应宽度  -->
+                                                </Grid.ColumnDefinitions>
+
+
+                                                <!--  文字：靠左  -->
+                                                <TextBlock
+                                                    Grid.Column="0"
+                                                    MinWidth="150"
+                                                    Margin="2,0"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Center"
+                                                    Text="{Binding MarkingNo}">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <!--  IsHave = false → 灰色  -->
+                                                                <DataTrigger Binding="{Binding IsHave}" Value="False">
+                                                                    <Setter Property="Foreground" Value="Red" />
+                                                                </DataTrigger>
+
+                                                                <!--  IsHave = true → 黑色（默认）  -->
+                                                                <DataTrigger Binding="{Binding IsHave}" Value="True">
+                                                                    <Setter Property="Foreground" Value="Black" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+
+                                                <!--  按钮：靠右  -->
+                                                <Button
+                                                    Grid.Column="1"
+                                                    Margin="5,0,0,0"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    BorderThickness="0"
+                                                    Command="{Binding DataContext.RemoveHistoryScanCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Content="X"
+                                                    Style="{StaticResource ButtonDashedWarning.Small}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                                <Button
+                                    Grid.Row="2"
+                                    Command="{Binding ClearHistoryMarkingNoCommand}"
+                                    Content="一键清理"
+                                    Style="{StaticResource ButtonDashedWarning.Small}" />
+                            </Grid>
+                        </Border>
+                    </hc:Drawer>
+
+                </Grid>
+
+            </hc:DrawerContainer>
+
+
+        </hc:TransitioningContentControl>
+
+        <WrapPanel
+            Grid.Row="2"
+            HorizontalAlignment="Center"
+            Visibility="{Binding ElementName=IsScanCode, Path=IsChecked, Converter={StaticResource InverterBoolToVisibilityConverter}}">
+            <hc:Pagination
+                Name="Pagination"
+                AutoHiding="False"
+                DataCountPerPage="{Binding PaginationPages.DataCountPerPage}"
+                MaxPageCount="{Binding PaginationPages.MaxPageCount}"
+                PageIndex="{Binding PaginationPages.PageIndex, Mode=TwoWay}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="PageUpdated">
+                        <i:InvokeCommandAction Command="{Binding PageUpdatedCommand}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </hc:Pagination>
+
+            <TextBlock Margin="5,0,0,0" Text="每页：" />
+            <ComboBox
+                Margin="5,0"
+                ItemsSource="{Binding PageSoure}"
+                SelectedItem="{Binding PaginationPages.DataCountPerPage, Mode=TwoWay}" />
+            <TextBlock Margin="0,0,5,0" Text="条" />
+            <TextBlock Text="{Binding PaginationPages.TotalCount, StringFormat=共：{0}条}" />
+
+
+        </WrapPanel>
+
+    </Grid>
+
+</UserControl>

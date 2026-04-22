@@ -16,7 +16,8 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 {
     public partial class DeviceCollectionConfigViewModel : ObservableObject
     {
-        PlcAddressExcelImportService _plcAddressExcelImportService;
+ 
+
 
         private AsyncRelayCommand _importAsyncCommand;
         public AsyncRelayCommand ImportAsyncCommand
@@ -31,6 +32,8 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             }
         }
 
+ 
+
         private RelayCommand _exportTemplateCommand;
         public IRelayCommand ExportTemplateCommand
         {
@@ -43,7 +46,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 return _exportTemplateCommand;
             }
         }
-
+        PlcAddressExcelImportService _plcAddressExcelImportService;
         public DeviceCollectionConfigViewModel(
             PlcAddressExcelImportService plcAddressExcelImportService
         )

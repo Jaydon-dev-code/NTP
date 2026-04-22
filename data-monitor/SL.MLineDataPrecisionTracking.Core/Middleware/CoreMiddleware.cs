@@ -41,6 +41,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Middleware
             services.RegisterType<PlcAddressExcelImportService>().SingleInstance();
             services.RegisterType<A_ProLineDataCollectionService>().As<ProLineDataCollectionServiceAbstract<Tb_LineA>>().SingleInstance();
             services.RegisterType<B_ProLineDataCollectionService>().As<ProLineDataCollectionServiceAbstract<Tb_LineB>>().SingleInstance();
+            services.RegisterType<Rcl_ProLineDataCollectionService>().As<ProLineDataCollectionServiceAbstract<Tb_HeatTreatmentData>>().SingleInstance();
 
         }
     }

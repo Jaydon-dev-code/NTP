@@ -50,9 +50,11 @@
     <Compile Include="Dtos\DevPlcPointMcDto.cs" />
     <Compile Include="Dtos\DevPlcPointMcReadDto.cs" />
     <Compile Include="Dtos\DevPlcPointMcWriteDto.cs" />
+    <Compile Include="Dtos\HeatTreatmentDataDto.cs" />
     <Compile Include="Dtos\LineSummaryDto.cs" />
     <Compile Include="Dtos\PlcPointImportDto.cs" />
     <Compile Include="Entities\Tb_Equipment.cs" />
+    <Compile Include="Entities\Tb_HeatTreatmentData.cs" />
     <Compile Include="Entities\Tb_LineA.cs" />
     <Compile Include="Entities\Tb_LineB.cs" />
     <Compile Include="Entities\Tb_LineSummary.cs" />

@@ -9,8 +9,8 @@
     <ProjectGuid>{C6E4DEBD-0906-4151-8C22-478C0D5328EC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SL.MLineDataPrecisionTracking.Core</RootNamespace>
-    <AssemblyName>SL.MLineDataPrecisionTracking.Core</AssemblyName>
+    <RootNamespace>SL.RclMLineDataPrecisionTracking.Core</RootNamespace>
+    <AssemblyName>SL.RclMLineDataPrecisionTracking.Core</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -55,20 +55,18 @@
     <Compile Include="Middleware\LogMiddleware.cs" />
     <Compile Include="Middleware\SqlSugerMiddleware.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Services\A_ProLineDataCollectionService.cs" />
-    <Compile Include="Services\B_ProLineDataCollectionService.cs" />
+    <Compile Include="Services\Rcl_ProLineDataCollectionService.cs" />
     <Compile Include="Services\PlcAddressExcelImportService.cs" />
     <Compile Include="Services\ProLineDataCollectionServiceAbstract.cs" />
-    <Compile Include="Services\Rcl_ProLineDataCollectionService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SL.MLineDataPrecisionTracking.Infrastructure\SL.MLineDataPrecisionTracking.Infrastructure.csproj">
+    <ProjectReference Include="..\SL.MLineDataPrecisionTracking.Infrastructure\SL.RclMLineDataPrecisionTracking.Infrastructure.csproj">
       <Project>{de4bbdb9-afdf-4418-be33-93c52cf53764}</Project>
-      <Name>SL.MLineDataPrecisionTracking.Infrastructure</Name>
+      <Name>SL.RclMLineDataPrecisionTracking.Infrastructure</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SL.MLineDataPrecisionTracking.Models\SL.MLineDataPrecisionTracking.Models.csproj">
+    <ProjectReference Include="..\SL.MLineDataPrecisionTracking.Models\SL.RclMLineDataPrecisionTracking.Models.csproj">
       <Project>{292117f3-5422-4c4f-86c6-12de0cf50bde}</Project>
-      <Name>SL.MLineDataPrecisionTracking.Models</Name>
+      <Name>SL.RclMLineDataPrecisionTracking.Models</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

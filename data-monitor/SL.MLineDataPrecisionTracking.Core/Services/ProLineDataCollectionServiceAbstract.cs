@@ -105,7 +105,14 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             try
             {
                 _lineReadPlcInfo = await InitPlcAddre();
-
+                if (_lineReadPlcInfo==null || _lineReadPlcInfo.Count<=0)
+                {
+                    Serilog.Log.Warning(
+                                "[采集开始点位初始化]【{_lineName}】点位数据异常，本服务无法启动。",
+                                _lineName
+                            );
+                    return;
+                }
                 _plcCallPCCanCollectionPoint = _lineReadPlcInfo.First(x =>
                     x.PointName == "采集开始"
                 );
@@ -252,6 +259,10 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             var linePoint = await _equipmentRepository.GetEquipmentAllAsync(x =>
                 x.DeviceName == _lineName
             );
+            if (linePoint is null)
+            {
+                return new List<DevPlcPointMcDto>();
+            }
             var re = new List<DevPlcPointMcDto>();
             foreach (var plcLinkeInfo in linePoint.PlcConnections)
             {
