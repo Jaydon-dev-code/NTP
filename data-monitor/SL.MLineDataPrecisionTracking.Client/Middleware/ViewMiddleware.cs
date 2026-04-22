@@ -33,7 +33,7 @@ namespace SL.MLineDataPrecisionTracking.Client.Middleware
                 .ToList();
 
             // 4. 批量单例注入（自身 → 自身）
-            foreach (var type in types)
+            foreach (var type in types)   
             {
                 services.RegisterType(type).InstancePerDependency();
             }
