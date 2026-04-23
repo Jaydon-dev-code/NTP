@@ -28,7 +28,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         public string Area { get; set; }
 
         /// <summary>起始地址</summary>
-        public int Address { get; set; }
+        public string Address { get; set; }
 
         /// <summary>数据类型 Int16/Int32/Float/Bool/String</summary>
         public string DataType { get; set; }

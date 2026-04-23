@@ -16,7 +16,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
             int port,
             Prefix prefix,
             TypeCode typeCode,
-            int address,
+            string address,
             int length,
             string readFormula="",
             string writeFormula="",
@@ -41,7 +41,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         public string IpAddress { get; set; } // PLC_IP
         public int Port { get; set; } // 端口
         public Prefix Prefix { get; set; } // D/M/X/Y
-        public int Address { get; set; } // 地址
+        public string Address { get; set; } // 地址
         public TypeCode DataType { get; set; } // Int16/Float/Bool
 
         public string ReadFormula { get; set; }
