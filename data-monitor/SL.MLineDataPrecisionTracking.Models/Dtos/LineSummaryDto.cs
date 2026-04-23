@@ -64,6 +64,10 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         [Description("序列码")]
         public string MarkingNo { get; set; }
 
+
+
+        [Description("半成品码")]
+        public string SemiFinishedProductCode { get; set; }
         /// <summary>
         /// 托盘号
         /// </summary>
@@ -81,12 +85,6 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         /// </summary>
         [Description("NG代码A")]
         public string NgCodeA { get; set; }
-
-        /// <summary>
-        /// 二维码打标内容
-        /// </summary>
-        [Description("序列码A")]
-        public string MarkingNoA { get; set; }
 
         /// <summary>
         /// 小内圈分选数据
