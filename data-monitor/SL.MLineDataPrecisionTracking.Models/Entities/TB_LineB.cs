@@ -32,6 +32,9 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         [SugarColumn(ColumnDescription = "屏蔽工位B")]
         public string ShieldStationB { get; set; }
 
+        [SugarColumn(ColumnDescription = "半成品码")]
+        public string SemiFinishedProductCode { get; set; }
+
         /// <summary>
         /// NG代码
         /// </summary>
