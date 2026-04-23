@@ -51,11 +51,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         [SugarColumn(ColumnDescription = "NG代码A")]
         public string NgCodeA { get; set; } = "";
 
-        /// <summary>
-        /// 二维码打标内容
-        /// </summary>
-        [SugarColumn(ColumnDescription = "序列码A")]
-        public string MarkingNoA { get; set; } = "";
+
 
         /// <summary>
         /// 二维码打标内容
@@ -81,6 +77,8 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         [SugarColumn(ColumnDescription = "内法兰分选数据")]
         public string InnerFlangeSortingData { get; set; } = "";
 
+        [SugarColumn(ColumnDescription = "半成品码")]
+        public string SemiFinishedProductCode { get; set; }
         /// <summary>
         /// A面钢球组差
         /// </summary>
