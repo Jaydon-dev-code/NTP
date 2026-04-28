@@ -20,7 +20,7 @@ namespace UnitTestProject
         public PlcOPTest()
         {
             //模拟plc
-           _server = new HslCommunication.Profinet.Melsec.MelsecMcServer();
+            _server = new HslCommunication.Profinet.Melsec.MelsecMcServer();
             _server.IsBinary = true;
             _server.AnalysisLogMessage = true;
             _server.ActiveTimeSpan = TimeSpan.Parse("01:00:00");
@@ -28,8 +28,17 @@ namespace UnitTestProject
             _server.EnableIPv6 = false;
             _server.ServerStart(6000);
         }
-
         [TestMethod]
+        public async Task ReadTesta()
+        {
+    
+            await Task.Delay(1000);
+
+            McpCommunication mcpCommunication = new McpCommunication();
+           var x= mcpCommunication.Read(new DevPlcPointMcDto() { IpAddress="100.100.100.3", Prefix=McpXLib.Enums.Prefix.X,Port=2000, DataType=TypeCode.Boolean,Address="1B22" ,Length=1});
+        }
+
+            [TestMethod]
         public async Task ReadTest()
         {
             await Task.Delay(1000);
@@ -62,7 +71,7 @@ namespace UnitTestProject
                     port: 6000,
                     prefix: McpXLib.Enums.Prefix.M,
                     typeCode: TypeCode.Boolean,
-                    address: 10,
+                    address: "10",
                     length: 1
                 ),
                 new DevPlcPointMcDto(
@@ -72,7 +81,7 @@ namespace UnitTestProject
                     port: 6000,
                     prefix: McpXLib.Enums.Prefix.M,
                     typeCode: TypeCode.Boolean,
-                    address: 15,
+                    address: "15",
                     length: 1
                 ),
                 new DevPlcPointMcDto(
@@ -82,7 +91,7 @@ namespace UnitTestProject
                     port: 6000,
                     prefix: McpXLib.Enums.Prefix.D,
                     typeCode: TypeCode.String,
-                    address: 20,
+                    address: "20",
                     length: 2
                 ),
                 new DevPlcPointMcDto(
@@ -92,7 +101,7 @@ namespace UnitTestProject
                     port: 6000,
                     prefix: McpXLib.Enums.Prefix.D,
                     typeCode: TypeCode.String,
-                    address: 20,
+                    address: "20",
                     length: 7
                 ),
                 new DevPlcPointMcDto(
@@ -102,7 +111,7 @@ namespace UnitTestProject
                     port: 6000,
                     prefix: McpXLib.Enums.Prefix.D,
                     typeCode: TypeCode.Int16,
-                    address: 30,
+                    address: "30",
                     length: 2
                 ),  new DevPlcPointMcDto(
                     deviceName: "a",
@@ -111,7 +120,7 @@ namespace UnitTestProject
                     port: 6000,
                     prefix: McpXLib.Enums.Prefix.D,
                     typeCode: TypeCode.Int32,
-                    address: 40,
+                    address: "40",
                     length: 2
                 ),
                   new DevPlcPointMcDto(
@@ -121,7 +130,7 @@ namespace UnitTestProject
                     port: 6000,
                     prefix: McpXLib.Enums.Prefix.D,
                     typeCode: TypeCode.Single,
-                    address: 50,
+                    address: "50",
                     length: 2
                 ),
             };
@@ -154,7 +163,7 @@ namespace UnitTestProject
                     port: 6000,
                     prefix: McpXLib.Enums.Prefix.M,
                     typeCode: TypeCode.Boolean,
-                    address: 22,
+                    address: "22",
                     length: 1,
                     value: new List<object>() { true }
                 ),

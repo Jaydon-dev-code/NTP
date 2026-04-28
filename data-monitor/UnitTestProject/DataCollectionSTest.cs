@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
+using Autofac.Core;
 using HslCommunication.Profinet.Melsec;
 using McpXLib;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -36,12 +37,7 @@ namespace UnitTestProject
             builder.AddLogMiddleware();
             Container = builder.Build();
             //-------------------------------------------------
-            foreach (
-                var item in new int[]
-                {  2000, 6000,
-                    4990,
-                }
-            )
+            foreach (var item in new int[] { 2000, 6000, 4990 })
             {
                 MelsecMcServer server = new HslCommunication.Profinet.Melsec.MelsecMcServer();
                 server.IsBinary = true;
@@ -53,21 +49,30 @@ namespace UnitTestProject
             }
         }
 
+        /// <summary>
+        /// 热处理
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task Rcl_DataCollectionTest()
         {
-            var rcl = Container.Resolve<
-                ProLineDataCollectionServiceAbstract<Tb_HeatTreatmentData>
-            >();
+            var rcl = Container
+                .Resolve<IEnumerable<ProLineDataCollectionServiceAbstract>>()
+                .First(x => x.GetType().Name == nameof(Rcl_ProLineDataCollectionService));
             rcl.ExecuteAsync(new System.Threading.CancellationToken());
-            //await RclRunAsync("热处理");
             await Task.Delay(20000 * 1000);
         }
 
+        /// <summary>
+        /// a线
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task A_DataCollectionTest()
         {
-            var rcl = Container.Resolve<ProLineDataCollectionServiceAbstract<Tb_LineA>>();
+            var rcl = Container
+                .Resolve<IEnumerable<ProLineDataCollectionServiceAbstract>>()
+                .First(x => x.GetType().Name == nameof(A_ProLineDataCollectionService));
             await rcl.ExecuteAsync(new System.Threading.CancellationToken());
 
             await Task.Delay(20000 * 1000);
@@ -95,12 +100,12 @@ namespace UnitTestProject
                             item.Value = new List<object>() { val.ToString() };
                         }
 
-                         mcp.Write(item);
+                        mcp.Write(item);
                         val++;
                     }
 
                     startPoint.Value = new List<object>() { true };
-                     mcp.Write(startPoint);
+                    mcp.Write(startPoint);
                 }
                 else
                 {
@@ -138,11 +143,17 @@ namespace UnitTestProject
                 }
             });
         }
+        /// <summary>
+        /// ab线联动测试
+        /// </summary>
+        /// <returns></returns>
 
         [TestMethod]
         public async Task B_DataCollectionTest()
         {
-            var b = Container.Resolve<ProLineDataCollectionServiceAbstract<Tb_LineB>>();
+            var b = Container
+                .Resolve<IEnumerable<ProLineDataCollectionServiceAbstract>>()
+                .First(x => x.GetType().Name == nameof(B_ProLineDataCollectionService));
             await b.ExecuteAsync(new System.Threading.CancellationToken());
             await Task.Delay(20000 * 1000);
         }
@@ -151,8 +162,12 @@ namespace UnitTestProject
         public async Task DataCollectionTest()
         {
             await Task.Delay(1000);
-            var a = Container.Resolve<ProLineDataCollectionServiceAbstract<Tb_LineA>>();
-            var b = Container.Resolve<ProLineDataCollectionServiceAbstract<Tb_LineB>>();
+            var a = Container
+                .Resolve<IEnumerable<ProLineDataCollectionServiceAbstract>>()
+                .First(x => x.GetType().Name == nameof(A_ProLineDataCollectionService));
+            var b = Container
+                .Resolve<IEnumerable<ProLineDataCollectionServiceAbstract>>()
+                .First(x => x.GetType().Name == nameof(B_ProLineDataCollectionService));
             int[] aPallNo = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             int[] bPallNo = new int[] { 10, 20, 30, 40, 50, 60, 70, 80, 90 };
             var mcp = Container.Resolve<McpCommunication>();
@@ -180,13 +195,12 @@ namespace UnitTestProject
             await Task.Delay(20000 * 10);
         }
 
-        async Task RunAsync<T>(
+        async Task RunAsync(
             string lineName,
-            ProLineDataCollectionServiceAbstract<T> lineServer,
+            ProLineDataCollectionServiceAbstract lineServer,
             int[] pallNo,
             Func<List<DevPlcPointMcDto>, int, Task> func = null
         )
-            where T : class, new()
         {
             lineServer.ExecuteAsync(new System.Threading.CancellationToken());
             var lineInfo = await InitPlcAddre(lineName);
