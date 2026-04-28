@@ -142,7 +142,6 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <None Include="Resources\测试点位数据.xlsx" />
-    <None Include="SL.MLineDataPrecisionTracking.Client_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
