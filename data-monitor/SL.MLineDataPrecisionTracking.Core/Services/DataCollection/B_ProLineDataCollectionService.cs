@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -14,12 +14,15 @@ using SqlSugar;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services
 {
-    public class B_ProLineDataCollectionService : ProLineDataCollectionServiceAbstract<Tb_LineB>
+    public class B_ProLineDataCollectionService : ProLineDataCollectionServiceAbstract
     {
         Tb_LineBRepository _lineBRepository;
         Tb_LineARepository _lineARepository;
         Tb_LineSummaryRepository _lineSummaryRepository;
         Tb_ModelNoToNameRepository _modelNoToNameRepository;
+
+        protected override string _lineName { get; set; } = "B线";
+        protected override Type DataModelType => typeof(Tb_LineB);
 
         public B_ProLineDataCollectionService(
             Tb_EquipmentRepository equipmentRepositor,
@@ -37,27 +40,22 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             _modelNoToNameRepository = tb_ModelNoToNameRepository;
         }
 
-        protected override string _lineName { get; set; } = "B线";
-
-        protected override async Task<bool> InsterCollectionData(Tb_LineB data)
+        protected override async Task<bool> InsterCollectionData(object data)
         {
+            var lineData = data as Tb_LineB;
             var aLineInfo = await _lineARepository.QueryableFirstAsync(
-                x => x.TrayNoA == data.LineATrayNo && x.IsUsing == false,
+                x => x.TrayNoA == lineData.LineATrayNo && x.IsUsing == false,
                 o => o.RecordTime
             );
             Tb_LineSummary tb_LineSummary = new Tb_LineSummary() { Result = ResultEnum.OK };
-            //找不到A 托盘或者 自己 ng了就是ng
-            if (aLineInfo == null || data.NgCodeB != "0")
+            if (aLineInfo == null || lineData.NgCodeB != "0")
             {
                 tb_LineSummary.Result = ResultEnum.NG;
             }
-            await _lineBRepository.InsertableAsync(data);
-            //通过 a托盘号 找到 a的信息 后生成记录
-            ABToSummary(aLineInfo, data, tb_LineSummary, new List<string>() { "A线托盘编号" });
-            //查询模型对应的信息
+            await _lineBRepository.InsertableAsync(lineData);
+            ABToSummary(aLineInfo, lineData, tb_LineSummary, new List<string>() { "A线托盘编号" });
             var models = await _modelNoToNameRepository.QueryabletAsync(x => true);
-            //给模型名称
-            tb_LineSummary.ModelNo = data.ModelNoB;
+            tb_LineSummary.ModelNo = lineData.ModelNoB;
             var modelNameB = models
                 .FirstOrDefault(x => x.ModelNo == tb_LineSummary.ModelNo)
                 ?.ModelName;
@@ -69,6 +67,16 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             }
 
             return await _lineSummaryRepository.InsertableAsync(tb_LineSummary) > 0;
+        }
+
+        protected override bool OtherCanCollection()
+        {
+            return true;
+        }
+
+        protected override void OtherInit()
+        {
+          
         }
     }
 }

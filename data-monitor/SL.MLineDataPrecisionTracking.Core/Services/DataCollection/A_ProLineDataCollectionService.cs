@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
@@ -18,9 +18,11 @@ using SqlSugar;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services
 {
-    public class A_ProLineDataCollectionService : ProLineDataCollectionServiceAbstract<Tb_LineA>
+    public class A_ProLineDataCollectionService : ProLineDataCollectionServiceAbstract
     {
         protected override string _lineName { get; set; } = "A线";
+        protected override Type DataModelType => typeof(Tb_LineA);
+
         Tb_LineARepository _lineARepository;
         Tb_LineSummaryRepository _ineSummaryRepository;
         Tb_ModelNoToNameRepository _modelNoToNameRepository;
@@ -39,23 +41,33 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             _modelNoToNameRepository = tb_ModelNoToNameRepository;
         }
 
-        protected override async Task<bool> InsterCollectionData(Tb_LineA data)
+        protected override async Task<bool> InsterCollectionData(object data)
         {
-            if (data.NgCodeA != "0")
+            var lineData = data as Tb_LineA;
+            if (lineData.NgCodeA != "0")
             {
                 Tb_LineSummary tb_LineSummary = new Tb_LineSummary() { Result = ResultEnum.NG };
-                ABToSummary(data, null, tb_LineSummary); //查询模型对应的信息
+                ABToSummary(lineData, null, tb_LineSummary);
                 var models = await _modelNoToNameRepository.QueryabletAsync(x => true);
-                //给模型名称
-                tb_LineSummary.ModelNo = data.ModelNoA;
+                tb_LineSummary.ModelNo = lineData.ModelNoA;
                 var modelNameB = models
                     .FirstOrDefault(x => x.ModelNo == tb_LineSummary.ModelNo)
                     ?.ModelName;
                 tb_LineSummary.ModelName = modelNameB == null ? "" : modelNameB;
                 await _ineSummaryRepository.InsertableAsync(tb_LineSummary);
-                data.IsUsing = true;
+                lineData.IsUsing = true;
             }
-            return await _lineARepository.InsertableAsync(data) > 0;
+            return await _lineARepository.InsertableAsync(lineData) > 0;
+        }
+
+        protected override void OtherInit()
+        {
+          
+        }
+
+        protected override bool OtherCanCollection()
+        {
+            return true;
         }
     }
 }

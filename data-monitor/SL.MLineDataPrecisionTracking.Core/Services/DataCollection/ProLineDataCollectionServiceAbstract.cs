@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NPOI.SS.Formula.Eval;
 using NPOI.SS.Formula.Functions;
+using Org.BouncyCastle.Asn1.X9;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
@@ -18,17 +19,30 @@ using SqlSugar.Extensions;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services
 {
-    public abstract class ProLineDataCollectionServiceAbstract<T>
-        where T : class, new()
+    public enum ServiceStatus
+    {
+        Stopped,
+        Running,
+        Paused,
+    }
+
+    public abstract class ProLineDataCollectionServiceAbstract
     {
         Tb_EquipmentRepository _equipmentRepository;
 
+        public string ServiceName => _lineName;
         protected abstract string _lineName { get; set; }
+        protected abstract Type DataModelType { get; }
         protected List<DevPlcPointMcDto> _lineReadPlcInfo;
         protected McpCommunication _mcp;
 
         DevPlcPointMcDto _plcCallPCCanCollectionPoint;
         DevPlcPointMcDto _pcCallPlcCollctionOk;
+
+        // 服务状态管理
+        public ServiceStatus Status { get; private set; } = ServiceStatus.Stopped;
+        private CancellationTokenSource _cancellationTokenSource;
+        private Task _serviceTask;
 
         public ProLineDataCollectionServiceAbstract(
             Tb_EquipmentRepository equipmentRepositor,
@@ -38,11 +52,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             _equipmentRepository = equipmentRepositor;
             _mcp = mcp;
         }
-        /// <summary>
-        /// 把 Tb_LineA + Tb_LineB 的值 赋值给 Tb_LineSummary
-        /// 只赋值带 [SugarColumn] 的字段
-        /// 支持过滤字段
-        /// </summary>
+
         protected void ABToSummary(
             object sourceA,
             object sourceB,
@@ -55,7 +65,6 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                 ignoreFields = new List<string>();
             }
 
-            // 拿到汇总类所有带 SugarColumn 的属性
             var summaryProperties = summary
                 .GetType()
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
@@ -66,22 +75,18 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             {
                 var fieldName = prop.Name;
 
-                // 过滤字段
                 if (
                     ignoreFields.Any(ig => ig.Equals(fieldName, StringComparison.OrdinalIgnoreCase))
                 )
                     continue;
 
-                // 先从 A 类取值
                 object value = GetValue(sourceA, fieldName);
 
-                // A 类没有，再从 B 类取值
                 if (value == null)
                 {
                     value = GetValue(sourceB, fieldName);
                 }
 
-                // 赋值给汇总类
                 if (value != null)
                 {
                     prop.SetValue(summary, value);
@@ -89,9 +94,6 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             }
         }
 
-        /// <summary>
-        /// 从对象中根据字段名取值
-        /// </summary>
         private static object GetValue(object obj, string fieldName)
         {
             if (obj == null)
@@ -100,17 +102,22 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             var prop = obj.GetType().GetProperty(fieldName);
             return prop?.CanRead == true ? prop.GetValue(obj) : null;
         }
+
         public async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             try
             {
+                Status = ServiceStatus.Running;
+
                 _lineReadPlcInfo = await InitPlcAddre();
-                if (_lineReadPlcInfo==null || _lineReadPlcInfo.Count<=0)
+                OtherInit();
+                if (_lineReadPlcInfo == null || _lineReadPlcInfo.Count <= 0)
                 {
                     Serilog.Log.Warning(
-                                "[采集开始点位初始化]【{_lineName}】点位数据异常，本服务无法启动。",
-                                _lineName
-                            );
+                        "[采集开始点位初始化]【{_lineName}】点位数据异常，本服务无法启动。",
+                        _lineName
+                    );
+                    Status = ServiceStatus.Stopped;
                     return;
                 }
                 _plcCallPCCanCollectionPoint = _lineReadPlcInfo.First(x =>
@@ -120,16 +127,15 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                 _pcCallPlcCollctionOk = _lineReadPlcInfo.First(x => x.PointName == "采集结束");
                 _lineReadPlcInfo.Remove(_plcCallPCCanCollectionPoint);
                 _lineReadPlcInfo.Remove(_pcCallPlcCollctionOk);
-                while (true)
+                while (!stoppingToken.IsCancellationRequested)
                 {
                     try
                     {
-                        if (await CanCollection() is false)  
+                        if (await CanCollection() is false || OtherCanCollection())
                         {
+                            await Task.Delay(500, stoppingToken);
                             continue;
                         }
-                        //var isStrart = await CanCollection();
-                        //Serilog.Log.Debug("[采集开始点位数据读取]【{_lineName}】{isStrart}", _lineName, isStrart);
 
                         var colRe = await CollectionData();
                         if (colRe.IsSuccess)
@@ -155,9 +161,14 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                     }
                     finally
                     {
-                        await Task.Delay(500);
+                        await Task.Delay(500, stoppingToken);
                     }
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                // 正常取消，不记录异常
+                Serilog.Log.Information("[服务控制]【{_lineName}】服务已停止", _lineName);
             }
             catch (Exception ex)
             {
@@ -167,19 +178,76 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                     ex.Message
                 );
             }
+            finally
+            {
+                Status = ServiceStatus.Stopped;
+            }
         }
 
-        protected abstract Task<bool> InsterCollectionData(T data);
-
-        protected virtual async Task<Result<T>> CollectionData()
+        // 手动操作方法
+        public void Start()
         {
-            var readValue =  _mcp.Read(_lineReadPlcInfo);
+            if (Status == ServiceStatus.Running)
+            {
+                Serilog.Log.Warning($"服务 {_lineName} 已经在运行中");
+                return;
+            }
+
+            // 停止现有任务
+            Stop();
+
+            // 创建新的取消令牌
+            _cancellationTokenSource = new CancellationTokenSource();
+
+            // 启动服务
+            _serviceTask = Task.Run(
+                () => ExecuteAsync(_cancellationTokenSource.Token),
+                _cancellationTokenSource.Token
+            );
+        }
+
+        public void Stop()
+        {
+            if (Status == ServiceStatus.Stopped)
+            {
+                return;
+            }
+
+            if (
+                _cancellationTokenSource != null
+                && !_cancellationTokenSource.IsCancellationRequested
+            )
+            {
+                _cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Dispose();
+            }
+
+            _cancellationTokenSource = null;
+            _serviceTask = null;
+            Status = ServiceStatus.Stopped;
+        }
+
+        public void Restart()
+        {
+            Stop();
+            // 延迟一下确保服务完全停止
+            Task.Delay(1000).Wait();
+            Start();
+        }
+
+        protected abstract void OtherInit();
+        protected abstract bool OtherCanCollection();
+        protected abstract Task<bool> InsterCollectionData(object data);
+
+        protected virtual async Task<Result<object>> CollectionData()
+        {
+            var readValue = _mcp.Read(_lineReadPlcInfo);
             if (readValue.IsSuccess is false)
             {
-                return Result<T>.Fail(readValue.Message);
+                return Result<object>.Fail(readValue.Message);
             }
-            T t = new T();
-            var props = typeof(T).GetProperties();
+            object t = Activator.CreateInstance(DataModelType);
+            var props = DataModelType.GetProperties();
             foreach (var prop in props)
             {
                 var attr = prop.GetCustomAttribute<SugarColumn>();
@@ -228,11 +296,13 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                         _lineName,
                         ex.Message
                     );
-                    return Result<T>.Fail($"[点位数据初始化]{_lineName}反射数据失败:{ex.Message}");
+                    return Result<object>.Fail(
+                        $"[点位数据初始化]{_lineName}反射数据失败:{ex.Message}"
+                    );
                 }
             }
 
-            return Result<T>.Success(t);
+            return Result<object>.Success(t);
         }
 
         protected virtual async Task CallPlcCollectionOK()
@@ -243,7 +313,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
 
         protected virtual async Task<bool> CanCollection()
         {
-            var re =  _mcp.Read(_plcCallPCCanCollectionPoint);
+            var re = _mcp.Read(_plcCallPCCanCollectionPoint);
             if (re.IsSuccess is false || re.Data.Value[0].ObjToBool() is false)
             {
                 return false;

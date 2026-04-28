@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,10 +10,12 @@ using SL.MLineDataPrecisionTracking.Models.Enum;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services
 {
-    public class Rcl_ProLineDataCollectionService
-        : ProLineDataCollectionServiceAbstract<Tb_HeatTreatmentData>
+    public class Rcl_ProLineDataCollectionService : ProLineDataCollectionServiceAbstract
     {
         Tb_HeatTreatmentDataRepository _rclRepository;
+
+        protected override string _lineName { get; set; } = "热处理";
+        protected override Type DataModelType => typeof(Tb_HeatTreatmentData);
 
         public Rcl_ProLineDataCollectionService(
             Tb_EquipmentRepository equipmentRepositor,
@@ -25,11 +27,20 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             _rclRepository = rclRepository;
         }
 
-        protected override string _lineName { get; set; } = "热处理";
-
-        protected override async Task<bool> InsterCollectionData(Tb_HeatTreatmentData data)
+        protected override async Task<bool> InsterCollectionData(object data)
         {
-            return await _rclRepository.InsertableAsync(data) > 0;
+            var heatData = data as Tb_HeatTreatmentData;
+            return await _rclRepository.InsertableAsync(heatData) > 0;
+        }
+
+        protected override bool OtherCanCollection()
+        {
+            return true;
+        }
+
+        protected override void OtherInit()
+        {
+           
         }
     }
 }

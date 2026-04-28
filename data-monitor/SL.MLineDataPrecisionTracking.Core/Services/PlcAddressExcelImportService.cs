@@ -102,7 +102,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                             PointName = x.PointName,
                             Description = x.Description,
                             Area = x.Area,
-                            Address = x.Address,
+                            Address = x.Address.ToString(),
                             DataType = x.DataType,
                             Length = x.Length,
                             WriteFormula = x.WriteFormula,
