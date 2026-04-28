@@ -1,0 +1,44 @@
+/* 自定义 Swagger UI 样式 */
+.swagger-section {
+    background-color: #f8f9fa !important;
+}
+
+#header {
+    background-color: #343a40 !important;
+    padding: 20px;
+}
+
+#header h1 {
+    color: #ffffff !important;
+    font-size: 24px !important;
+}
+
+.swagger-ui .info {
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.swagger-ui .operation {
+    margin: 10px 0;
+    padding: 15px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.swagger-ui .parameter {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+.swagger-ui .response {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
