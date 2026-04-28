@@ -55,11 +55,11 @@
     <Compile Include="Middleware\LogMiddleware.cs" />
     <Compile Include="Middleware\SqlSugerMiddleware.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Services\A_ProLineDataCollectionService.cs" />
-    <Compile Include="Services\B_ProLineDataCollectionService.cs" />
+    <Compile Include="Services\DataCollection\A_ProLineDataCollectionService.cs" />
+    <Compile Include="Services\DataCollection\B_ProLineDataCollectionService.cs" />
     <Compile Include="Services\PlcAddressExcelImportService.cs" />
-    <Compile Include="Services\ProLineDataCollectionServiceAbstract.cs" />
-    <Compile Include="Services\Rcl_ProLineDataCollectionService.cs" />
+    <Compile Include="Services\DataCollection\ProLineDataCollectionServiceAbstract.cs" />
+    <Compile Include="Services\DataCollection\Rcl_ProLineDataCollectionService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SL.MLineDataPrecisionTracking.Infrastructure\SL.MLineDataPrecisionTracking.Infrastructure.csproj">

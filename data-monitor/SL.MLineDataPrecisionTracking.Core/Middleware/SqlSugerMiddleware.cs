@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Autofac;
+using SL.MLineDataPrecisionTracking.Infrastructure;
+using SL.MLineDataPrecisionTracking.Models;
+using SqlSugar;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Reflection;
-using Autofac;
-using SqlSugar;
 
 namespace SL.MLineDataPrecisionTracking.Core.Middleware
 {
@@ -37,13 +39,10 @@ namespace SL.MLineDataPrecisionTracking.Core.Middleware
                     )&& CreateTable
                 )
                 {
-                    string dllPath = Path.Combine(
-                        AppContext.BaseDirectory,
-                        "SL.MLineDataPrecisionTracking.Models.dll"
-                    );
+  
                     string targetNamespace = "SL.MLineDataPrecisionTracking.Models.Entities";
                     List<Type> types = new List<Type>();
-                    foreach (var t in Assembly.LoadFrom(dllPath).GetTypes())
+                    foreach (var t in typeof(ModelsAssemblyMarker).Assembly.GetTypes())
                     {
                         if (
                             t.IsClass
@@ -54,7 +53,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Middleware
                             && // 不是泛型类
                             !t.IsInterface
                             && // 不是接口
-                            t.Namespace.Contains(targetNamespace)
+                            t.Namespace==targetNamespace
                         )
                         {
                             types.Add(t);

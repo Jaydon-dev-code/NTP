@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using SL.MLineDataPrecisionTracking.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,9 +14,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Middleware
     {
         public static void AddInfrastructureMiddleware(this ContainerBuilder services)
         {
-            // 1. 加载 DLL 文件（默认从程序运行目录找）
-            string dllPath = Path.Combine(AppContext.BaseDirectory, "SL.MLineDataPrecisionTracking.Infrastructure.dll");
-            Assembly assembly = Assembly.LoadFrom(dllPath);
+            Assembly assembly = typeof(InfrastructureAssemblyMarker).Assembly;
 
             // 2. 目标命名空间
             string targetNamespace = "SL.MLineDataPrecisionTracking.Infrastructure";
