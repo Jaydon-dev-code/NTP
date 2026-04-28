@@ -96,6 +96,11 @@
     </Compile>
     <Compile Include="Common\EnumDescriptionConverter.cs" />
     <Compile Include="Common\EnumToStringtConverter.cs" />
+    <Compile Include="Http\BaseHttp.cs" />
+    <Compile Include="Http\MeticulousPursuitApi.cs" />
+    <Compile Include="Http\Rcl_MeticulousPursuitApi.cs" />
+    <Compile Include="Http\ServiceApi.cs" />
+    <Compile Include="Middleware\HttpMiddleware.cs" />
     <Compile Include="Middleware\ViewMiddleware.cs" />
     <Compile Include="ViewModel\Control\DeviceCollectionConfigViewModel.cs" />
     <Compile Include="ViewModel\Control\MeticulousPursuitViewModel.cs" />

@@ -1,15 +1,155 @@
-﻿<UserControl
+<UserControl
     x:Class="SL.MLineDataPrecisionTracking.Client.View.Control.DeviceCollectionConfig"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="http://schemas.superdev.ch/valueconverters/2016/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:SL.MLineDataPrecisionTracking.Client.View.Control"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <StackPanel>
-        <Button Command="{Binding ImportAsyncCommand}" Content="导入" />
-        <Button Command="{Binding ExportTemplateAsyncCommand}" Content="导出模板" />
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <converters:BoolToStringConverter
+            x:Key="BoolToStringConverter"
+            FalseValue="启用"
+            TrueValue="禁用" />
+
+
+        <!--<converters:TupleConverter x:Key="TupleConverter" />-->
+    </UserControl.Resources>
+    <StackPanel Margin="10">
+        <!--  导入导出功能  -->
+        <StackPanel Margin="0,0,0,20" Orientation="Horizontal">
+            <Button
+                Width="100"
+                Margin="0,0,10,0"
+                Command="{Binding ImportAsyncCommand}"
+                Content="导入" />
+            <Button
+                Width="120"
+                Command="{Binding ExportTemplateCommand}"
+                Content="导出模板" />
+        </StackPanel>
+
+        <!--  服务管理标题  -->
+        <TextBlock
+            Margin="0,0,0,10"
+            FontSize="16"
+            FontWeight="Bold"
+            Text="服务管理" />
+
+        <!--  批量操作  -->
+        <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
+            <Button
+                Width="120"
+                Margin="0,0,10,0"
+                Command="{Binding StartAllServicesCommand}"
+                Content="启动所有服务" />
+            <Button
+                Width="120"
+                Margin="0,0,10,0"
+                Command="{Binding StopAllServicesCommand}"
+                Content="停止所有服务" />
+            <Button
+                Width="100"
+                Command="{Binding LoadServicesCommand}"
+                Content="刷新状态" />
+        </StackPanel>
+
+        <!--  服务列表  -->
+        <DataGrid
+            Margin="0,10,0,0"
+            AutoGenerateColumns="False"
+            ItemsSource="{Binding Services}">
+            <DataGrid.Columns>
+                <DataGridTextColumn
+                    Width="100"
+                    Binding="{Binding ServiceId}"
+                    Header="服务ID" />
+                <DataGridTextColumn
+                    Width="150"
+                    Binding="{Binding Name}"
+                    Header="服务名称" />
+                <DataGridTextColumn
+                    Width="200"
+                    Binding="{Binding ServiceType}"
+                    Header="服务类型" />
+                <DataGridTemplateColumn Width="100" Header="运行状态">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                <Setter Property="Text" Value="运行中" />
+                                                <Setter Property="Foreground" Value="Green" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsRunning}" Value="False">
+                                                <Setter Property="Text" Value="已停止" />
+                                                <Setter Property="Foreground" Value="Red" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Width="100" Header="启用状态">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding IsEnabled}" IsEnabled="False" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Width="200" Header="操作">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Button
+                                    Width="60"
+                                    Margin="0,0,5,0"
+                                    Command="{Binding DataContext.StartServiceCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    CommandParameter="{Binding ServiceId}"
+                                    Content="启动"
+                                    IsEnabled="{Binding IsEnabled}" />
+                                <Button
+                                    Width="60"
+                                    Margin="0,0,5,0"
+                                    Command="{Binding DataContext.StopServiceCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    CommandParameter="{Binding ServiceId}"
+                                    Content="停止" />
+                                <Button
+                                    Width="60"
+                                    Command="{Binding DataContext.RestartServiceCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    CommandParameter="{Binding ServiceId}"
+                                    Content="重启"
+                                    IsEnabled="{Binding IsEnabled}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Width="120" Header="启用/禁用">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button
+                                Width="100"
+                                Command="{Binding DataContext.SetServiceEnabledCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                CommandParameter="{Binding}"
+                                Content="{Binding IsEnabled, Converter={StaticResource BoolToStringConverter}}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!--  加载状态  -->
+        <TextBlock
+            Margin="0,10,0,0"
+            Text="加载中..."
+            Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}" />
     </StackPanel>
 </UserControl>

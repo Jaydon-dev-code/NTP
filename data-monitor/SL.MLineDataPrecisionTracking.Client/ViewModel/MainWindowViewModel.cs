@@ -147,10 +147,17 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel
             {
                 new MenuItems()
                 {
-                    Header = "数据查询",
+                    Header = "装配数据查询",
                     Icon =
                         $"{AppDomain.CurrentDomain.BaseDirectory}Resources\\Image\\ProductionRecord.png",
                     Page = App.Container.Resolve<MeticulousPursuit>(),
+                },
+                   new MenuItems()
+                {
+                    Header = "热处理数据查询",
+                    Icon =
+                        $"{AppDomain.CurrentDomain.BaseDirectory}Resources\\Image\\ProductionRecord.png",
+                    Page = App.Container.Resolve<Rcl_MeticulousPursuit>(),
                 },
                 new MenuItems()
                 {

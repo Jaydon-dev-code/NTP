@@ -13,12 +13,12 @@ using HandyControl.Controls;
 using HandyControl.Data;
 using MathNet.Numerics.Distributions;
 using Microsoft.Win32;
+using SL.MLineDataPrecisionTracking.Client.Http;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
-using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Dtos;
+using SL.MLineDataPrecisionTracking.Models.Dtos.Request;
 using SL.MLineDataPrecisionTracking.Models.Entities;
-using SqlSugar;
 
 namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 {
@@ -151,9 +151,9 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
         List<LineSummaryDto> _quValues;
         List<LineSummaryDto> _mkNoQuValues;
 
-        Tb_LineSummaryRepository _lineSummaryRepository;
+        MeticulousPursuitApi _meticulousPursuitApi;
 
-        public MeticulousPursuitViewModel(Tb_LineSummaryRepository tb_LineSummaryRepository)
+        public MeticulousPursuitViewModel(MeticulousPursuitApi meticulousPursuitApi)
         {
             PaginationPages = new PaginationPage();
             var lastDay = DateTime.Now.Date;
@@ -170,7 +170,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             {
                 HistoryScanMarkingNos = new ObservableCollection<ScanRecord>();
             }
-            _lineSummaryRepository = tb_LineSummaryRepository;
+            _meticulousPursuitApi = meticulousPursuitApi;
             QueryValue = new ObservableCollection<LineSummaryDto>();
             PageSoure = new ObservableCollection<int>() { 100, 200, 500 };
             PaginationPages.DataCountPerPage = 100;
@@ -223,12 +223,19 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             {
                 return;
             }
-            LineSummaryDto findValue = new LineSummaryDto(
-                await _lineSummaryRepository.QueryableFirstAsync(x =>
-                    x.MarkingNo == QueryConditions.MarkingNo
-                )
-            );
-            if (findValue?.MarkingNo == null)
+
+            var request = new LineSummaryQueryRequestDto
+            {
+                RefinedSearch = new RefinedSearchCriteria { MarkingNo = QueryConditions.MarkingNo }
+            };
+            var apiResult = await _meticulousPursuitApi.MarkingNoQuery(request);
+
+            LineSummaryDto findValue;
+            if (apiResult.IsSuccess && apiResult.Data?.List?.Count > 0)
+            {
+                findValue = new LineSummaryDto(apiResult.Data.List.First());
+            }
+            else
             {
                 findValue = new LineSummaryDto(
                     new Tb_LineSummary()
@@ -290,28 +297,39 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 
         async Task<bool> QuData(int pageIndex)
         {
-            List<LineSummaryDto> queryValue = new List<LineSummaryDto>();
-            var exp = Expressionable.Create<Tb_LineSummary>();
-
-            // 👇 一行调用封装好的条件
-            if (!BuildCommonQueryCondition(ref exp))
+            // 时间校验
+            var startTime = QueryConditions.StartDate.Date + QueryConditions.StartTime.TimeOfDay;
+            var endTime = QueryConditions.EndDate.Date + QueryConditions.EndTime.TimeOfDay;
+            if (startTime > endTime)
+            {
+                HandyControl.Controls.MessageBox.Warning("起始时间不能大于结束时间！");
                 return false;
+            }
 
             PaginationPages.PageIndex = pageIndex;
-            var re = await _lineSummaryRepository.QueryableAsync(
-                exp.ToExpression(),
-                x => x.RecordTime,
-                PaginationPages.PageIndex,
-                pageSize: PaginationPages.DataCountPerPage
-            );
 
-            PaginationPages.MaxPageCount = re.TotalPage;
-            PaginationPages.TotalCount = re.TotalCount;
+            var request = new LineSummaryQueryRequestDto
+            {
+                RefinedSearch = QueryConditions,
+                PageNumber = PaginationPages.PageIndex,
+                PageSize = PaginationPages.DataCountPerPage
+            };
+
+            var apiResult = await _meticulousPursuitApi.QueryablToPagee(request);
+
+            if (!apiResult.IsSuccess)
+            {
+                HandyControl.Controls.MessageBox.Warning($"查询失败：{apiResult.Message}");
+                return false;
+            }
+
+            PaginationPages.MaxPageCount = apiResult.Data.TotalPage;
+            PaginationPages.TotalCount = apiResult.Data.TotalCount;
 
             Application.Current.Dispatcher.Invoke(() =>
             {
                 QueryValue.Clear();
-                foreach (var item in re.List)
+                foreach (var item in apiResult.Data.List)
                 {
                     QueryValue.Add(new LineSummaryDto(item));
                 }
@@ -332,7 +350,6 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             if (saveFileDialog.ShowDialog() != true)
                 return;
 
-            var exp = Expressionable.Create<Tb_LineSummary>();
             List<LineSummaryDto> re = new List<LineSummaryDto>();
             // 扫码模式单独判断
             if (QueryConditions?.IsScanCode == true)
@@ -347,12 +364,29 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             }
             else
             {
-                // 👇 普通条件：一行调用
-                if (!BuildCommonQueryCondition(ref exp))
+                // 时间校验
+                var startTime = QueryConditions.StartDate.Date + QueryConditions.StartTime.TimeOfDay;
+                var endTime = QueryConditions.EndDate.Date + QueryConditions.EndTime.TimeOfDay;
+                if (startTime > endTime)
+                {
+                    HandyControl.Controls.MessageBox.Warning("起始时间不能大于结束时间！");
                     return;
-                re = (await _lineSummaryRepository.QueryableAsync(exp.ToExpression()))
-                    .Select(x => new LineSummaryDto(x))
-                    .ToList();
+                }
+
+                var request = new LineSummaryQueryRequestDto
+                {
+                    RefinedSearch = QueryConditions
+                };
+
+                var apiResult = await _meticulousPursuitApi.SaveQuery(request);
+
+                if (!apiResult.IsSuccess)
+                {
+                    HandyControl.Controls.MessageBox.Warning($"查询失败：{apiResult.Message}");
+                    return;
+                }
+
+                re = apiResult.Data.List.Select(x => new LineSummaryDto(x)).ToList();
             }
 
             if (re?.Count == 0)
@@ -371,68 +405,6 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             {
                 HandyControl.Controls.MessageBox.Warning($"导出失败！/r/n{ex.Message}");
             }
-        }
-
-        /// <summary>
-        /// 统一构建查询条件（Query + Save 共用）
-        /// </summary>
-        private bool BuildCommonQueryCondition(ref Expressionable<Tb_LineSummary> exp)
-        {
-            // 扫码模式
-            if (QueryConditions?.IsScanCode == true)
-            {
-                if (string.IsNullOrWhiteSpace(QueryConditions.MarkingNo))
-                    return false;
-
-                exp.And(x => x.MarkingNo == QueryConditions.MarkingNo);
-            }
-            // 时间 + 普通条件模式
-            else
-            {
-                var startTime =
-                    QueryConditions.StartDate.Date + QueryConditions.StartTime.TimeOfDay;
-                var endTime = QueryConditions.EndDate.Date + QueryConditions.EndTime.TimeOfDay;
-
-                if (startTime > endTime)
-                {
-                    HandyControl.Controls.MessageBox.Warning("起始时间不能大于结束时间！");
-                    return false;
-                }
-
-                exp.And(x => x.RecordTime >= startTime && x.RecordTime <= endTime);
-
-                // 统一公共条件
-                if (string.IsNullOrEmpty(QueryConditions.TrayNoA) is false)
-                {
-                    exp.And(x => x.TrayNoA == QueryConditions.TrayNoA);
-                }
-                if (string.IsNullOrEmpty(QueryConditions.TrayNoB) is false)
-                {
-                    exp.And(x => x.TrayNoB == QueryConditions.TrayNoB);
-                }
-                if (string.IsNullOrEmpty(QueryConditions.NgCodeA) is false)
-                {
-                    exp.And(x => x.NgCodeA == QueryConditions.NgCodeA);
-                }
-                if (string.IsNullOrEmpty(QueryConditions.NgCodeB) is false)
-                {
-                    exp.And(x => x.NgCodeB == QueryConditions.NgCodeB);
-                }
-                if (string.IsNullOrEmpty(QueryConditions.MarkingNo) is false)
-                {
-                    exp.And(x => x.MarkingNo == QueryConditions.MarkingNo);
-                }
-                if (string.IsNullOrEmpty(QueryConditions.ModelName) is false)
-                {
-                    exp.And(x => x.ModelName == QueryConditions.ModelName);
-                }
-                if (QueryConditions.Result != Models.Enum.ResultEnum.ALL)
-                {
-                    exp.And(x => x.Result == QueryConditions.Result);
-                }
-            }
-
-            return true;
         }
 
         async Task PageUpdated()

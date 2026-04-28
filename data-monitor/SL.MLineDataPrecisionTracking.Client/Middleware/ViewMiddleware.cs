@@ -19,7 +19,7 @@ namespace SL.MLineDataPrecisionTracking.Client.Middleware
 
             // 2. 目标命名空间
             string targetNamespaceView = "SL.MLineDataPrecisionTracking.Client.View";
-            string targetNamespaceViewModel = "SL.MLineDataPrecisionTracking.Client.ViewModel";
+ 
 
             // 3. 获取该命名空间下 所有 非抽象、非泛型、非静态类
             var types = assembly.GetTypes()
@@ -28,7 +28,8 @@ namespace SL.MLineDataPrecisionTracking.Client.Middleware
                     !t.IsAbstract &&              // 不是抽象类
                     !t.IsGenericType &&          // 不是泛型类
                     !t.IsInterface &&            // 不是接口
-                    t.Namespace.Contains(targetNamespaceView) || t.Namespace.Contains(targetNamespaceViewModel)// 严格匹配命名空间
+
+                    t.Namespace?.Contains(targetNamespaceView)==true// 匹配命名空间
                 ).Where(t => !t.Name.StartsWith("<"))
                 .ToList();
 

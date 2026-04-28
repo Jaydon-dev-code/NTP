@@ -12,34 +12,34 @@
     Width="800"
     Height="450"
     Background="#F5F7FA"
-    WindowState="Maximized"
-    WindowStyle="None"
     mc:Ignorable="d">
-    <!--  Topmost="True"  -->
+    <!--  WindowStyle="None" Topmost="True"      WindowState="Maximized"  -->
 
     <Grid Margin="0,10">
 
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="30" />
+            <RowDefinition Height="35" />
             <RowDefinition Height="*" />
             <RowDefinition Height="20" />
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0">
             <Grid>
                 <Image
-                    Width="120"
+                    Width="150"
                     HorizontalAlignment="Left"
                     Source="pack://application:,,,/Resources/Image/CompanyLogo.jpg" />
                 <TextBlock Style="{StaticResource TextBlockTitle}" Text="{Binding SoftwareName}" />
-                <StackPanel
+                <!--<StackPanel
                     Margin="0,0,10,0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Top"
                     FlowDirection="RightToLeft"
                     Orientation="Horizontal">
 
-                    <!--  关闭按钮  -->
+                -->
+                <!--  关闭按钮  -->
+                <!--
                     <Button
                         Width="40"
                         Margin="0,0,0,0"
@@ -57,12 +57,16 @@
                                 <Setter Property="Foreground" Value="#606266" />
                                 <Setter Property="Background" Value="Transparent" />
                                 <Style.Triggers>
-                                    <!--  鼠标悬浮：变红底白叉  -->
+                -->
+                <!--  鼠标悬浮：变红底白叉  -->
+                <!--
                                     <Trigger Property="IsMouseOver" Value="True">
                                         <Setter Property="Background" Value="#E81123" />
                                         <Setter Property="Foreground" Value="White" />
                                     </Trigger>
-                                    <!--  鼠标按下：变浅红  -->
+                -->
+                <!--  鼠标按下：变浅红  -->
+                <!--
                                     <Trigger Property="IsPressed" Value="True">
                                         <Setter Property="Background" Value="#F1707A" />
                                     </Trigger>
@@ -101,7 +105,7 @@
                         </Button.Style>
                     </Button>
 
-                </StackPanel>
+                </StackPanel>-->
 
             </Grid>
             <hc:Divider
@@ -121,7 +125,7 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="150" />
                 <ColumnDefinition Width="3" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
