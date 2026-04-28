@@ -219,14 +219,14 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <None Include="Resources\Packages\Npgsql.dll" />
+    <None Include="Resources\DBPackages\Npgsql.dll" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Packages\DmProvider.dll" />
-    <None Include="Resources\Packages\Kdbndp.dll" />
-    <None Include="Resources\Packages\Newtonsoft.Json.dll" />
-    <None Include="Resources\Packages\Oracle.ManagedDataAccess.dll" />
-    <None Include="Resources\Packages\System.Data.SQLite.dll" />
+    <None Include="Resources\DBPackages\DmProvider.dll" />
+    <None Include="Resources\DBPackages\Kdbndp.dll" />
+    <None Include="Resources\DBPackages\Newtonsoft.Json.dll" />
+    <None Include="Resources\DBPackages\Oracle.ManagedDataAccess.dll" />
+    <None Include="Resources\DBPackages\System.Data.SQLite.dll" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.8">
