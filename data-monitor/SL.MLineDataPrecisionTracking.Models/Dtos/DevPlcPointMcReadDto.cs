@@ -9,6 +9,8 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
 {
     public class DevPlcPointMcReadDto
     {
+        public  DevPlcPointMcReadDto()
+            {}
         public DevPlcPointMcReadDto(DevPlcPointMcDto devPlcPointMcDto,int shortOffset)
         {
             IpAddress = devPlcPointMcDto.IpAddress;

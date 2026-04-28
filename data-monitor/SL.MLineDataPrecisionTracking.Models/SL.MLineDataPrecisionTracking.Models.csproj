@@ -47,12 +47,17 @@
     <Compile Include="Domain\RefinedSearchCriteria.cs" />
     <Compile Include="Domain\Result.cs" />
     <Compile Include="Domain\ScanRecord.cs" />
+    <Compile Include="Domain\ServiceInfo.cs" />
     <Compile Include="Dtos\DevPlcPointMcDto.cs" />
     <Compile Include="Dtos\DevPlcPointMcReadDto.cs" />
     <Compile Include="Dtos\DevPlcPointMcWriteDto.cs" />
     <Compile Include="Dtos\HeatTreatmentDataDto.cs" />
     <Compile Include="Dtos\LineSummaryDto.cs" />
     <Compile Include="Dtos\PlcPointImportDto.cs" />
+    <Compile Include="Dtos\Request\HeatTreatmentDataQueryRequestDto.cs" />
+    <Compile Include="Dtos\Request\LineSummaryQueryRequestDto.cs" />
+    <Compile Include="Dtos\Response\HeatTreatmentDataQueryResponseDto.cs" />
+    <Compile Include="Dtos\Response\LineSummaryQueryResponseDto.cs" />
     <Compile Include="Entities\Tb_Equipment.cs" />
     <Compile Include="Entities\Tb_HeatTreatmentData.cs" />
     <Compile Include="Entities\Tb_LineA.cs" />
@@ -61,7 +66,9 @@
     <Compile Include="Entities\Tb_ModelNoToName.cs" />
     <Compile Include="Entities\Tb_PlcConnection.cs" />
     <Compile Include="Entities\Tb_PlcPoint.cs" />
+    <Compile Include="Entities\Tb_ServiceStatus.cs" />
     <Compile Include="Enum\ResultEnum.cs" />
+    <Compile Include="ModelsAssemblyMarker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -75,5 +82,6 @@
       <Version>5.1.4.207</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -9,6 +9,8 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
 {
     public class DevPlcPointMcDto
     {
+        public DevPlcPointMcDto()
+        { }
         public DevPlcPointMcDto(
             string deviceName,
             string pointName,
