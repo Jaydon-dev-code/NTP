@@ -1,11 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Threading;
 using Autofac;
 using Serilog;
 using SL.MLineDataPrecisionTracking.Client.Middleware;
@@ -14,6 +6,15 @@ using SL.MLineDataPrecisionTracking.Core.Middleware;
 using SL.MLineDataPrecisionTracking.Core.Services;
 using SL.MLineDataPrecisionTracking.Models.Entities;
 using SqlSugar;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace SL.MLineDataPrecisionTracking.Client
 {
@@ -22,11 +23,26 @@ namespace SL.MLineDataPrecisionTracking.Client
     /// </summary>
     public partial class App : Application
     {
-        // 全局容器（整个程序唯一）
+        private static Mutex _mutex;
+        private const string AppUniqueName = "SL.MLineDataPrecisionTracking.Client";
         public static IContainer Container { get; private set; }
 
         protected override void OnStartup(StartupEventArgs e)
         {
+
+             // 尝试创建互斥体，判断是否已有实例运行
+            _mutex = new Mutex(true, AppUniqueName, out bool isNewInstance);
+
+            if (!isNewInstance)
+            {
+                HandyControl.Controls.MessageBox .Show("应用程序已在运行，无法启动多个实例！", "提示",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                Shutdown();
+                return;
+            }
+
+
+
             // 全局异常捕获
             this.DispatcherUnhandledException += App_DispatcherUnhandledException;
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
@@ -34,44 +50,28 @@ namespace SL.MLineDataPrecisionTracking.Client
             var builder = new ContainerBuilder();
 
             builder.AddViewMiddleware();
+            builder.AddHttpMiddleware();
             builder.AddInfrastructureMiddleware();
             builder.AddCoreMiddleware();
-            builder.AddSqlSugerMiddleware();
             builder.AddLogMiddleware();
 
             // 4. 构建容器
             Container = builder.Build();
 
-            // 5. 从容器解析主窗口（关键！这样才能自动注入）
-
-            //Container.Resolve<ProLineDataCollectionService>().ExecuteAsync(new System.Threading.CancellationToken());
-
             var mainWindow = Container.Resolve<MainWindow>();
-            //调试模式强行顶置会 卡
-#if DEBUG
-            mainWindow.Topmost = false;
 
-#else
-      //      mainWindow.Topmost = true;
-
-#endif
 
             mainWindow.Closing += MainWindow_Closing;
             mainWindow.Show();
-            Task.Run(() =>
-            {
-                Container
-                    .Resolve<ProLineDataCollectionServiceAbstract<Tb_LineA>>()
-                    .ExecuteAsync(new System.Threading.CancellationToken());
-            });
-            Task.Run(() =>
-                {
-                    Container
-                        .Resolve<ProLineDataCollectionServiceAbstract<Tb_LineB>>()
-                        .ExecuteAsync(new System.Threading.CancellationToken());
-                });
         }
 
+        // 程序退出时释放互斥体
+        protected override void OnExit(ExitEventArgs e)
+        {
+            _mutex?.ReleaseMutex();
+            _mutex?.Close();
+            base.OnExit(e);
+        }
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             var result = HandyControl.Controls.MessageBox.Show(
@@ -96,8 +96,9 @@ namespace SL.MLineDataPrecisionTracking.Client
         {
             e.Handled = true; // 关键：标记已处理，程序不闪退
 
+            Log.Error($"UI异常，请联系管理员。\r\n{e.Exception.Message}");
             HandyControl.Controls.MessageBox.Show(
-                $"UI异常，请联系管理员。",
+                $"UI异常，请联系管理员。{e.Exception.Message}",
                 "错误",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error
