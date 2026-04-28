@@ -10,6 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using McpXLib;
 using McpXLib.Enums;
+using NPOI.XSSF.UserModel;
+using Org.BouncyCastle.Utilities.Net;
 using Serilog;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Models.Domain;
@@ -32,11 +34,48 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
         /// </summary>
         public Result<DevPlcPointMcDto> Read(DevPlcPointMcDto readPlcInfo)
         {
-            var readDto = new DevPlcPointMcReadDto(
-                readPlcInfo,
-                readPlcInfo.DataType.GetTypeOfShortOffset()
-            );
-            var re = Read(readDto);
+            Result<DevPlcPointMcReadDto> re = new Result<DevPlcPointMcReadDto>() {Data=new DevPlcPointMcReadDto() };
+            if (int.TryParse(readPlcInfo.Address, out int result) is false)
+            {
+                byte[] data = null;
+                try
+                {
+                    data = ReadWithRetrySync(
+                        readPlcInfo.IpAddress,
+                        readPlcInfo.Port,
+                        readPlcInfo.Prefix,
+                        readPlcInfo.Address,
+                        (ushort)readPlcInfo.Length
+                    );
+                    re.IsSuccess = true;
+                }
+                catch (Exception ex)
+                {
+                    data = new byte[readPlcInfo.Length * 2];
+                    Serilog.Log.Warning(
+                        "[Mcp通讯异常]同步读取信息：{readPlcInfo.IpAddress}-{readPlcInfo.Port}-{readPlcInfo.Prefix}-{readPlcInfo.Address}-{readPlcInfo.Length}\r\n{@ex}",
+                        readPlcInfo.IpAddress,
+                        readPlcInfo.Port,
+                        readPlcInfo.Prefix,
+                        readPlcInfo.Address,
+                        readPlcInfo.Length,
+                        ex
+                    );
+                }
+                re.Data.Value = data.ConvertToValues(
+                    0 * readPlcInfo.DataType.GetTypeOfShortOffset(),
+                    readPlcInfo.DataType,
+                    readPlcInfo.Length
+                );
+            }
+            else
+            {
+                var readDto = new DevPlcPointMcReadDto(
+                    readPlcInfo,
+                    readPlcInfo.DataType.GetTypeOfShortOffset()
+                );
+                re = Read(readDto);
+            }
 
             if (!re.IsSuccess)
             {
@@ -176,7 +215,6 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                         }
                     }
                 }
-                 
 
                 return Result<List<DevPlcPointMcReadDto>>.Success(lineReadPlcInfo);
             }
@@ -249,13 +287,25 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
 
                 try
                 {
-                    var data = ReadWithRetrySync(ipAddress, port, prefix, currentAddress, readLen);
+                    var data = ReadWithRetrySync(
+                        ipAddress,
+                        port,
+                        prefix,
+                        currentAddress.ToString(),
+                        readLen
+                    );
 
                     // 空数据重试一次
                     if (data.Length == 0)
                     {
                         Thread.Sleep(100);
-                        data = ReadWithRetrySync(ipAddress, port, prefix, currentAddress, readLen);
+                        data = ReadWithRetrySync(
+                            ipAddress,
+                            port,
+                            prefix,
+                            currentAddress.ToString(),
+                            readLen
+                        );
                     }
 
                     allData.AddRange(data);
@@ -291,7 +341,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             string ipAddress,
             int port,
             Prefix prefix,
-            int currentAddress,
+            string currentAddress,
             ushort readLen,
             int maxRetry = 3,
             int retryInterval = 300
