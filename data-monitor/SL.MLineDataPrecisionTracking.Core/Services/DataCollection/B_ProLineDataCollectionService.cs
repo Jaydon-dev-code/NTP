@@ -55,7 +55,11 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             {
                 tb_LineSummary.Result = ResultEnum.NG;
             }
-            await _lineBRepository.InsertableAsync(lineData);
+            else
+            {
+                lineData.ALineFID = aLineInfo.Id;
+            }
+            var bLineFid=    await _lineBRepository.InsertableReturnIdentityAsync(lineData);
             ABToSummary(aLineInfo, lineData, tb_LineSummary, new List<string>() { "A线托盘编号" });
             var models = await _modelNoToNameRepository.QueryabletAsync(x => true);
             tb_LineSummary.ModelNo = lineData.ModelNoB;
@@ -68,7 +72,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                 aLineInfo.IsUsing = true;
                 await _lineARepository.UpdateableAsync(aLineInfo);
             }
-
+            tb_LineSummary.BLineFID = bLineFid;
             return await _lineSummaryRepository.InsertableAsync(tb_LineSummary) > 0;
         }
 

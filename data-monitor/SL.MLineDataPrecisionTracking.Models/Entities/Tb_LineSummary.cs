@@ -27,6 +27,15 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         [SugarColumn(ColumnDescription = "型号名称")]
         public string ModelName { get; set; } = "";
 
+        [SugarColumn(ColumnDescription = "A线采集时间", IsNullable = true)]
+        public DateTime? ALineRecordTime { get; set; }
+
+        [SugarColumn(ColumnDescription = "a线主键ID", DefaultValue = "0")]
+        public int ALineFID { get; set; }
+
+        [SugarColumn(ColumnDescription = "b线主键ID", DefaultValue = "0")]
+        public int BLineFID { get; set; }
+
         /// <summary>
         /// 托盘号
         /// </summary>
@@ -51,13 +60,11 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         [SugarColumn(ColumnDescription = "NG代码A")]
         public string NgCodeA { get; set; } = "";
 
-
-
         /// <summary>
         /// 二维码打标内容
         /// </summary>
         [SugarColumn(ColumnDescription = "序列码")]
-        public string MarkingNo{ get; set; } = "";
+        public string MarkingNo { get; set; } = "";
 
         /// <summary>
         /// 小内圈分选数据
@@ -79,6 +86,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
 
         [SugarColumn(ColumnDescription = "半成品码")]
         public string SemiFinishedProductCode { get; set; }
+
         /// <summary>
         /// A面钢球组差
         /// </summary>
@@ -240,8 +248,6 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// </summary>
         [SugarColumn(ColumnDescription = "铆接后成型外径")]
         public string PostRivetingOuterDiameter { get; set; } = "";
-
-
 
         /// <summary>
         /// 径跳值

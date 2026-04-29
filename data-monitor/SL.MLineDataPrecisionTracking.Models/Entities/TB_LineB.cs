@@ -15,6 +15,9 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
 
         public DateTime RecordTime { get; set; } = DateTime.Now;
 
+        [SugarColumn(ColumnDescription = "a线主键ID", DefaultValue = "0")]
+        public int ALineFID { get; set; }
+
         /// <summary>
         /// 托盘号
         /// </summary>
