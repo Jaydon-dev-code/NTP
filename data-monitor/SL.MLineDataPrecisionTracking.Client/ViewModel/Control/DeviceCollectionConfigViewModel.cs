@@ -1,8 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HandyControl.Controls;
@@ -10,6 +5,12 @@ using Microsoft.Win32;
 using SL.MLineDataPrecisionTracking.Client.Http;
 using SL.MLineDataPrecisionTracking.Core.Services;
 using SL.MLineDataPrecisionTracking.Models.Domain;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 {
@@ -29,18 +30,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             set => SetProperty(ref _isLoading, value);
         }
 
-        private readonly ServiceApi _serviceApi;
-
-
-        public DeviceCollectionConfigViewModel(
- 
-            ServiceApi serviceApi
-        )
-        {
-          
-            _serviceApi = serviceApi;
-            LoadServicesAsync();
-        }
+     
 
         private AsyncRelayCommand _importAsyncCommand;
         public AsyncRelayCommand ImportAsyncCommand
@@ -158,6 +148,13 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 return _stopAllServicesCommand;
             }
         }
+        private readonly ServiceApi _serviceApi;
+
+        DeviceCollectionConfigApi _deviceCollectionConfigApi;
+        public DeviceCollectionConfigViewModel(ServiceApi serviceApi, DeviceCollectionConfigApi deviceCollectionConfigApi)
+        {
+            _deviceCollectionConfigApi= deviceCollectionConfigApi;
+        }
 
         async Task ImportAsync()
         {
@@ -167,21 +164,28 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 Title = "导入点位信息",
             };
 
-            //if (openFileDialog.ShowDialog() == true)
-            //{
-            //    var re = await _plcAddressExcelImportService.ImportPlcPointsAsync(
-            //        openFileDialog.FileName
-            //    );
+            if (openFileDialog.ShowDialog() == true)
+            {
 
-            //    if (re)
-            //    {
-            //        HandyControl.Controls.MessageBox.Success("导入成功！");
-            //    }
-            //    else
-            //    {
-            //        HandyControl.Controls.MessageBox.Warning("导入失败！");
-            //    }
-            //}
+                using (FileStream fs = new FileStream(openFileDialog.FileName, FileMode.Open, FileAccess.Read))
+                {
+                    var re = await _deviceCollectionConfigApi.ImportPlcPointsAsync(
+                      fs, openFileDialog.FileName
+                   );
+                    if (re.IsSuccess)
+                    {
+                        HandyControl.Controls.MessageBox.Success("导入成功！");
+                    }
+                    else
+                    {
+                        HandyControl.Controls.MessageBox.Warning($"导入失败！\r\n{re.Message}");
+                    }
+                }
+
+               
+
+             
+            }
         }
 
         void ExportTemplate()
@@ -193,29 +197,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 FileName = $"数据导出_{DateTime.Now:yyyyMMddHHmmss}.xlsx",
             };
             return;
-
-            //if (saveFileDialog.ShowDialog() == true)
-            //{
-            //    using (ExcelPackage package = new ExcelPackage())
-            //    {
-            //        // 创建工作表
-            //        ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("导出数据");
-
-            //        // 写入表头和数据
-            //        for (int i = 0; i < _testData.Count; i++)
-            //        {
-            //            string[] rowData = _testData[i].Split(',');
-            //            for (int j = 0; j < rowData.Length; j++)
-            //            {
-            //                worksheet.Cells[i + 1, j + 1].Value = rowData[j];
-            //            }
-            //        }
-
-            //        // 保存文件
-            //        File.WriteAllBytes(saveFileDialog.FileName, package.GetAsByteArray());
-            //    }
-            //    MessageBox.Show("Excel导出成功！", "提示");
-            //}
+          
         }
 
         public async Task LoadServicesAsync()
@@ -308,7 +290,6 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 
         public async Task SetServiceEnabledAsync(ServiceInfo serviceInfo)
         {
-            //var (id, enabled) = param;
             try
             {
                 serviceInfo.IsEnabled = !serviceInfo.IsEnabled;

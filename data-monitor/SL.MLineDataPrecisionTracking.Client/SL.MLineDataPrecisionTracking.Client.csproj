@@ -97,6 +97,7 @@
     <Compile Include="Common\EnumDescriptionConverter.cs" />
     <Compile Include="Common\EnumToStringtConverter.cs" />
     <Compile Include="Http\BaseHttp.cs" />
+    <Compile Include="Http\DeviceCollectionConfigApi.cs" />
     <Compile Include="Http\MeticulousPursuitApi.cs" />
     <Compile Include="Http\Rcl_MeticulousPursuitApi.cs" />
     <Compile Include="Http\ServiceApi.cs" />

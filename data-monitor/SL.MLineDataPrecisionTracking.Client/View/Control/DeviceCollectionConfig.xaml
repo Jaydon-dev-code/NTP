@@ -15,9 +15,6 @@
             x:Key="BoolToStringConverter"
             FalseValue="启用"
             TrueValue="禁用" />
-
-
-        <!--<converters:TupleConverter x:Key="TupleConverter" />-->
     </UserControl.Resources>
     <StackPanel Margin="10">
         <!--  导入导出功能  -->
