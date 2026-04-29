@@ -71,7 +71,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// <summary>
         /// 二维码打标内容
         /// </summary>
-        [SugarColumn(ColumnDescription = "二维码打标内容")]
+        [SugarColumn(ColumnDescription = "序列码")]
         public string MarkingNo { get; set; }
     }
 }

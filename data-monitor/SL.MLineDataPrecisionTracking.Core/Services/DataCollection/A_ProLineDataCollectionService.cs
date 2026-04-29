@@ -12,14 +12,18 @@ using Org.BouncyCastle.Asn1.Ocsp;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
+using SL.MLineDataPrecisionTracking.Models.Dtos;
 using SL.MLineDataPrecisionTracking.Models.Entities;
 using SL.MLineDataPrecisionTracking.Models.Enum;
 using SqlSugar;
+using SqlSugar.Extensions;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services
 {
     public class A_ProLineDataCollectionService : ProLineDataCollectionServiceAbstract
     {
+        DevPlcPointMcDto _plcCallPCTrayNoPoint;
+        string _lastTrayNoPoint;
         protected override string _lineName { get; set; } = "A线";
         protected override Type DataModelType => typeof(Tb_LineA);
 
@@ -62,12 +66,25 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
 
         protected override void OtherInit()
         {
-          
+            _plcCallPCTrayNoPoint = _lineReadPlcInfo.First(x => x.PointName == "托盘号A");
         }
 
         protected override bool OtherCanCollection()
         {
-            return true;
+            var re = _mcp.Read(_plcCallPCTrayNoPoint);
+            if (
+                re.IsSuccess is false
+                || re.Data.Value[0].ToString() == "0"
+                || re.Data.Value[0].ToString() == _lastTrayNoPoint
+            )
+            {
+                return false;
+            }
+            else
+            {
+                _lastTrayNoPoint = re.Data.Value[0].ToString();
+                return true;
+            }
         }
     }
 }

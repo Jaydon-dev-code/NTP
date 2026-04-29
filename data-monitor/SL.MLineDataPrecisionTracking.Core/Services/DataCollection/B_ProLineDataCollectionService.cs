@@ -8,6 +8,7 @@ using NPOI.SS.Formula.Functions;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
+using SL.MLineDataPrecisionTracking.Models.Dtos;
 using SL.MLineDataPrecisionTracking.Models.Entities;
 using SL.MLineDataPrecisionTracking.Models.Enum;
 using SqlSugar;
@@ -16,6 +17,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
 {
     public class B_ProLineDataCollectionService : ProLineDataCollectionServiceAbstract
     {
+        DevPlcPointMcDto _plcCallPCTrayNoPoint;
+        string _lastTrayNoPoint;
         Tb_LineBRepository _lineBRepository;
         Tb_LineARepository _lineARepository;
         Tb_LineSummaryRepository _lineSummaryRepository;
@@ -69,14 +72,27 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             return await _lineSummaryRepository.InsertableAsync(tb_LineSummary) > 0;
         }
 
-        protected override bool OtherCanCollection()
-        {
-            return true;
-        }
-
         protected override void OtherInit()
         {
-          
+            _plcCallPCTrayNoPoint = _lineReadPlcInfo.First(x => x.PointName == "托盘号B");
+        }
+
+        protected override bool OtherCanCollection()
+        {
+            var re = _mcp.Read(_plcCallPCTrayNoPoint);
+            if (
+                re.IsSuccess is false
+                || re.Data.Value[0].ToString() == "0"
+                || re.Data.Value[0].ToString() == _lastTrayNoPoint
+            )
+            {
+                return false;
+            }
+            else
+            {
+                _lastTrayNoPoint = re.Data.Value[0].ToString();
+                return true;
+            }
         }
     }
 }
