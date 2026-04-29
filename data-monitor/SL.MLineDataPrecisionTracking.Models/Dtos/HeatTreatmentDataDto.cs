@@ -28,7 +28,6 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
             OutputFrequency = entity.OutputFrequency;
             ExternalSprayCoolingWater = entity.ExternalSprayCoolingWater;
             AuxiliarySprayCoolingWater = entity.AuxiliarySprayCoolingWater;
-            InternalSprayCoolingWater = entity.InternalSprayCoolingWater;
             MarkingNo = entity.MarkingNo;
             IsHave = true;
         }
@@ -92,11 +91,6 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         /// 辅喷冷却水量
         /// </summary>
         public string AuxiliarySprayCoolingWater { get; set; }
-
-        /// <summary>
-        /// 内喷冷却水量
-        /// </summary>
-        public string InternalSprayCoolingWater { get; set; }
 
         /// <summary>
         /// 二维码打标内容

@@ -63,12 +63,6 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         public string AuxiliarySprayCoolingWater { get; set; }
 
         /// <summary>
-        /// 内喷冷却水量
-        /// </summary>
-        [SugarColumn(ColumnDescription = "内喷冷却水量")]
-        public string InternalSprayCoolingWater { get; set; }
-
-        /// <summary>
         /// 二维码打标内容
         /// </summary>
         [SugarColumn(ColumnDescription = "序列码")]

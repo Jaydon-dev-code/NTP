@@ -1,49 +1,36 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HandyControl.Controls;
 using SL.MLineDataPrecisionTracking.Client.Http;
 using SL.MLineDataPrecisionTracking.Core.Services;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
-using SL.MLineDataPrecisionTracking.Models.Dtos.Request;
-using SL.MLineDataPrecisionTracking.Models.Entities;
-using SL.MLineDataPrecisionTracking.Models.Dtos.Response;
 using SL.MLineDataPrecisionTracking.Models.Domain;
+using SL.MLineDataPrecisionTracking.Models.Dtos;
+using SL.MLineDataPrecisionTracking.Models.Dtos.Request;
+using SL.MLineDataPrecisionTracking.Models.Dtos.Response;
+using SL.MLineDataPrecisionTracking.Models.Entities;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 {
     public partial class Rcl_MeticulousPursuitViewModel : ObservableObject
     {
-        private ObservableCollection<Tb_HeatTreatmentData> _lineSummaryDataList = new ObservableCollection<Tb_HeatTreatmentData>();
-        public ObservableCollection<Tb_HeatTreatmentData> LineSummaryDataList
+        private ObservableCollection<HeatTreatmentDataDto> _heatTreatmentData;
+     
+        public ObservableCollection<HeatTreatmentDataDto> HeatTreatmentData
         {
-            get => _lineSummaryDataList;
-            set => SetProperty(ref _lineSummaryDataList, value);
+            get => _heatTreatmentData;
+            set => SetProperty(ref _heatTreatmentData, value);
         }
-
-        private int _totalCount = 0;
-        public int TotalCount
+        private PaginationPage _paginationPages;
+        public PaginationPage PaginationPages
         {
-            get => _totalCount;
-            set => SetProperty(ref _totalCount, value);
-        }
-
-        private int _currentPage = 1;
-        public int CurrentPage
-        {
-            get => _currentPage;
-            set => SetProperty(ref _currentPage, value);
-        }
-
-        private int _pageSize = 10;
-        public int PageSize
-        {
-            get => _pageSize;
-            set => SetProperty(ref _pageSize, value);
+            get => _paginationPages;
+            set => SetProperty(ref _paginationPages, value);
         }
 
         private bool _isLoading = false;
@@ -52,47 +39,30 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             get => _isLoading;
             set => SetProperty(ref _isLoading, value);
         }
-
-        private readonly Rcl_MeticulousPursuitApi _meticulousPursuitApi;
-
-        public Rcl_MeticulousPursuitViewModel(
-            Rcl_MeticulousPursuitApi meticulousPursuitApi
-        )
+        private RefinedSearchCriteria _queryConditions;
+        public RefinedSearchCriteria QueryConditions
         {
-            _meticulousPursuitApi = meticulousPursuitApi;
-            var lastDay = DateTime.Now.Date;
-            HeatTreatmentDataQueryRequest = new HeatTreatmentDataQueryRequestDto
-            {
-                PageNumber = 1,
-                PageSize = 10,
-                RefinedSearch = new RefinedSearchCriteria
-                {
-                    StartDate = lastDay.Date,
-                    EndDate = lastDay.Date,
-                    StartTime = lastDay,
-                    EndTime = lastDay.AddTicks(-1),
-                    Result = SL.MLineDataPrecisionTracking.Models.Enum.ResultEnum.ALL
-                }
-            };
+            get => _queryConditions;
+            set => SetProperty(ref _queryConditions, value);
         }
 
-        private HeatTreatmentDataQueryRequestDto _heatTreatmentDataQueryRequest;
-        public HeatTreatmentDataQueryRequestDto HeatTreatmentDataQueryRequest
+        private static ObservableCollection<int> _pageSoure;
+        public ObservableCollection<int> PageSoure
         {
-            get => _heatTreatmentDataQueryRequest;
-            set => SetProperty(ref _heatTreatmentDataQueryRequest, value);
+            get => _pageSoure;
+            set => SetProperty(ref _pageSoure, value);
         }
 
-        private RelayCommand _quDataCommand;
-        public IRelayCommand QuDataCommand
+        private RelayCommand _queryCommand;
+        public IRelayCommand QueryCommand
         {
             get
             {
-                if (_quDataCommand == null)
+                if (_queryCommand == null)
                 {
-                    _quDataCommand = new RelayCommand(QuData);
+                    _queryCommand = new RelayCommand(QuData);
                 }
-                return _quDataCommand;
+                return _queryCommand;
             }
         }
 
@@ -135,23 +105,39 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             }
         }
 
+        private readonly Rcl_MeticulousPursuitApi _meticulousPursuitApi;
+
+        public Rcl_MeticulousPursuitViewModel(Rcl_MeticulousPursuitApi meticulousPursuitApi)
+        {
+            _meticulousPursuitApi = meticulousPursuitApi;
+            HeatTreatmentData = new ObservableCollection<HeatTreatmentDataDto>();
+            PaginationPages = new PaginationPage();
+            var lastDay = DateTime.Now.Date;
+            QueryConditions = new RefinedSearchCriteria()
+            {
+                StartDate = lastDay.Date,
+                EndDate = lastDay.Date,
+                StartTime = lastDay,
+                EndTime = lastDay.AddTicks(-1),
+            };
+            PageSoure = new ObservableCollection<int>() { 100, 200, 500 };
+            PaginationPages.DataCountPerPage = 100;
+        }
+
         private async void QuData()
         {
             IsLoading = true;
             try
             {
-                HeatTreatmentDataQueryRequest.PageNumber = CurrentPage;
-                HeatTreatmentDataQueryRequest.PageSize = PageSize;
-
-                var result = await _meticulousPursuitApi.QueryablToPagee(HeatTreatmentDataQueryRequest);
+                var result = await _meticulousPursuitApi.QueryablToPagee(GetQueryRequest());
                 if (result.IsSuccess)
                 {
-                    LineSummaryDataList.Clear();
+                    HeatTreatmentData.Clear();
                     foreach (var item in result.Data.List)
                     {
-                        LineSummaryDataList.Add(item);
+                        HeatTreatmentData.Add(new HeatTreatmentDataDto(item));
                     }
-                    TotalCount = result.Data.TotalCount;
+                    PaginationPages.MaxPageCount = result.Data.TotalCount;
                 }
                 else
                 {
@@ -168,42 +154,23 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             }
         }
 
-        private async void MarkingNoQuery()
+        HeatTreatmentDataQueryRequestDto GetQueryRequest()
         {
-            IsLoading = true;
-            try
-            {
-                var result = await _meticulousPursuitApi.MarkingNoQuery(HeatTreatmentDataQueryRequest);
-                if (result.IsSuccess)
-                {
-                    LineSummaryDataList.Clear();
-                    foreach (var item in result.Data.List)
-                    {
-                        LineSummaryDataList.Add(item);
-                    }
-                    TotalCount = result.Data.TotalCount;
-                }
-                else
-                {
-                    HandyControl.Controls.MessageBox.Error(result.Message);
-                }
-            }
-            catch (Exception ex)
-            {
-                HandyControl.Controls.MessageBox.Error($"查询数据时发生错误: {ex.Message}");
-            }
-            finally
-            {
-                IsLoading = false;
-            }
+            HeatTreatmentDataQueryRequestDto queryRequest = new HeatTreatmentDataQueryRequestDto();
+            queryRequest.PageIndex = PaginationPages.PageIndex;
+            queryRequest.DataCountPerPage = PaginationPages.DataCountPerPage;
+            queryRequest.RefinedSearch = QueryConditions;
+            return queryRequest;
         }
+
+        private async void MarkingNoQuery() { }
 
         private async void SaveQuery()
         {
             IsLoading = true;
             try
             {
-                var result = await _meticulousPursuitApi.SaveQuery(HeatTreatmentDataQueryRequest);
+                var result = await _meticulousPursuitApi.SaveQuery(GetQueryRequest());
                 if (result.IsSuccess)
                 {
                     // 这里可以处理导出逻辑

@@ -18,10 +18,10 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos.Request
         public RefinedSearchCriteria RefinedSearch { get; set; }
 
         // 页码
-        public int PageNumber { get; set; }
+        public int PageIndex { get; set; }
 
         // 每页条数
-        public int PageSize { get; set; }
+        public int DataCountPerPage { get; set; }
 
     }
 }

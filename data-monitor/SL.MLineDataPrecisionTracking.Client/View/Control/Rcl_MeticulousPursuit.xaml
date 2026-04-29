@@ -61,9 +61,6 @@
                 <RowDefinition Height="5" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="5" />
-                <!--<RowDefinition Height="*" />
-                <RowDefinition Height="5" />
-                <RowDefinition Height="*" />-->
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="120" />
@@ -122,116 +119,6 @@
                     </hc:TimePicker.Clock>
                 </hc:TimePicker>
             </Grid>
-
-
-            <!--<TextBlock
-                Grid.Row="4"
-                Grid.Column="0"
-                Text="A 托盘编号" />
-            <TextBox
-                Grid.Row="4"
-                Grid.Column="1"
-                Width="150"
-                IsEnabled="{Binding QueryConditions.IsScanCode, Converter={StaticResource BoolInverter}}"
-                Style="{StaticResource DataGridEditingTextColumnStyle.Small}"
-                Text="{Binding QueryConditions.TrayNoA, Mode=TwoWay}" />
-            <TextBlock
-                Grid.Row="4"
-                Grid.Column="2"
-                Text="B 托盘编号" />
-            <TextBox
-                Grid.Row="4"
-                Grid.Column="3"
-                Grid.ColumnSpan="2"
-                Width="150"
-                Height="32"
-                Margin="0,0,116,0"
-                VerticalAlignment="Top"
-                IsEnabled="{Binding QueryConditions.IsScanCode, Converter={StaticResource BoolInverter}}"
-                Style="{StaticResource DataGridEditingTextColumnStyle.Small}"
-                Text="{Binding QueryConditions.TrayNoB, Mode=TwoWay}" />
-            <TextBlock
-                Grid.Row="6"
-                Grid.Column="0"
-                Text="A NG编号" />
-            <TextBox
-                Grid.Row="6"
-                Grid.Column="1"
-                Width="150"
-                IsEnabled="{Binding QueryConditions.IsScanCode, Converter={StaticResource BoolInverter}}"
-                Style="{StaticResource DataGridEditingTextColumnStyle.Small}"
-                Text="{Binding QueryConditions.NgCodeA, Mode=TwoWay}" />
-            <TextBlock
-                Grid.Row="6"
-                Grid.Column="2"
-                Text="B NG编号" />
-            <TextBox
-                Grid.Row="6"
-                Grid.Column="3"
-                Width="150"
-                IsEnabled="{Binding QueryConditions.IsScanCode, Converter={StaticResource BoolInverter}}"
-                Style="{StaticResource DataGridEditingTextColumnStyle.Small}"
-                Text="{Binding QueryConditions.NgCodeB, Mode=TwoWay}" />
-
-            <TextBlock
-                Grid.Row="2"
-                Grid.Column="4"
-                Text="模型编号" />
-            <TextBox
-                Grid.Row="2"
-                Grid.Column="5"
-                Width="150"
-                IsEnabled="{Binding QueryConditions.IsScanCode, Converter={StaticResource BoolInverter}}"
-                Style="{StaticResource DataGridEditingTextColumnStyle.Small}"
-                Text="{Binding QueryConditions.ModelName, Mode=TwoWay}" />-->
-
-            <!--<TextBlock
-                Grid.Row="4"
-                Grid.Column="4"
-                Text="OP" />
-            <ComboBox
-                Grid.Row="4"
-                Grid.Column="5"
-                Width="150"
-                IsEnabled="{Binding QueryConditions.IsScanCode, Converter={StaticResource BoolInverter}}"
-                SelectedIndex="0"
-                SelectedValue="{Binding QueryConditions.OP, Mode=TwoWay}"
-                Style="{StaticResource ComboBox.Small}">
-                <ComboBoxItem>ALL</ComboBoxItem>
-                <ComboBoxItem>300</ComboBoxItem>
-                <ComboBoxItem>400</ComboBoxItem>
-                <ComboBoxItem>620</ComboBoxItem>
-                <ComboBoxItem>640</ComboBoxItem>
-                <ComboBoxItem>650</ComboBoxItem>
-                <ComboBoxItem>660</ComboBoxItem>
-                <ComboBoxItem>680</ComboBoxItem>
-                <ComboBoxItem>690</ComboBoxItem>
-                <ComboBoxItem>730</ComboBoxItem>
-                <ComboBoxItem>800</ComboBoxItem>
-                <ComboBoxItem>900</ComboBoxItem>
-                <ComboBoxItem>1000</ComboBoxItem>
-                <ComboBoxItem>1110</ComboBoxItem>
-                <ComboBoxItem>1310</ComboBoxItem>
-                <ComboBoxItem>1400</ComboBoxItem>
-                <ComboBoxItem>1500</ComboBoxItem>
-                <ComboBoxItem>1600</ComboBoxItem>
-                <ComboBoxItem>1700</ComboBoxItem>
-            </ComboBox>-->
-
-            <!--<TextBlock
-                Grid.Row="6"
-                Grid.Column="4"
-                Text="检测结果" />
-            <ComboBox
-                Grid.Row="6"
-                Grid.Column="5"
-                Width="150"
-                IsEnabled="{Binding QueryConditions.IsScanCode, Converter={StaticResource BoolInverter}}"
-                ItemsSource="{Binding Source={StaticResource ResultEnum}}"
-                SelectedIndex="0"
-                SelectedValue="{Binding QueryConditions.Result, Mode=TwoWay}" />-->
-
-
 
             <TextBlock
                 Grid.Row="4"
@@ -298,7 +185,7 @@
                         Margin="0,0,15,0"
                         hc:DataGridAttach.ShowRowNumber="True"
                         AutoGenerateColumns="False"
-                        ItemsSource="{Binding QueryValue}"
+                        ItemsSource="{Binding HeatTreatmentData}"
                         ScrollViewer.CanContentScroll="True"
                         ScrollViewer.HorizontalScrollBarVisibility="Visible  "
                         ScrollViewer.VerticalScrollBarVisibility="Visible">
@@ -384,14 +271,6 @@
                                 Binding="{Binding AuxiliarySprayCoolingWater}"
                                 Header="辅喷冷却水量（L/分）"
                                 IsReadOnly="True" />
-
-                            <!--  内喷冷却水量  -->
-                            <DataGridTextColumn
-                                MinWidth="120"
-                                Binding="{Binding InternalSprayCoolingWater}"
-                                Header="内喷冷却水量（L/分）"
-                                IsReadOnly="True" />
-
 
                         </DataGrid.Columns>
                     </DataGrid>

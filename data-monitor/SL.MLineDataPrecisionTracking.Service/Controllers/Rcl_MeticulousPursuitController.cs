@@ -48,8 +48,8 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
                 var re = await _heatTreatmentDataRepository.QueryableAsync(
                     expression.Data,
                     x => x.RecordTime,
-                    heatTreatmentDataQueryRequest.PageNumber,
-                    heatTreatmentDataQueryRequest.PageSize
+                    heatTreatmentDataQueryRequest.PageIndex,
+                    heatTreatmentDataQueryRequest.DataCountPerPage
                 );
                 return ApiResult<HeatTreatmentDataQueryResponseDto>.Success(
                     new HeatTreatmentDataQueryResponseDto(re.List, re.TotalCount, re.TotalPage)
