@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
@@ -34,14 +34,14 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         /// <summary>
         /// 导入 PLC 点位 Excel
         /// </summary>
-        public async Task<bool> ImportPlcPointsAsync(string excelPath)
+        public async Task<bool> ImportPlcPointsAsync(Stream excelStream)
         {
             try
             {
                 await _equipmentRepository.DeleteableAsync(x => true);
                 await _plcConnectionRepository.DeleteableAsync(x => true);
                 await _plcPointRepository.DeleteableAsync(x => true);
-                var list = ReadExcel(excelPath);
+                var list = ReadExcel(excelStream);
                 // 按【设备+IP】分组导入
                 var groups = list.GroupBy(x => new
                 {
@@ -123,15 +123,11 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         /// <summary>
         /// 读取Excel
         /// </summary>
-        List<PlcPointImportDto> ReadExcel(string path)
+        List<PlcPointImportDto> ReadExcel(Stream stream)
         {
             var list = new List<PlcPointImportDto>();
 
-            using (
-                var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
-            )
-            {
-                IWorkbook workbook = new XSSFWorkbook(fs);
+            IWorkbook workbook = new XSSFWorkbook(stream);
                 ISheet sheet = workbook.GetSheetAt(0);
 
                 // 从第2行开始（第1行是表头）
@@ -161,7 +157,6 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                 }
 
                 return list;
-            }
         }
     }
 }
