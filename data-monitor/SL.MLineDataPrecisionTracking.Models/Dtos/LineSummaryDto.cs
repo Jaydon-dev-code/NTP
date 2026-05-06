@@ -1,15 +1,14 @@
-﻿
-using CommunityToolkit.Mvvm.ComponentModel;
-using SL.MLineDataPrecisionTracking.Models.Entities;
-using SL.MLineDataPrecisionTracking.Models.Enum;
-using SqlSugar;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using SL.MLineDataPrecisionTracking.Models.Entities;
+using SL.MLineDataPrecisionTracking.Models.Enum;
+using SqlSugar;
 
 namespace SL.MLineDataPrecisionTracking.Models.Dtos
 {
@@ -54,20 +53,22 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
 
         [Description("型号名称")]
         public string ModelName { get; set; }
+
         [Description("型号名称")]
-        public string ModelNo{ get; set; }
+        public string ModelNo { get; set; }
 
         [Description("检测结果")]
         public ResultEnum Result { get; set; }
 
-
         [Description("序列码")]
         public string MarkingNo { get; set; }
 
-
-
         [Description("半成品码")]
         public string SemiFinishedProductCode { get; set; }
+
+        [Description("A线成品时间")]
+        public DateTime? ALineRecordTime { get; set; }
+
         /// <summary>
         /// 托盘号
         /// </summary>
@@ -182,14 +183,11 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         [Description("挡水环平行差")]
         public string WaterBaffleParallelDiff { get; set; }
 
-
-
         /// <summary>
         /// 托盘号
         /// </summary>
         [Description("托盘号B")]
         public string TrayNoB { get; set; }
-
 
         /// <summary>
         /// 屏蔽工位
@@ -202,8 +200,6 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         /// </summary>
         [Description("NG代码B")]
         public string NgCodeB { get; set; }
-
-   
 
         /// <summary>
         /// 识别代码
@@ -264,7 +260,6 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         /// </summary>
         [Description("铆接后成型外径")]
         public string PostRivetingOuterDiameter { get; set; }
-
 
         /// <summary>
         /// 径跳值
@@ -399,6 +394,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         public string VibrationUpperRH { get; set; }
 
         private bool _isHave = true;
+
         [Description("是否存在记录")]
         public bool IsHave
         {

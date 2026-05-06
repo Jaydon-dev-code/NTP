@@ -15,14 +15,24 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
 
         public DateTime RecordTime { get; set; } = DateTime.Now;
 
-        [SugarColumn(ColumnDescription = "a线主键ID", DefaultValue = "0")]
+        /// <summary>
+        /// ColumnDescription = "a线主键ID"
+        /// </summary>
+        [SugarColumn(DefaultValue = "0")]
         public int ALineFID { get; set; }
+        /// <summary>
+        /// A线采集时间
+        /// </summary>
+
+        [SugarColumn( IsNullable = true)]
+        public DateTime? ALineRecordTime { get; set; }
 
         /// <summary>
         /// 托盘号
         /// </summary>
         [SugarColumn(ColumnDescription = "托盘号B")]
         public string TrayNoB { get; set; }
+
         /// <summary>
         /// 型号
         /// </summary>

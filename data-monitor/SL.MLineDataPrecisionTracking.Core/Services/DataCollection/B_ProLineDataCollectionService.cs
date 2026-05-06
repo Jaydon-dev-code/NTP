@@ -58,8 +58,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             else
             {
                 lineData.ALineFID = aLineInfo.Id;
+                lineData.ALineRecordTime = aLineInfo.RecordTime;
             }
-            var bLineFid=    await _lineBRepository.InsertableReturnIdentityAsync(lineData);
+            var bLineFid = await _lineBRepository.InsertableReturnIdentityAsync(lineData);
             ABToSummary(aLineInfo, lineData, tb_LineSummary, new List<string>() { "A线托盘编号" });
             var models = await _modelNoToNameRepository.QueryabletAsync(x => true);
             tb_LineSummary.ModelNo = lineData.ModelNoB;
@@ -95,6 +96,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             else
             {
                 _lastTrayNoPoint = re.Data.Value[0].ToString();
+
                 return true;
             }
         }
