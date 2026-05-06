@@ -8,9 +8,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:system="clr-namespace:System;assembly=mscorlib"
     x:Name="Window"
-    Title="MainWindow"
-    Width="800"
-    Height="450"
+    Title="{Binding SoftwareName}"
+    Width="1080"
+    Height="600"
     Background="#F5F7FA"
     mc:Ignorable="d">
     <!--  WindowStyle="None" Topmost="True"      WindowState="Maximized"  -->
