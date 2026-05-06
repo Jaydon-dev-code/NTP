@@ -22,7 +22,6 @@ namespace SL.MLineDataPrecisionTracking.Service
     public partial class OwinHostService : ServiceBase
     {
         private IDisposable _webApp;
-
         public OwinHostService()
         {
             InitializeComponent();
@@ -37,6 +36,9 @@ namespace SL.MLineDataPrecisionTracking.Service
         {
             _webApp = WebApp.Start<Startup>(url: ConfigurationManager.AppSettings["ServiceUri"]);
             Log.Information("服务已启动。");
+            Startup.Container.Resolve<DataCollectionServiceManager>().StartAllAsync();
+            Log.Information("采集服务已启动。");
+
         }
 
         protected override void OnStop()
