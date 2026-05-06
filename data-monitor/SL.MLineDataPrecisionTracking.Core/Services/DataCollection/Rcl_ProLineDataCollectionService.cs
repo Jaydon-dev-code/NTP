@@ -15,7 +15,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
     {
         Tb_HeatTreatmentDataRepository _rclRepository;
         private DevPlcPointMcDto _plcCallPCMarkingNoPoint;
-        private string _lastMarkingNoPoint;
+        private string _lastMarkingNo;
 
         protected override string _lineName { get; set; } = "热处理";
         protected override Type DataModelType => typeof(Tb_HeatTreatmentData);
@@ -44,18 +44,22 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         protected override bool OtherCanCollection()
         {
             var re = _mcp.Read(_plcCallPCMarkingNoPoint);
-            if (
-                re.IsSuccess is false
-                ||  String.IsNullOrEmpty(re.Data.Value[0].ToString())
-                || re.Data.Value[0].ToString() == _lastMarkingNoPoint
-            )
+            if (re.IsSuccess is false)
             {
                 return false;
             }
             else
             {
-                _lastMarkingNoPoint = re.Data.Value[0].ToString();
-                return true;
+                var makingNo = string.Concat(re.Data.Value);
+                if (string.IsNullOrEmpty(makingNo) || makingNo == _lastMarkingNo)
+                {
+                    return false;
+                }
+                else
+                {
+                    _lastMarkingNo = makingNo;
+                    return true;
+                }
             }
         }
     }
