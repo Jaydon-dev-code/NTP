@@ -131,16 +131,15 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                 {
                     try
                     {
-                        if (await CanCollection() is false || OtherCanCollection())
+                        if (await CanCollection() is false || OtherCanCollection() is false)
                         {
-                            await Task.Delay(500, stoppingToken);
                             continue;
                         }
 
                         var colRe = await CollectionData();
                         if (colRe.IsSuccess)
                         {
-                            Serilog.Log.Debug(
+                            Serilog.Log.Information(
                                 "[采集开始点位数据读取]【{_lineName}】{@Data}",
                                 _lineName,
                                 colRe.Data
@@ -316,6 +315,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             var re = _mcp.Read(_plcCallPCCanCollectionPoint);
             if (re.IsSuccess is false || re.Data.Value[0].ObjToBool() is false)
             {
+                Serilog.Log.Debug("[采集开始点位数据读取]【{_lineName}】plc未触发开始采集信号。", _lineName);
                 return false;
             }
             else
