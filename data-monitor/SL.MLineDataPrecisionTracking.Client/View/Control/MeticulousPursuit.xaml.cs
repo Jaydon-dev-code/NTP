@@ -1,4 +1,6 @@
-﻿using SL.MLineDataPrecisionTracking.Client.ViewModel.Control;
+﻿using SL.MLineDataPrecisionTracking.Client.Common;
+using SL.MLineDataPrecisionTracking.Client.ViewModel.Control;
+using SL.MLineDataPrecisionTracking.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,8 +21,10 @@ namespace SL.MLineDataPrecisionTracking.Client.View.Control
     /// <summary>
     /// MeticulousPursuit.xaml 的交互逻辑
     /// </summary>
+    [ViewLinkServerInfoAttribute(serverName: new string[] { nameof(A_ProLineDataCollectionService), nameof(B_ProLineDataCollectionService) }, heard: "装配线数据查询", icon: "Resources\\Image\\ProductionRecord.png")]
     public partial class MeticulousPursuit : UserControl
     {
+       
         public MeticulousPursuit(MeticulousPursuitViewModel meticulousPursuitViewModel)
         {
             this.DataContext = meticulousPursuitViewModel;

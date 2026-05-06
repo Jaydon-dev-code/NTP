@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -16,6 +17,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HandyControl.Controls;
 using HandyControl.Data;
+using NPOI.SS.Formula.Functions;
+using SL.MLineDataPrecisionTracking.Client.Common;
+using SL.MLineDataPrecisionTracking.Client.Http;
 using SL.MLineDataPrecisionTracking.Client.View.Control;
 using SL.MLineDataPrecisionTracking.Client.ViewModel.Control;
 using SL.MLineDataPrecisionTracking.Models.Domain;
@@ -39,6 +43,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel
             get => _currentContent;
             set => SetProperty(ref _currentContent, value);
         }
+
         private string _softwareName;
         public string SoftwareName
         {
@@ -52,6 +57,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel
             get => _versionInfo;
             set => SetProperty(ref _versionInfo, value);
         }
+
         private string _tbTime;
         public string TbTime
         {
@@ -59,14 +65,14 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel
             set => SetProperty(ref _tbTime, value);
         }
 
-        private RelayCommand<SideMenu> _loadedCommand;
-        public IRelayCommand<SideMenu> LoadedCommand
+        private AsyncRelayCommand<SideMenu> _loadedCommand;
+        public AsyncRelayCommand<SideMenu> LoadedCommand
         {
             get
             {
                 if (_loadedCommand == null)
                 {
-                    _loadedCommand = new RelayCommand<SideMenu>(Loaded);
+                    _loadedCommand = new AsyncRelayCommand<SideMenu>(Loaded);
                 }
                 return _loadedCommand;
             }
@@ -134,8 +140,11 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel
             window.WindowState = WindowState.Minimized;
         }
 
-        public MainWindowViewModel()
+        ServiceApi _serviceApi;
+
+        public MainWindowViewModel(ServiceApi serviceApi)
         {
+            _serviceApi = serviceApi;
             SoftwareName = string.IsNullOrEmpty(ConfigurationManager.AppSettings["SoftwareName"])
                 ? "双林轴承数字追溯管理系统"
                 : ConfigurationManager.AppSettings["SoftwareName"];
@@ -143,30 +152,10 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel
                 .Reflection.Assembly.GetExecutingAssembly()
                 .GetName()
                 .Version.ToString();
-            _menus = new List<MenuItems>
-            {
-                new MenuItems()
-                {
-                    Header = "装配数据查询",
-                    Icon =
-                        $"{AppDomain.CurrentDomain.BaseDirectory}Resources\\Image\\ProductionRecord.png",
-                    Page = App.Container.Resolve<MeticulousPursuit>(),
-                },
-                   new MenuItems()
-                {
-                    Header = "热处理数据查询",
-                    Icon =
-                        $"{AppDomain.CurrentDomain.BaseDirectory}Resources\\Image\\ProductionRecord.png",
-                    Page = App.Container.Resolve<Rcl_MeticulousPursuit>(),
-                },
-                new MenuItems()
-                {
-                    Header = "设置",
-                    Icon = $"{AppDomain.CurrentDomain.BaseDirectory}Resources\\Image\\Setting.png",
-                    Page = App.Container.Resolve<DeviceCollectionConfig>(),
-                },
-            };
+           
         }
+
+      
 
         /// <summary>
         /// 从文件路径加载图片到 Image 控件
@@ -197,8 +186,9 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel
             return new BitmapImage();
         }
 
-        void Loaded(SideMenu sideMenu)
+        async Task Loaded(SideMenu sideMenu)
         {
+           await GetMeun();
             bool isFirst = true;
             foreach (var item in _menus)
             {
@@ -218,7 +208,78 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel
                 }
             }
         }
+        private async Task GetMeun()
+        {
+            _menus = new List<MenuItems>();
+            var serviceInfo = await _serviceApi.GetAllServicesAsync();
 
+            if (serviceInfo.IsSuccess)
+            {
+                Assembly assembly = Assembly.GetExecutingAssembly();
+
+                // 2. 目标命名空间
+                string targetNamespaceView = "SL.MLineDataPrecisionTracking.Client.View.Control";
+                var types = assembly
+                    .GetTypes()
+                    .Where(t =>
+                        t.IsClass
+                        && // 是类
+                        !t.IsAbstract
+                        && // 不是抽象类
+                        !t.IsGenericType
+                        && // 不是泛型类
+                        !t.IsInterface
+                        && // 不是接口
+                        t.Namespace==targetNamespaceView // 匹配命名空间
+                    )
+                    .Where(t => !t.Name.StartsWith("<"))
+                    .ToList();
+                foreach (var type in types)
+                {
+                    var attr = type.GetCustomAttribute<ViewLinkServerInfoAttribute>();
+                    if (attr == null)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        bool allServersValid = true;
+
+                        foreach (var typeName in attr.ServiceType)
+                        {
+                            if (
+                                serviceInfo.Data.FirstOrDefault(x => x.ServiceType == typeName && x.IsEnabled)
+                                == null
+                            )
+                            {
+                                allServersValid = false;
+                                break;
+                            }
+                        }
+                        if (allServersValid)
+                        {
+                            _menus.Add(
+                                new MenuItems()
+                                {
+                                    Header = attr.Header,
+                                    Page = App.Container.Resolve(type),
+                                    Icon = $"{AppDomain.CurrentDomain.BaseDirectory}{attr.Icon}",
+                                }
+                            );
+                        }
+                    }
+                }
+            }
+
+            _menus.Add(
+                new MenuItems()
+                {
+                    Header = "设置",
+                    Icon = $"{AppDomain.CurrentDomain.BaseDirectory}Resources\\Image\\Setting.png",
+                    Page = App.Container.Resolve<DeviceCollectionConfig>(),
+                }
+            );
+        }
         void SelectionChanged(FunctionEventArgs<object> e)
         {
             if (e.Info is SideMenuItem menu && menu.Header != lastMenuName)

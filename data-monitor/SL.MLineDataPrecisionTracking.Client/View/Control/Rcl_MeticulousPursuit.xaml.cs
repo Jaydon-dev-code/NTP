@@ -1,4 +1,6 @@
-﻿using SL.MLineDataPrecisionTracking.Client.ViewModel.Control;
+﻿using SL.MLineDataPrecisionTracking.Client.Common;
+using SL.MLineDataPrecisionTracking.Client.ViewModel.Control;
+using SL.MLineDataPrecisionTracking.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +21,7 @@ namespace SL.MLineDataPrecisionTracking.Client.View.Control
     /// <summary>
     /// Rcl_MeticulousPursuit.xaml 的交互逻辑
     /// </summary>
+    [ViewLinkServerInfoAttribute( serverName:new string[] { nameof(Rcl_ProLineDataCollectionService) },heard: "热处理数据查询",icon: "Resources\\Image\\ProductionRecord.png")]
     public partial class Rcl_MeticulousPursuit : UserControl
     {
         public Rcl_MeticulousPursuit(Rcl_MeticulousPursuitViewModel rcl_MeticulousPursuitViewModel)
