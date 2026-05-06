@@ -318,7 +318,7 @@ namespace SL.MLineDataPrecisionTracking.Service.Services
 
             if (serviceStatus != null)
             {
-                await _serviceStatusRepository.UpdateAsync(serviceStatus);
+                await _serviceStatusRepository.UpdateByServiceIdAsync(serviceStatus);
             }
 
             if (shouldStopService)
