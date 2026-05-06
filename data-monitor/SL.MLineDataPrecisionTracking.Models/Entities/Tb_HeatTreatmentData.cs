@@ -23,7 +23,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// <summary>
         /// 冷却开始时间（yyyy-MM-dd HH:mm:ss 格式）
         /// </summary>
-        [SugarColumn(ColumnDescription = "冷却时间")]
+        [SugarColumn(ColumnDescription = "冷却开始时间")]
         public string CoolingStartTime { get; set; }
 
         /// <summary>
