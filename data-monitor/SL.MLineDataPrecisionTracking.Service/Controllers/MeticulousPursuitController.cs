@@ -84,7 +84,7 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
                 );
                 return ApiResult<LineSummaryQueryResponseDto>.Success(
                     new LineSummaryQueryResponseDto(
-                        new List<Models.Entities.Tb_LineSummary>() { re },
+                        re == null ? null : new List<Tb_LineSummary> { re },
                         0,
                         0
                     )

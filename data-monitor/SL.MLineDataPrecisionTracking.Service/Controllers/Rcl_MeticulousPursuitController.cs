@@ -91,7 +91,7 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
                 );
                 return ApiResult<HeatTreatmentDataQueryResponseDto>.Success(
                     new HeatTreatmentDataQueryResponseDto(
-                        new List<Tb_HeatTreatmentData>() { re },
+                      re==null?null:new List<Tb_HeatTreatmentData>() { re},
                         0,
                         0
                     )
