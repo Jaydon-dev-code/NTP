@@ -53,7 +53,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
 
         public static HeatTreatmentDataDto NotFindMakringNo(string markingNo)
         {
-            return new HeatTreatmentDataDto() { MarkingNo= markingNo };
+            return new HeatTreatmentDataDto() { MarkingNo= markingNo ,IsHave=false};
         }
 
          HeatTreatmentDataDto()

@@ -50,7 +50,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
                     }
                     string headerName = desc?.Description ?? properties[i].Name; // 自动取中文
 
-                    ICell cell = headerRow.CreateCell(i);
+                    ICell cell = headerRow.CreateCell(i- ignoreInfo.Count);
                     cell.SetCellValue(headerName);
                 }
                 foreach (var item in ignoreInfo)

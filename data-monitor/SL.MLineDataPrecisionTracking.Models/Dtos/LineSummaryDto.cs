@@ -21,7 +21,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         }
         public static LineSummaryDto NotFindMakringNo(string makingNo)
         {
-            return new LineSummaryDto() { MarkingNo= makingNo };
+            return new LineSummaryDto() { MarkingNo= makingNo,IsHave=false,Result=ResultEnum.NG };
         }
          LineSummaryDto()
         {
