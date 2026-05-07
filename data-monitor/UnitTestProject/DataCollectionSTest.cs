@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using SL.MLineDataPrecisionTracking.Core.Middleware;
 using Autofac;
 using HslCommunication.Profinet.Melsec;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SL.MLineDataPrecisionTracking.Core.Middleware;
 using SL.MLineDataPrecisionTracking.Core.Services;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
@@ -64,7 +64,7 @@ namespace UnitTestProject
                     IsBinary = true,
                     AnalysisLogMessage = true,
                     ActiveTimeSpan = TimeSpan.Parse("01:00:00"),
-                    EnableIPv6 = false
+                    EnableIPv6 = false,
                 };
                 server.ServerStart(port);
                 _servers.Add(server);
@@ -176,6 +176,62 @@ namespace UnitTestProject
             // 定义A线和B线的托盘号序列
             int[] aTrayNos = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             int[] bTrayNos = new int[] { 10, 20, 30, 40, 50, 60, 70, 80, 90 };
+
+            var mcp = Container.Resolve<McpCommunication>();
+
+            // 启动A线和B线的数据采集任务
+            Task aTask = RunAsync("A线", aService, aTrayNos);
+            await Task.Delay(5000); // 等待A线先启动
+            Task bTask = RunAsync(
+                "B线",
+                bService,
+                bTrayNos,
+                // B线特殊的回调函数：设置A线托盘编号关联
+                async (lineInfo, index) =>
+                {
+                    await Task.Delay(100);
+                    var aTrayNoPoint = lineInfo.FirstOrDefault(x => x.PointName == "A线托盘编号");
+
+                    if (aTrayNoPoint != null)
+                    {
+                        aTrayNoPoint.Value = new List<object>() { aTrayNos[index] };
+                        mcp.Write(aTrayNoPoint);
+                    }
+                }
+            );
+
+            // 等待所有任务完成
+            await Task.WhenAll(aTask, bTask);
+            await Task.Delay(20000 * 10);
+        }
+
+        /// <summary>
+        /// 测试A/B线联动数据采集,检测托盘号一致会不会重复财政及
+        /// 模拟A线先采集，B线后采集的完整流程
+        /// </summary>
+        /// <remarks>
+        /// 联动测试流程：
+        /// 1. A线采集9重复个托盘的数据
+        /// 2. B线采集对应的9重复个托盘数据（包含A线托盘编号关联）
+        /// 3. 验证A/B线数据能正确关联并生成汇总记录，并且不重复
+        /// </remarks>
+        [TestMethod]
+        public async Task DataCollectionChkeIsRepeatTest()
+        {
+            await Task.Delay(1000);
+
+            // 解析A线和B线服务
+            var aService = Container
+                .Resolve<IEnumerable<ProLineDataCollectionServiceAbstract>>()
+                .First(x => x.GetType().Name == nameof(A_ProLineDataCollectionService));
+
+            var bService = Container
+                .Resolve<IEnumerable<ProLineDataCollectionServiceAbstract>>()
+                .First(x => x.GetType().Name == nameof(B_ProLineDataCollectionService));
+
+            // 定义A线和B线的托盘号序列
+            int[] aTrayNos = new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+            int[] bTrayNos = new int[] { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
 
             var mcp = Container.Resolve<McpCommunication>();
 
@@ -324,9 +380,61 @@ namespace UnitTestProject
             lineInfo.Remove(endPoint);
             lineInfo.Remove(startPoint);
             var mcp = Container.Resolve<McpCommunication>();
-
+            var rclService = Container
+              .Resolve<IEnumerable<ProLineDataCollectionServiceAbstract>>()
+              .First(x => x.GetType().Name == nameof(Rcl_ProLineDataCollectionService));
+            rclService.ExecuteAsync(new CancellationToken());
             // 启动采集完成监控
-            RclEndServer(endPoint, startPoint, mcp);
+            EndServer(endPoint, startPoint, mcp);
+
+            int val = 1000;
+            for (int i = 0; i < 10; i++)
+            {
+                if ((mcp.Read(startPoint)).Data.Value[0].ObjToBool() is false)
+                {
+                    foreach (var item in lineInfo)
+                    {
+                        item.Value = new List<object>() { val };
+                        if (item.DataType == TypeCode.String)
+                        {
+                            item.Value = new List<object>() { val.ToString() };
+                        }
+
+                        mcp.Write(item);
+                        val++;
+                    }
+
+                    startPoint.Value = new List<object>() { true };
+                    mcp.Write(startPoint);
+                }
+                else
+                {
+                    i--;
+                    await Task.Delay(200);
+                }
+            }
+        }
+
+
+        [TestMethod]
+        public async Task RclRunChkeIsRepeatAsync()
+        {
+            var lineInfo = await InitPlcAddre("热处理");
+            var endPoint = lineInfo.FirstOrDefault(x => x.PointName == "采集结束");
+            var startPoint = lineInfo.FirstOrDefault(x => x.PointName == "采集开始");
+            var makingNoPoint = lineInfo.FirstOrDefault(x => x.PointName == "序列码");
+            lineInfo.Remove(endPoint);
+            lineInfo.Remove(startPoint);
+            lineInfo.Remove(makingNoPoint);
+            var mcp = Container.Resolve<McpCommunication>();
+            makingNoPoint.Value = new List<object>() { "22223effdsa" };
+            mcp.Write(makingNoPoint);
+            var rclService = Container
+              .Resolve<IEnumerable<ProLineDataCollectionServiceAbstract>>()
+              .First(x => x.GetType().Name == nameof(Rcl_ProLineDataCollectionService));
+            rclService.ExecuteAsync(new CancellationToken());
+            // 启动采集完成监控
+            EndServer(endPoint, startPoint, mcp);
 
             int val = 1000;
             for (int i = 0; i < 10; i++)
@@ -447,18 +555,20 @@ namespace UnitTestProject
             {
                 foreach (var point in plcConnection.Points)
                 {
-                    result.Add(new DevPlcPointMcDto(
-                        linePoint.DeviceName,          // 设备名称
-                        point.PointName,               // 点位名称
-                        plcConnection.IpAddress,       // IP地址
-                        plcConnection.Port,           // 端口
-                        point.Area.ToPrefix(),         // 区域前缀
-                        point.DataType.ToTypeCode(),  // 数据类型
-                        point.Address,                 // 地址
-                        point.Length,                  // 长度
-                        point.ReadFormula,             // 读取公式
-                        point.WriteFormula             // 写入公式
-                    ));
+                    result.Add(
+                        new DevPlcPointMcDto(
+                            linePoint.DeviceName, // 设备名称
+                            point.PointName, // 点位名称
+                            plcConnection.IpAddress, // IP地址
+                            plcConnection.Port, // 端口
+                            point.Area.ToPrefix(), // 区域前缀
+                            point.DataType.ToTypeCode(), // 数据类型
+                            point.Address, // 地址
+                            point.Length, // 长度
+                            point.ReadFormula, // 读取公式
+                            point.WriteFormula // 写入公式
+                        )
+                    );
                 }
             }
             return result;
