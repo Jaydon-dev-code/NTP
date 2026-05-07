@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration.Install;
 using System.Linq;
+using System.ServiceProcess;
 using System.Threading.Tasks;
 
 namespace SL.MLineDataPrecisionTracking.Service
@@ -14,6 +15,8 @@ namespace SL.MLineDataPrecisionTracking.Service
         public ProjectInstaller()
         {
             InitializeComponent();
+            this.serviceInstaller1.Description = "双林数据追溯后台服务。";
+            this.serviceInstaller1.StartType = ServiceStartMode.Automatic;  // 自动启动
         }
 
         private void serviceInstaller1_AfterInstall(object sender, InstallEventArgs e)
