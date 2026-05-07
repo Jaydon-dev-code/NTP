@@ -16,6 +16,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 {
     public partial class DeviceCollectionConfigViewModel : ObservableObject
     {
+   
         private List<ServiceInfo> _services = new List<ServiceInfo>();
         public List<ServiceInfo> Services
         {
@@ -154,6 +155,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
         public DeviceCollectionConfigViewModel(ServiceApi serviceApi, DeviceCollectionConfigApi deviceCollectionConfigApi)
         {
             _deviceCollectionConfigApi= deviceCollectionConfigApi;
+            _serviceApi = serviceApi;
         }
 
         async Task ImportAsync()
