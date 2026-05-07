@@ -16,11 +16,11 @@ namespace SL.MLineDataPrecisionTracking.Service
         /// </summary>
         static void Main()
         {
-            var service = new OwinHostService();
 
             // 直接运行 = 控制台模式（F5调试用）
             if (Environment.UserInteractive)
             {
+                var service = new OwinHostService();
                 Console.WriteLine("=== 调试模式启动 ===");
                 try
                 {
