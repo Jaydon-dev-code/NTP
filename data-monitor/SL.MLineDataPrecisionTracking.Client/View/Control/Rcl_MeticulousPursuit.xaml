@@ -155,7 +155,7 @@
             <Button
                 Grid.Row="0"
                 Grid.Column="5"
-                Command="{Binding SaveQueryValueCommand}"
+                Command="{Binding SaveQueryCommand}"
                 Content="导出"
                 IsEnabled="{Binding QueryConditions.IsScanCode, Converter={StaticResource BoolInverter}}" />
 
@@ -185,7 +185,7 @@
                         Margin="0,0,15,0"
                         hc:DataGridAttach.ShowRowNumber="True"
                         AutoGenerateColumns="False"
-                        ItemsSource="{Binding HeatTreatmentData}"
+                        ItemsSource="{Binding QueryValue}"
                         ScrollViewer.CanContentScroll="True"
                         ScrollViewer.HorizontalScrollBarVisibility="Visible  "
                         ScrollViewer.VerticalScrollBarVisibility="Visible">
@@ -296,7 +296,7 @@
                                 <StackPanel Grid.Row="0" Orientation="Horizontal">
                                     <TextBlock VerticalAlignment="Center" Text="扫码记录（近100条）" />
                                     <Button
-                                        Command="{Binding SaveQueryValueCommand}"
+                                        Command="{Binding SaveQueryCommand}"
                                         Content="导出"
                                         Style="{StaticResource ButtonInfo.Small}" />
 

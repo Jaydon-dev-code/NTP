@@ -1,30 +1,36 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HandyControl.Controls;
+using Microsoft.Win32;
 using SL.MLineDataPrecisionTracking.Client.Http;
 using SL.MLineDataPrecisionTracking.Core.Services;
+using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Dtos;
 using SL.MLineDataPrecisionTracking.Models.Dtos.Request;
 using SL.MLineDataPrecisionTracking.Models.Dtos.Response;
 using SL.MLineDataPrecisionTracking.Models.Entities;
+using SqlSugar;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Input;
 
 namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 {
     public partial class Rcl_MeticulousPursuitViewModel : ObservableObject
     {
-        private ObservableCollection<HeatTreatmentDataDto> _heatTreatmentData;
+        private ObservableCollection<HeatTreatmentDataDto> _queryValue;
      
-        public ObservableCollection<HeatTreatmentDataDto> HeatTreatmentData
+        public ObservableCollection<HeatTreatmentDataDto> QueryValue
         {
-            get => _heatTreatmentData;
-            set => SetProperty(ref _heatTreatmentData, value);
+            get => _queryValue;
+            set => SetProperty(ref _queryValue, value);
         }
         private PaginationPage _paginationPages;
         public PaginationPage PaginationPages
@@ -53,27 +59,53 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             set => SetProperty(ref _pageSoure, value);
         }
 
-        private RelayCommand _queryCommand;
-        public IRelayCommand QueryCommand
+        private static ObservableCollection<ScanRecord> _historyScanMarkingNos;
+        public ObservableCollection<ScanRecord> HistoryScanMarkingNos
+        {
+            get => _historyScanMarkingNos;
+            set => SetProperty(ref _historyScanMarkingNos, value);
+        }
+
+        private AsyncRelayCommand _queryCommand;
+        public AsyncRelayCommand QueryCommand
         {
             get
             {
                 if (_queryCommand == null)
                 {
-                    _queryCommand = new RelayCommand(QuData);
+                    _queryCommand = new AsyncRelayCommand(Query);
                 }
                 return _queryCommand;
             }
         }
+        private IRelayCommand<System.Windows.Controls.TextBox> _openScanCodeModelCommand;
+        public IRelayCommand<System.Windows.Controls.TextBox> OpenScanCodeModelCommand
+        {
+            get
+            {
+                if (_openScanCodeModelCommand == null)
+                {
+                    _openScanCodeModelCommand = new RelayCommand<System.Windows.Controls.TextBox>(
+                        OpenScanCodeModel
+                    );
+                }
+                return _openScanCodeModelCommand;
+            }
+        }
 
-        private RelayCommand _markingNoQueryCommand;
-        public IRelayCommand MarkingNoQueryCommand
+
+
+        private AsyncRelayCommand<System.Windows.Controls.TextBox> _markingNoQueryCommand;
+        public AsyncRelayCommand<System.Windows.Controls.TextBox> MarkingNoQueryCommand
         {
             get
             {
                 if (_markingNoQueryCommand == null)
                 {
-                    _markingNoQueryCommand = new RelayCommand(MarkingNoQuery);
+                    _markingNoQueryCommand = new AsyncRelayCommand<System.Windows.Controls.TextBox>(
+                        MarkingNoQuery,
+                        (x) => QueryConditions?.IsScanCode == true
+                    );
                 }
                 return _markingNoQueryCommand;
             }
@@ -92,26 +124,57 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             }
         }
 
-        private RelayCommand _exportCommand;
-        public IRelayCommand ExportCommand
+        private AsyncRelayCommand _pageUpdatedCommand;
+        public IAsyncRelayCommand PageUpdatedCommand
         {
             get
             {
-                if (_exportCommand == null)
+                if (_pageUpdatedCommand == null)
                 {
-                    _exportCommand = new RelayCommand(Export);
+                    _pageUpdatedCommand = new AsyncRelayCommand(PageUpdated);
                 }
-                return _exportCommand;
+                return _pageUpdatedCommand;
             }
         }
 
+        private RelayCommand<ScanRecord> _removeHistoryScanCommand;
+        public IRelayCommand<ScanRecord> RemoveHistoryScanCommand
+        {
+            get
+            {
+                if (_removeHistoryScanCommand == null)
+                {
+                    _removeHistoryScanCommand = new RelayCommand<ScanRecord>(RemoveHistoryScan);
+                }
+                return _removeHistoryScanCommand;
+            }
+        }
+
+        private RelayCommand _clearHistoryMarkingNoCommand;
+        public IRelayCommand ClearHistoryMarkingNoCommand
+        {
+            get
+            {
+                if (_clearHistoryMarkingNoCommand == null)
+                {
+                    _clearHistoryMarkingNoCommand = new RelayCommand(ClearHistoryMarkingNo);
+                }
+                return _clearHistoryMarkingNoCommand;
+            }
+        }
+
+        List<HeatTreatmentDataDto> _mkNoQuValues;
+        List<HeatTreatmentDataDto> _quValues;
         private readonly Rcl_MeticulousPursuitApi _meticulousPursuitApi;
 
         public Rcl_MeticulousPursuitViewModel(Rcl_MeticulousPursuitApi meticulousPursuitApi)
         {
             _meticulousPursuitApi = meticulousPursuitApi;
-            HeatTreatmentData = new ObservableCollection<HeatTreatmentDataDto>();
+            QueryValue = new ObservableCollection<HeatTreatmentDataDto>();
             PaginationPages = new PaginationPage();
+            _mkNoQuValues = new List<HeatTreatmentDataDto>();
+            _quValues = new List<HeatTreatmentDataDto>();
+            HistoryScanMarkingNos = new ObservableCollection<ScanRecord>();
             var lastDay = DateTime.Now.Date;
             QueryConditions = new RefinedSearchCriteria()
             {
@@ -124,20 +187,75 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             PaginationPages.DataCountPerPage = 100;
         }
 
-        private async void QuData()
+        async Task Query()
+        {
+            //默认查询第一页
+            bool flowControl = await QuData(1);
+            if (!flowControl)
+            {
+                return;
+            }
+        }
+
+        private void RemoveHistoryScan(ScanRecord record)
+        {
+            if (record != null)
+            {
+                HistoryScanMarkingNos.Remove(record);
+
+                QueryValue.Remove(QueryValue.FirstOrDefault(x => x.MarkingNo == record.MarkingNo));
+            }
+        }
+
+        private void ClearHistoryMarkingNo()
+        {
+            HistoryScanMarkingNos.Clear();
+            _mkNoQuValues.Clear();
+            QueryValue.Clear();
+        }
+
+        private void OpenScanCodeModel(System.Windows.Controls.TextBox textBox)
+        {
+            if (QueryConditions?.IsScanCode == true)
+            {
+                _quValues = QueryValue.ToList();
+                QueryValue.Clear();
+                foreach (var item in _mkNoQuValues)
+                {
+                    QueryValue.Add(item);
+                }
+                Keyboard.Focus(textBox);
+            }
+            else
+            { //无扫码模式
+                _mkNoQuValues = QueryValue.ToList();
+                QueryValue.Clear();
+                foreach (var item in _quValues)
+                {
+                    QueryValue.Add(item);
+                }
+            }
+        }
+
+        async Task PageUpdated()
+        {
+            await QuData(PaginationPages.PageIndex);
+        }
+        private async Task<bool> QuData(int pageIndex)
         {
             IsLoading = true;
             try
             {
-                var result = await _meticulousPursuitApi.QueryablToPagee(GetQueryRequest());
+                var result = await _meticulousPursuitApi.QueryablToPagee(GetQueryRequest(pageIndex));
                 if (result.IsSuccess)
                 {
-                    HeatTreatmentData.Clear();
+                    QueryValue.Clear();
                     foreach (var item in result.Data.List)
                     {
-                        HeatTreatmentData.Add(new HeatTreatmentDataDto(item));
+                        QueryValue.Add(new HeatTreatmentDataDto(item));
                     }
-                    PaginationPages.MaxPageCount = result.Data.TotalCount;
+                    PaginationPages.TotalCount = result.Data.TotalCount;
+                    PaginationPages.MaxPageCount = result.Data.TotalPage;
                 }
                 else
                 {
@@ -146,54 +264,155 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             }
             catch (Exception ex)
             {
+               
                 HandyControl.Controls.MessageBox.Error($"查询数据时发生错误: {ex.Message}");
+                return false;
             }
             finally
             {
                 IsLoading = false;
             }
+            return true;
         }
 
-        HeatTreatmentDataQueryRequestDto GetQueryRequest()
+        HeatTreatmentDataQueryRequestDto GetQueryRequest(int pageIndex)
         {
             HeatTreatmentDataQueryRequestDto queryRequest = new HeatTreatmentDataQueryRequestDto();
-            queryRequest.PageIndex = PaginationPages.PageIndex;
+            queryRequest.PageIndex = pageIndex;
             queryRequest.DataCountPerPage = PaginationPages.DataCountPerPage;
             queryRequest.RefinedSearch = QueryConditions;
             return queryRequest;
         }
 
-        private async void MarkingNoQuery() { }
+        private async Task MarkingNoQuery(System.Windows.Controls.TextBox textBox)
+        {
+            if (string.IsNullOrEmpty(QueryConditions?.MarkingNo))
+            {
+                return;
+            }
+
+            var request = new HeatTreatmentDataQueryRequestDto
+            {
+                RefinedSearch = new RefinedSearchCriteria { MarkingNo = QueryConditions.MarkingNo }
+            };
+            var apiResult = await _meticulousPursuitApi.MarkingNoQuery(request);
+
+            HeatTreatmentDataDto findValue;
+            if (apiResult.IsSuccess && apiResult.Data?.List?.Count > 0)
+            {
+                findValue = new HeatTreatmentDataDto(apiResult.Data.List.First());
+            }
+            else
+            {
+                findValue =  HeatTreatmentDataDto.NotFindMakringNo(QueryConditions.MarkingNo);
+            }
+
+            var historyScanMarkingNo = HistoryScanMarkingNos.FirstOrDefault(x =>
+                x.MarkingNo == QueryConditions.MarkingNo
+            );
+
+            if (historyScanMarkingNo != null)
+            {
+                HistoryScanMarkingNos.Remove(historyScanMarkingNo);
+                HistoryScanMarkingNos.Insert(0, historyScanMarkingNo);
+                var tmp = QueryValue.FirstOrDefault(x => x.MarkingNo == QueryConditions.MarkingNo);
+                if (tmp != null)
+                {
+                    QueryValue.Remove(tmp);
+                }
+            }
+            else
+            {
+                HistoryScanMarkingNos.Insert(
+                    0,
+                    new ScanRecord()
+                    {
+                        MarkingNo = QueryConditions.MarkingNo,
+                        IsHave = findValue.IsHave,
+                    }
+                );
+            }
+
+            QueryValue.Insert(0, findValue);
+
+            for (int i = 0; i <= HistoryScanMarkingNos.Count - 101; i++)
+            {
+                HistoryScanMarkingNos.RemoveAt(HistoryScanMarkingNos.Count - 1);
+                QueryValue.RemoveAt(QueryValue.Count - 1);
+            }
+            textBox.Text = string.Empty;
+        }
 
         private async void SaveQuery()
         {
-            IsLoading = true;
-            try
+            SaveFileDialog saveFileDialog = new SaveFileDialog
             {
-                var result = await _meticulousPursuitApi.SaveQuery(GetQueryRequest());
-                if (result.IsSuccess)
-                {
-                    // 这里可以处理导出逻辑
-                    HandyControl.Controls.MessageBox.Success("导出成功！");
-                }
-                else
-                {
-                    HandyControl.Controls.MessageBox.Error(result.Message);
-                }
-            }
-            catch (Exception ex)
-            {
-                HandyControl.Controls.MessageBox.Error($"导出数据时发生错误: {ex.Message}");
-            }
-            finally
-            {
-                IsLoading = false;
-            }
-        }
+                Filter = "Excel文件 (*.xlsx)|*.xlsx",
+                Title = "保存Excel文件",
+                FileName = $"数据导出_{DateTime.Now:yyyyMMddHHmmss}.xlsx",
+            };
 
-        private void Export()
-        {
-            // 导出逻辑
-        }
+            if (saveFileDialog.ShowDialog() != true)
+                return;
+
+            List<HeatTreatmentDataDto> re = new List<HeatTreatmentDataDto>();
+            // 扫码模式单独判断
+            if (QueryConditions?.IsScanCode == true)
+            {
+                if (HistoryScanMarkingNos.Count == 0)
+                {
+                    HandyControl.Controls.MessageBox.Warning("暂无可导出的扫码数据！");
+                    return;
+                }
+
+                re = QueryValue.ToList();
+            }
+            else
+            {
+                // 时间校验
+                var startTime = QueryConditions.StartDate.Date + QueryConditions.StartTime.TimeOfDay;
+                var endTime = QueryConditions.EndDate.Date + QueryConditions.EndTime.TimeOfDay;
+                if (startTime > endTime)
+                {
+                    HandyControl.Controls.MessageBox.Warning("起始时间不能大于结束时间！");
+                    return;
+                }
+
+                var request = new LineSummaryQueryRequestDto
+                {
+                    RefinedSearch = QueryConditions
+                };
+
+                var apiResult= await _meticulousPursuitApi.SaveQuery(GetQueryRequest(0));
+
+                if (!apiResult.IsSuccess)
+                {
+                    HandyControl.Controls.MessageBox.Warning($"查询失败：{apiResult.Message}");
+                    return;
+                }
+
+                re = apiResult.Data.List.Select(x => new HeatTreatmentDataDto(x)).ToList();
+            }
+
+            if (re?.Count == 0)
+            {
+                HandyControl.Controls.MessageBox.Warning(
+                    "未检测到导出的数据信息，请检测搜索条件后再次导出！"
+                );
+                return;
+            }
+            var ex = Expand.ExportToExcel(re, saveFileDialog.FileName);
+            if (ex.IsSuccess)
+            {
+                HandyControl.Controls.MessageBox.Success("导出完成！");
+            }
+            else
+            {
+                HandyControl.Controls.MessageBox.Warning($"导出失败！/r/n{ex.Message}");
+            }
+
+        }        
+
+     
     }
 }
