@@ -215,6 +215,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
         {
             HistoryScanMarkingNos.Clear();
             _mkNoQuValues.Clear();
+            QueryValue.Clear();
         }
 
         private async Task MarkingNoQuery(System.Windows.Controls.TextBox textBox)
@@ -237,16 +238,8 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             }
             else
             {
-                findValue = new LineSummaryDto(
-                    new Tb_LineSummary()
-                    {
-                        MarkingNo = QueryConditions.MarkingNo,
-                        Result = Models.Enum.ResultEnum.NG,
-                    }
-                )
-                {
-                    IsHave = false,
-                };
+                findValue =  LineSummaryDto.NotFindMakringNo(QueryConditions.MarkingNo);
+                   
             }
 
             var historyScanMarkingNo = HistoryScanMarkingNos.FirstOrDefault(x =>

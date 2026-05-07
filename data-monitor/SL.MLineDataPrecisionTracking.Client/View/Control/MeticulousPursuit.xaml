@@ -179,7 +179,7 @@
             <TextBlock
                 Grid.Row="2"
                 Grid.Column="4"
-                Text="模型编号" />
+                Text="型号名称" />
             <TextBox
                 Grid.Row="2"
                 Grid.Column="5"
@@ -232,7 +232,7 @@
                 IsEnabled="{Binding QueryConditions.IsScanCode, Converter={StaticResource BoolInverter}}"
                 ItemsSource="{Binding Source={StaticResource ResultEnum}}"
                 SelectedIndex="0"
-                SelectedValue="{Binding QueryConditions.Result, Mode=TwoWay}" />
+                SelectedValue="{Binding QueryConditions.Result, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
 
 
