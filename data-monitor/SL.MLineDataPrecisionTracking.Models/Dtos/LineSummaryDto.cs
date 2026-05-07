@@ -19,6 +19,14 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
             // 自动映射所有同名属性
             AutoMapProperties(tb_LineSummary, this);
         }
+        public static LineSummaryDto NotFindMakringNo(string makingNo)
+        {
+            return new LineSummaryDto() { MarkingNo= makingNo };
+        }
+         LineSummaryDto()
+        {
+         
+        }
 
         /// <summary>
         /// 反射自动赋值同名属性
@@ -49,7 +57,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         }
 
         [Description("记录时间")]
-        public DateTime RecordTime { get; set; } = DateTime.Now;
+        public DateTime? RecordTime { get; set; }
 
         [Description("型号名称")]
         public string ModelName { get; set; }
@@ -395,7 +403,6 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
 
         private bool _isHave = true;
 
-        [Description("是否存在记录")]
         public bool IsHave
         {
             get => _isHave;

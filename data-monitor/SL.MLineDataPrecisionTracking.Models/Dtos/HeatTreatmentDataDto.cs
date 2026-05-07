@@ -1,11 +1,12 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using SL.MLineDataPrecisionTracking.Models.Entities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
-using SL.MLineDataPrecisionTracking.Models.Entities;
 
 namespace SL.MLineDataPrecisionTracking.Models.Dtos
 {
@@ -20,40 +21,52 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         /// <param name="entity">实体对象</param>
         public HeatTreatmentDataDto(Tb_HeatTreatmentData entity)
         {
-            Id = entity.Id;
-            RecordTime = entity.RecordTime;
-            HeatingTime = entity.HeatingTime;
-            CoolingStartTime = entity.CoolingStartTime;
-            CoolingTime = entity.CoolingTime;
-            OutputPower = entity.OutputPower;
-            OutputVoltage = entity.OutputVoltage;
-            OutputFrequency = entity.OutputFrequency;
-            ExternalSprayCoolingWater = entity.ExternalSprayCoolingWater;
-            AuxiliarySprayCoolingWater = entity.AuxiliarySprayCoolingWater;
-            MarkingNo = entity.MarkingNo;
-            IsHave = true;
+            AutoMapProperties(entity,this);
         }
-
         /// <summary>
-        /// 构造函数（无数据时）
+        /// 反射自动赋值同名属性
         /// </summary>
-        /// <param name="markingNo">条码号</param>
-        public HeatTreatmentDataDto(string markingNo)
+        private void AutoMapProperties(object source, object target)
         {
-            MarkingNo = markingNo;
-            IsHave = false;
+            if (source == null || target == null)
+                return;
+
+            PropertyInfo[] sourceProperties = source.GetType().GetProperties();
+            PropertyInfo[] targetProperties = target.GetType().GetProperties();
+
+            foreach (var sourceProp in sourceProperties)
+            {
+                // 找目标对象中同名、可读、可写的属性
+                var targetProp = Array.Find(
+                    targetProperties,
+                    p => p.Name == sourceProp.Name && p.CanWrite && sourceProp.CanRead
+                );
+
+                if (targetProp != null)
+                {
+                    // 类型兼容就赋值
+                    object value = sourceProp.GetValue(source);
+                    targetProp.SetValue(target, value);
+                }
+            }
         }
 
-        /// <summary>
-        /// 主键ID
-        /// </summary>
-        public int Id { get; set; }
+        public static HeatTreatmentDataDto NotFindMakringNo(string markingNo)
+        {
+            return new HeatTreatmentDataDto() { MarkingNo= markingNo };
+        }
+
+         HeatTreatmentDataDto()
+        {
+          
+       
+        }
 
         /// <summary>
         /// 记录时间
         /// </summary>
         [Description("记录时间")]
-        public DateTime RecordTime { get; set; }
+        public DateTime?  RecordTime { get; set; }
 
         /// <summary>
         /// 二维码打标内容
@@ -111,7 +124,6 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
 
         private bool _isHave = true;
 
-        [Description("是否存在记录")]
         public bool IsHave
         {
             get => _isHave;

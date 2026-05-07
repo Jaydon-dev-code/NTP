@@ -12,6 +12,7 @@
     Width="1080"
     Height="600"
     Background="#F5F7FA"
+    Icon="pack://siteoforigin:,,,/Resources/Image/CompanyIcon.png"
     mc:Ignorable="d">
     <!--  WindowStyle="None" Topmost="True"      WindowState="Maximized"  -->
 

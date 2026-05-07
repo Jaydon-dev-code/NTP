@@ -35,26 +35,35 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
                 ISheet sheet = workbook.CreateSheet("Sheet1");
 
                 // 1. 获取实体类所有属性
-                PropertyInfo[] properties = typeof(T).GetProperties();
+                List<PropertyInfo> properties = typeof(T).GetProperties().ToList();
 
                 // 2. 创建表头（读取 Description 中文）
                 IRow headerRow = sheet.CreateRow(0);
-                for (int i = 0; i < properties.Length; i++)
+                List<PropertyInfo> ignoreInfo=new List<PropertyInfo>();
+                for (int i = 0; i < properties.Count; i++)
                 {
                     var desc = properties[i].GetCustomAttribute<DescriptionAttribute>();
+                    if (desc==null)
+                    {
+                        ignoreInfo.Add(properties[i]);
+                        continue;
+                    }
                     string headerName = desc?.Description ?? properties[i].Name; // 自动取中文
 
                     ICell cell = headerRow.CreateCell(i);
                     cell.SetCellValue(headerName);
                 }
-
+                foreach (var item in ignoreInfo)
+                {
+                    properties.Remove(item);
+                }
                 // 3. 写数据
                 for (int rowIndex = 0; rowIndex < dataList.Count; rowIndex++)
                 {
                     IRow row = sheet.CreateRow(rowIndex + 1);
                     var data = dataList[rowIndex];
 
-                    for (int colIndex = 0; colIndex < properties.Length; colIndex++)
+                    for (int colIndex = 0; colIndex < properties.Count; colIndex++)
                     {
                         object val = properties[colIndex].GetValue(data);
                         row.CreateCell(colIndex).SetCellValue(val?.ToString() ?? "");
@@ -62,7 +71,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
                 }
 
                 // 4. 自动列宽
-                for (int i = 0; i < properties.Length; i++)
+                for (int i = 0; i < properties.Count; i++)
                 {
                     sheet.AutoSizeColumn(i);
                 }
