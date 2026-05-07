@@ -71,7 +71,7 @@ namespace UnitTestProject
             }
         }
 
-        #region 单线测试方法
+        #region 模拟测试
 
         /// <summary>
         /// 测试热处理数据采集服务
@@ -147,7 +147,7 @@ namespace UnitTestProject
 
         #endregion
 
-        #region A/B线联动测试
+        #region 模拟测试
 
         /// <summary>
         /// 测试A/B线联动数据采集
@@ -464,9 +464,7 @@ namespace UnitTestProject
             }
         }
 
-        #endregion
-
-        #region 私有辅助方法
+      
 
         /// <summary>
         /// 启动PLC采集完成信号监控
@@ -505,37 +503,7 @@ namespace UnitTestProject
             });
         }
 
-        /// <summary>
-        /// 热处理服务专用的PLC采集完成信号监控
-        /// </summary>
-        private void RclEndServer(
-            DevPlcPointMcDto endPoint,
-            DevPlcPointMcDto startPoint,
-            McpCommunication mcp
-        )
-        {
-            Task.Run(async () =>
-            {
-                while (true)
-                {
-                    try
-                    {
-                        var endValue = mcp.Read(endPoint);
-                        if (endValue.Data.Value[0].ObjToBool())
-                        {
-                            startPoint.Value = new List<object>() { false };
-                            endPoint.Value = new List<object>() { false };
-                            mcp.Write(startPoint);
-                            mcp.Write(endPoint);
-                        }
-                    }
-                    finally
-                    {
-                        await Task.Delay(200);
-                    }
-                }
-            });
-        }
+
 
         /// <summary>
         /// 从数据库初始化指定生产线的PLC点位信息
