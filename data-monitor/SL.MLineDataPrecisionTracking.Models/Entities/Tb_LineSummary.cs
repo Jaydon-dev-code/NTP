@@ -85,7 +85,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         public string InnerFlangeSortingData { get; set; } = "";
 
         [SugarColumn(ColumnDescription = "半成品码")]
-        public string SemiFinishedProductCode { get; set; }
+        public string SemiFinishedProductCode { get; set; } = "";
 
         /// <summary>
         /// A面钢球组差
