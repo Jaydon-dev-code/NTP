@@ -40,8 +40,10 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ServiceProcess" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HubTest.cs" />
     <Compile Include="LogTest.cs" />
     <Compile Include="PlcOPTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -59,6 +61,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SL.MLineDataPrecisionTracking.Client\SL.MLineDataPrecisionTracking.Client.csproj">
+      <Project>{63bae626-1915-4b19-acbd-bd8100c857ca}</Project>
+      <Name>SL.MLineDataPrecisionTracking.Client</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SL.MLineDataPrecisionTracking.Core\SL.MLineDataPrecisionTracking.Core.csproj">
       <Project>{c6e4debd-0906-4151-8c22-478c0d5328ec}</Project>
       <Name>SL.MLineDataPrecisionTracking.Core</Name>
@@ -70,6 +76,10 @@
     <ProjectReference Include="..\SL.MLineDataPrecisionTracking.Models\SL.MLineDataPrecisionTracking.Models.csproj">
       <Project>{292117F3-5422-4C4F-86C6-12DE0CF50BDE}</Project>
       <Name>SL.MLineDataPrecisionTracking.Models</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SL.MLineDataPrecisionTracking.Service\SL.MLineDataPrecisionTracking.Service.csproj">
+      <Project>{9d40bca8-8414-4a1f-989f-6db38fc3a1e0}</Project>
+      <Name>SL.MLineDataPrecisionTracking.Service</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
