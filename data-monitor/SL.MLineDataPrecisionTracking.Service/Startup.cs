@@ -1,17 +1,20 @@
-﻿using System;
+﻿using Autofac;
+using Autofac.Core;
+using Autofac.Integration.WebApi;
+using Microsoft.AspNet.SignalR;
+using Owin;
+using SL.MLineDataPrecisionTracking.Core.Middleware;
+using SL.MLineDataPrecisionTracking.Models.Domain;
+using SL.MLineDataPrecisionTracking.Service.Services;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Autofac;
-using Autofac.Core;
-using Autofac.Integration.WebApi;
-using Owin;
-using SL.MLineDataPrecisionTracking.Core.Middleware;
-using SL.MLineDataPrecisionTracking.Service.Services;
 
 namespace SL.MLineDataPrecisionTracking.Service
 {
@@ -38,6 +41,8 @@ namespace SL.MLineDataPrecisionTracking.Service
 
             app.UseAutofacWebApi(config);
             app.UseWebApi(config);
+
+            app.MapSignalR();
         }
 
         private void InitAutofac()
@@ -53,6 +58,23 @@ namespace SL.MLineDataPrecisionTracking.Service
             builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
             builder.RegisterType<OwinHostService>().As<OwinHostService>();
             Container = builder.Build();
+            cc();
+        }
+
+        void cc()
+        {
+            IHubContext _hubContext = Container.Resolve<IHubContext>();
+            Task.Run(() => {
+                while (true)
+                {
+                    _hubContext.Clients.All.ScanRecord(
+                     new ScanRecord() { IsHave = true, MarkingNo = "122222222" }
+                 );
+                    Thread.Sleep(1000);
+
+                }
+            });
+
         }
     }
 }
