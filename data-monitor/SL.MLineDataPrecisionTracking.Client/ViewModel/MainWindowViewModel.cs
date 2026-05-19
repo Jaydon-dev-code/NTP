@@ -146,7 +146,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel
         {
             _serviceApi = serviceApi;
             SoftwareName = string.IsNullOrEmpty(ConfigurationManager.AppSettings["SoftwareName"])
-                ? "双林轴承数字追溯管理系统"
+                ? "湖北双林轴承数字追溯管理系统"
                 : ConfigurationManager.AppSettings["SoftwareName"];
             VersionInfo = System
                 .Reflection.Assembly.GetExecutingAssembly()
