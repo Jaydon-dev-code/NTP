@@ -217,16 +217,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\DBPackages\Npgsql.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\DBPackages\DmProvider.dll" />
-    <None Include="Resources\DBPackages\Kdbndp.dll" />
-    <None Include="Resources\DBPackages\Newtonsoft.Json.dll" />
-    <None Include="Resources\DBPackages\Oracle.ManagedDataAccess.dll" />
-    <None Include="Resources\DBPackages\System.Data.SQLite.dll" />
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.8">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4.8 %28x86 和 x64%29</ProductName>

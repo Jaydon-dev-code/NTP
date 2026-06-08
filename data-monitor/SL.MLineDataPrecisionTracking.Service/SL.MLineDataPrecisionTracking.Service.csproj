@@ -133,4 +133,8 @@
     <Content Include="CompanyIcon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>:: 复制 Npgsql.dll 到输出根目录
+xcopy "$(ProjectDir)..\SL.MLineDataPrecisionTracking.Infrastructure\Resources\DBPackages\Npgsql.dll" "$(TargetDir)" /Y /R</PreBuildEvent>
+  </PropertyGroup>
 </Project>

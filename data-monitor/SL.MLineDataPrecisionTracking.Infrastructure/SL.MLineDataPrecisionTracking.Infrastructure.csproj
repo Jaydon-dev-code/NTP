@@ -80,6 +80,23 @@
       <Version>8.0.0</Version>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\DBPackages\DmProvider.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\DBPackages\Kdbndp.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\DBPackages\Newtonsoft.Json.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\DBPackages\Npgsql.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\DBPackages\Oracle.ManagedDataAccess.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\DBPackages\System.Data.SQLite.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
