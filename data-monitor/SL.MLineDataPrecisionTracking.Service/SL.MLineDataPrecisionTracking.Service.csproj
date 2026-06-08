@@ -135,6 +135,8 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>:: 复制 Npgsql.dll 到输出根目录
-xcopy "$(ProjectDir)..\SL.MLineDataPrecisionTracking.Infrastructure\Resources\DBPackages\Npgsql.dll" "$(TargetDir)" /Y /R</PreBuildEvent>
+xcopy "$(ProjectDir)..\SL.MLineDataPrecisionTracking.Infrastructure\Resources\DBPackages\Npgsql.dll" "$(TargetDir)" /Y /R
+:: 将安装脚本放到根目录
+xcopy "$(ProjectDir)InstallInfo\*" "$(TargetDir)" /E /Y /I</PreBuildEvent>
   </PropertyGroup>
 </Project>
