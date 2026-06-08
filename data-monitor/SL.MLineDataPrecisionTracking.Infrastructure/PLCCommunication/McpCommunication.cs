@@ -26,7 +26,9 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
         private readonly object _lockObj = new object();
         private readonly Dictionary<string, McpX> _mcpDic = new Dictionary<string, McpX>();
 
-        public McpCommunication() { }
+        public McpCommunication()
+        {
+        }
 
         #region 同步读取方法
         /// <summary>
@@ -34,7 +36,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
         /// </summary>
         public Result<DevPlcPointMcDto> Read(DevPlcPointMcDto readPlcInfo)
         {
-            Result<DevPlcPointMcReadDto> re = new Result<DevPlcPointMcReadDto>() {Data=new DevPlcPointMcReadDto() };
+            Result<DevPlcPointMcReadDto> re = new Result<DevPlcPointMcReadDto>() { Data = new DevPlcPointMcReadDto() };
             if (int.TryParse(readPlcInfo.Address, out int result) is false)
             {
                 byte[] data = null;
@@ -359,6 +361,8 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                 catch (Exception ex)
                 {
                     Log.Warning($"同步第{i + 1}次读取失败：{ex.Message}");
+
+                    MarkMcpInvalid(ipAddress, port);
 
                     if (i == maxRetry - 1)
                     {
@@ -934,6 +938,8 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                 catch (Exception ex)
                 {
                     Log.Warning($"第{i + 1}次读取失败：{ex.Message}");
+
+                    MarkMcpInvalid(ipAddress, port);
 
                     // 最后一次重试失败，抛出异常
                     if (i == maxRetry - 1)
