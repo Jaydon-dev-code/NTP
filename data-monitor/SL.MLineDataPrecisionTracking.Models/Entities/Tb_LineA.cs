@@ -29,7 +29,6 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         [SugarColumn(ColumnDescription = "托盘号A")]
         public string TrayNoA { get; set; }
 
-
         /// <summary>
         /// 屏蔽工位
         /// </summary>
@@ -137,5 +136,17 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// </summary>
         [SugarColumn(ColumnDescription = "挡水环平行差")]
         public string WaterBaffleParallelDiff { get; set; }
+
+        /// <summary>
+        /// 外法兰半成品码
+        /// </summary>
+        [SugarColumn(ColumnDescription = "外法兰半成品码", DefaultValue = " ")]
+        public string OuterFlangeSemiFinishedCode { get; set; }
+
+        /// <summary>
+        /// 内法兰半成品码
+        /// </summary>
+        [SugarColumn(ColumnDescription = "内法兰半成品码", DefaultValue = " ")]
+        public string InnerFlangeSemiFinishedCode { get; set; } 
     }
 }

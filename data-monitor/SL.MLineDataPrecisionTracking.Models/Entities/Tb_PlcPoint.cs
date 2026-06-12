@@ -22,7 +22,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         public string PointName { get; set; }
 
         /// <summary>描述</summary>
-        public string Description { get; set; }
+        public string Description { get; set; } = "";
 
         /// <summary>区块 D/M/X/Y/R</summary>
         public string Area { get; set; }

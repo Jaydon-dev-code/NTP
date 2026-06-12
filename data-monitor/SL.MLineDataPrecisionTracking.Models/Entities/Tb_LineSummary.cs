@@ -84,8 +84,17 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         [SugarColumn(ColumnDescription = "内法兰分选数据")]
         public string InnerFlangeSortingData { get; set; } = "";
 
-        [SugarColumn(ColumnDescription = "半成品码")]
-        public string SemiFinishedProductCode { get; set; } = "";
+        /// <summary>
+        /// 外法兰半成品码
+        /// </summary>
+        [SugarColumn(ColumnDescription = "外法兰半成品码", DefaultValue = " ")]
+        public string OuterFlangeSemiFinishedCode { get; set; } = "";
+
+        /// <summary>
+        /// 内法兰半成品码
+        /// </summary>
+        [SugarColumn(ColumnDescription = "内法兰半成品码", DefaultValue = " ")]
+        public string InnerFlangeSemiFinishedCode { get; set; } = "";
 
         /// <summary>
         /// A面钢球组差
