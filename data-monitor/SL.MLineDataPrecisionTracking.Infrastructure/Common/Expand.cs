@@ -381,5 +381,19 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
                 throw new NotSupportedException($"不支持解析类型: {result}");
             }
         }
+
+
+        /// <summary>
+        /// 获取枚举描述
+        /// </summary>
+        public static string GetDescription(this Enum enumValue)
+        {
+            if (enumValue == null)
+                return string.Empty;
+
+            FieldInfo field = enumValue.GetType().GetField(enumValue.ToString());
+            var descAttr = field.GetCustomAttribute<DescriptionAttribute>();
+            return descAttr?.Description ?? enumValue.ToString();
+        }
     }
 }
