@@ -59,7 +59,6 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                     ?.ModelName;
                 tb_LineSummary.ModelName = modelNameB == null ? "" : modelNameB;
                 await _ineSummaryRepository.InsertableAsync(tb_LineSummary);
-                lineData.IsUsing = true;
             }
             return await _lineARepository.InsertableAsync(lineData) > 0;
         }

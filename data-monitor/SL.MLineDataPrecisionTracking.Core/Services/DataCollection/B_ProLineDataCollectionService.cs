@@ -47,7 +47,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         {
             var lineData = data as Tb_LineB;
             var aLineInfo = await _lineARepository.QueryableFirstAsync(
-                x => x.TrayNoA == lineData.LineATrayNo && x.IsUsing == false,
+                x => x.TrayNoA == lineData.LineATrayNo,
                 o => o.RecordTime
             );
             Tb_LineSummary tb_LineSummary = new Tb_LineSummary() { Result = ResultEnum.OK };
@@ -68,11 +68,6 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                 .FirstOrDefault(x => x.ModelNo == tb_LineSummary.ModelNo)
                 ?.ModelName;
             tb_LineSummary.ModelName = modelNameB == null ? "" : modelNameB;
-            if (aLineInfo != null)
-            {
-                aLineInfo.IsUsing = true;
-                await _lineARepository.UpdateableAsync(aLineInfo);
-            }
             tb_LineSummary.BLineFID = bLineFid;
             return await _lineSummaryRepository.InsertableAsync(tb_LineSummary) > 0;
         }
