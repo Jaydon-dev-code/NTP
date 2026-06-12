@@ -67,6 +67,10 @@
     <Compile Include="Entities\Tb_PlcConnection.cs" />
     <Compile Include="Entities\Tb_PlcPoint.cs" />
     <Compile Include="Entities\Tb_ServiceStatus.cs" />
+    <Compile Include="Enum\Assembly_A_LineNgCodeEnum.cs" />
+    <Compile Include="Enum\Assembly_A_LinePassCodeEnum.cs" />
+    <Compile Include="Enum\Assembly_B_LineNgCodeEnum.cs" />
+    <Compile Include="Enum\Assembly_B_LinePassCodeEnum.cs" />
     <Compile Include="Enum\ResultEnum.cs" />
     <Compile Include="ModelsAssemblyMarker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
