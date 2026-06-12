@@ -51,15 +51,16 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                 o => o.RecordTime
             );
             Tb_LineSummary tb_LineSummary = new Tb_LineSummary() { Result = ResultEnum.OK };
-            if (aLineInfo == null || lineData.NgCodeB != "0")
+            if (lineData.NgCodeB != "0")
             {
                 tb_LineSummary.Result = ResultEnum.NG;
             }
-            else
+            if (aLineInfo != null )
             {
                 lineData.ALineFID = aLineInfo.Id;
                 lineData.ALineRecordTime = aLineInfo.RecordTime;
             }
+           
             var bLineFid = await _lineBRepository.InsertableReturnIdentityAsync(lineData);
             ABToSummary(aLineInfo, lineData, tb_LineSummary, new List<string>() { "A线托盘编号" });
             var models = await _modelNoToNameRepository.QueryabletAsync(x => true);
