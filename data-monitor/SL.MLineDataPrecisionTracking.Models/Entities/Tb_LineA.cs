@@ -137,7 +137,5 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// </summary>
         [SugarColumn(ColumnDescription = "挡水环平行差")]
         public string WaterBaffleParallelDiff { get; set; }
-
-        public bool IsUsing { get; set; }
     }
 }
