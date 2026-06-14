@@ -19,14 +19,18 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
             // 自动映射所有同名属性
             AutoMapProperties(tb_LineSummary, this);
         }
+
         public static LineSummaryDto NotFindMakringNo(string makingNo)
         {
-            return new LineSummaryDto() { MarkingNo= makingNo,IsHave=false,Result=ResultEnum.NG };
+            return new LineSummaryDto()
+            {
+                MarkingNo = makingNo,
+                IsHave = false,
+                Result = ResultEnum.NG,
+            };
         }
-         LineSummaryDto()
-        {
-         
-        }
+
+        LineSummaryDto() { }
 
         /// <summary>
         /// 反射自动赋值同名属性
@@ -71,8 +75,17 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         [Description("序列码")]
         public string MarkingNo { get; set; }
 
-        [Description("半成品码")]
-        public string SemiFinishedProductCode { get; set; }
+        /// <summary>
+        /// 外法兰半成品码
+        /// </summary>
+        [Description("外法兰半成品码")]
+        public string OuterFlangeSemiFinishedCode { get; set; }
+
+        /// <summary>
+        /// 内法兰半成品码
+        /// </summary>
+        [Description("内法兰半成品码")]
+        public string InnerFlangeSemiFinishedCode { get; set; }
 
         [Description("A线成品时间")]
         public DateTime? ALineRecordTime { get; set; }
@@ -282,9 +295,9 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         public string EndRunout { get; set; }
 
         /// <summary>
-        /// 扭矩检测值
+        /// ABS反转齿数
         /// </summary>
-        [Description("扭矩检测值")]
+        [Description("ABS反转齿数")]
         public string TorqueValue { get; set; }
 
         /// <summary>

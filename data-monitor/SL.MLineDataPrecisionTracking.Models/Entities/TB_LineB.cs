@@ -138,9 +138,9 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         public string EndRunout { get; set; }
 
         /// <summary>
-        /// 扭矩检测值
+        /// ABS反转齿数
         /// </summary>
-        [SugarColumn(ColumnDescription = "扭矩检测值")]
+        [SugarColumn(ColumnDescription = "ABS反转齿数")]
         public string TorqueValue { get; set; }
 
         /// <summary>

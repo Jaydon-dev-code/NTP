@@ -357,17 +357,23 @@
                                 Binding="{Binding TrayNoB}"
                                 Header="托盘号B"
                                 IsReadOnly="True" />
-                            <DataGridTextColumn
-                                MinWidth="100"
-                                Binding="{Binding ShieldStationA}"
-                                Header="屏蔽工位A"
-                                IsReadOnly="True" />
+
                             <DataGridTextColumn
                                 MinWidth="100"
                                 Binding="{Binding NgCodeA}"
                                 Header="NG代码A"
                                 IsReadOnly="True" />
 
+                            <DataGridTextColumn
+                                MinWidth="100"
+                                Binding="{Binding NgCodeB}"
+                                Header="NG代码B"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                MinWidth="100"
+                                Binding="{Binding ShieldStationA}"
+                                Header="屏蔽工位A"
+                                IsReadOnly="True" />
                             <DataGridTextColumn
                                 MinWidth="120"
                                 Binding="{Binding SmallInnerRingSortingData}"
@@ -454,11 +460,7 @@
                                 Binding="{Binding ShieldStationB}"
                                 Header="屏蔽工位B"
                                 IsReadOnly="True" />
-                            <DataGridTextColumn
-                                MinWidth="100"
-                                Binding="{Binding NgCodeB}"
-                                Header="NG代码B"
-                                IsReadOnly="True" />
+
                             <DataGridTextColumn
                                 MinWidth="100"
                                 Binding="{Binding IdentificationCode}"
@@ -523,7 +525,7 @@
                             <DataGridTextColumn
                                 MinWidth="100"
                                 Binding="{Binding TorqueValue}"
-                                Header="扭矩检测值"
+                                Header="ABS反转齿数"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
                                 MinWidth="110"
