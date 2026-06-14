@@ -157,7 +157,7 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
 
             if (string.IsNullOrEmpty(search.MarkingNo) is false)
             {
-                exp.And(x => x.MarkingNo == search.MarkingNo);
+                exp.And(x => x.MarkingNo.Contains(search.MarkingNo));
             }
 
             return Result<Expression<Func<Tb_HeatTreatmentData, bool>>>.Success(exp.ToExpression());

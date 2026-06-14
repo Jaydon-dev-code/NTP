@@ -163,7 +163,7 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
             }
             if (string.IsNullOrEmpty(search.MarkingNo) is false)
             {
-                exp.And(x => x.MarkingNo == search.MarkingNo);
+                exp.And(x => x.MarkingNo.Contains(search.MarkingNo) );
             }
             if (string.IsNullOrEmpty(search.ModelName) is false)
             {
