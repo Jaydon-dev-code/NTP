@@ -110,7 +110,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                 Status = ServiceStatus.Running;
 
                 _lineReadPlcInfo = await InitPlcAddre();
-                OtherInit();
+                await OtherInitAsync();
                 if (_lineReadPlcInfo == null || _lineReadPlcInfo.Count <= 0)
                 {
                     Serilog.Log.Warning(
@@ -234,7 +234,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             Start();
         }
 
-        protected abstract void OtherInit();
+        protected abstract Task OtherInitAsync();
         protected abstract bool OtherCanCollection();
         protected abstract Task<bool> InsterCollectionData(object data);
 
@@ -315,7 +315,10 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             var re = _mcp.Read(_plcCallPCCanCollectionPoint);
             if (re.IsSuccess is false || re.Data.Value[0].ObjToBool() is false)
             {
-                Serilog.Log.Debug("[采集开始点位数据读取]【{_lineName}】plc未触发开始采集信号。", _lineName);
+                Serilog.Log.Debug(
+                    "[采集开始点位数据读取]【{_lineName}】plc未触发开始采集信号。",
+                    _lineName
+                );
                 return false;
             }
             else

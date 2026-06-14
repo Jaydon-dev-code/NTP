@@ -24,6 +24,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
     {
         DevPlcPointMcDto _plcCallPCTrayNoPoint;
         string _lastTrayNoPoint;
+        List<Tb_ModelNoToName> _models;
         protected override string _lineName { get; set; } = "A线";
         protected override Type DataModelType => typeof(Tb_LineA);
 
@@ -50,11 +51,16 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             var lineData = data as Tb_LineA;
             if (lineData.NgCodeA != "0")
             {
+                if (int.TryParse(lineData.NgCodeA, out var ngCodeA))
+                {
+                    lineData.NgCodeA =
+                        $"({ngCodeA}) {((Assembly_A_LineNgCodeEnum)ngCodeA).GetDescription()}";
+                }
                 Tb_LineSummary tb_LineSummary = new Tb_LineSummary() { Result = ResultEnum.NG };
                 ABToSummary(lineData, null, tb_LineSummary);
-                var models = await _modelNoToNameRepository.QueryabletAsync(x => true);
+
                 tb_LineSummary.ModelNo = lineData.ModelNoA;
-                var modelNameB = models
+                var modelNameB = _models
                     .FirstOrDefault(x => x.ModelNo == tb_LineSummary.ModelNo)
                     ?.ModelName;
                 tb_LineSummary.ModelName = modelNameB == null ? "" : modelNameB;
@@ -63,9 +69,10 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             return await _lineARepository.InsertableAsync(lineData) > 0;
         }
 
-        protected override void OtherInit()
+        protected override async Task OtherInitAsync()
         {
             _plcCallPCTrayNoPoint = _lineReadPlcInfo.First(x => x.PointName == "托盘号A");
+            _models = await _modelNoToNameRepository.QueryabletAsync(x => true);
         }
 
         protected override bool OtherCanCollection()

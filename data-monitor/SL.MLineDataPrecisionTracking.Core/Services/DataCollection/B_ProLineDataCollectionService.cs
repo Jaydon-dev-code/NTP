@@ -23,7 +23,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         Tb_LineARepository _lineARepository;
         Tb_LineSummaryRepository _lineSummaryRepository;
         Tb_ModelNoToNameRepository _modelNoToNameRepository;
-
+        List<Tb_ModelNoToName> _models;
         protected override string _lineName { get; set; } = "B线";
         protected override Type DataModelType => typeof(Tb_LineB);
 
@@ -53,6 +53,11 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             Tb_LineSummary tb_LineSummary = new Tb_LineSummary() { Result = ResultEnum.OK };
             if (lineData.NgCodeB != "0")
             {
+                if (int.TryParse(lineData.NgCodeB, out var ngCodeB))
+                {
+                    lineData.NgCodeB =
+                        $"({ngCodeB}) {((Assembly_B_LineNgCodeEnum)ngCodeB).GetDescription()}";
+                }
                 tb_LineSummary.Result = ResultEnum.NG;
             }
             if (aLineInfo != null )
@@ -60,12 +65,11 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                 lineData.ALineFID = aLineInfo.Id;
                 lineData.ALineRecordTime = aLineInfo.RecordTime;
             }
-           
             var bLineFid = await _lineBRepository.InsertableReturnIdentityAsync(lineData);
             ABToSummary(aLineInfo, lineData, tb_LineSummary, new List<string>() { "A线托盘编号" });
-            var models = await _modelNoToNameRepository.QueryabletAsync(x => true);
+      
             tb_LineSummary.ModelNo = lineData.ModelNoB;
-            var modelNameB = models
+            var modelNameB = _models
                 .FirstOrDefault(x => x.ModelNo == tb_LineSummary.ModelNo)
                 ?.ModelName;
             tb_LineSummary.ModelName = modelNameB == null ? "" : modelNameB;
@@ -73,9 +77,10 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             return await _lineSummaryRepository.InsertableAsync(tb_LineSummary) > 0;
         }
 
-        protected override void OtherInit()
+        protected override async Task OtherInitAsync()
         {
             _plcCallPCTrayNoPoint = _lineReadPlcInfo.First(x => x.PointName == "托盘号B");
+            _models = await _modelNoToNameRepository.QueryabletAsync(x => true);
         }
 
         protected override bool OtherCanCollection()

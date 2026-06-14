@@ -36,7 +36,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             return await _rclRepository.InsertableAsync(heatData) > 0;
         }
 
-        protected override void OtherInit()
+        protected override async Task OtherInitAsync()
         {
             _plcCallPCMarkingNoPoint = _lineReadPlcInfo.First(x => x.PointName == "序列码");
         }
