@@ -58,23 +58,7 @@ namespace SL.MLineDataPrecisionTracking.Service
             builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
             builder.RegisterType<OwinHostService>().As<OwinHostService>();
             Container = builder.Build();
-            cc();
         }
 
-        void cc()
-        {
-            IHubContext _hubContext = Container.Resolve<IHubContext>();
-            Task.Run(() => {
-                while (true)
-                {
-                    _hubContext.Clients.All.ScanRecord(
-                     new ScanRecord() { IsHave = true, MarkingNo = "122222222" }
-                 );
-                    Thread.Sleep(1000);
-
-                }
-            });
-
-        }
     }
 }
