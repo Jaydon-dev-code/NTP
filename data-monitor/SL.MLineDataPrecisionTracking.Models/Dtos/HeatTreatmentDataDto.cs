@@ -1,5 +1,3 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using SL.MLineDataPrecisionTracking.Models.Entities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,6 +5,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using SL.MLineDataPrecisionTracking.Models.Entities;
 
 namespace SL.MLineDataPrecisionTracking.Models.Dtos
 {
@@ -21,8 +21,9 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         /// <param name="entity">实体对象</param>
         public HeatTreatmentDataDto(Tb_HeatTreatmentData entity)
         {
-            AutoMapProperties(entity,this);
+            AutoMapProperties(entity, this);
         }
+
         /// <summary>
         /// 反射自动赋值同名属性
         /// </summary>
@@ -53,20 +54,16 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
 
         public static HeatTreatmentDataDto NotFindMakringNo(string markingNo)
         {
-            return new HeatTreatmentDataDto() { MarkingNo= markingNo ,IsHave=false};
+            return new HeatTreatmentDataDto() { MarkingNo = markingNo, IsHave = false };
         }
 
-         HeatTreatmentDataDto()
-        {
-          
-       
-        }
+        HeatTreatmentDataDto() { }
 
         /// <summary>
         /// 记录时间
         /// </summary>
         [Description("记录时间")]
-        public DateTime?  RecordTime { get; set; }
+        public DateTime? RecordTime { get; set; }
 
         /// <summary>
         /// 二维码打标内容
@@ -121,6 +118,9 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         /// </summary>
         [Description("辅喷冷却水量（L/分）")]
         public string AuxiliarySprayCoolingWater { get; set; }
+
+        [Description("能量（kJ）")]
+        public string Energy { get; set; }
 
         private bool _isHave = true;
 

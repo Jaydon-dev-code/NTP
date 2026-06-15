@@ -1,9 +1,9 @@
-﻿using SqlSugar;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SqlSugar;
 
 namespace SL.MLineDataPrecisionTracking.Models.Entities
 {
@@ -14,6 +14,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         public int Id { get; set; }
 
         public DateTime RecordTime { get; set; } = DateTime.Now;
+
         /// <summary>
         /// 加热时间（单位：秒/分钟，根据业务定义）
         /// </summary>
@@ -67,5 +68,11 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// </summary>
         [SugarColumn(ColumnDescription = "序列码")]
         public string MarkingNo { get; set; }
+
+        /// <summary>
+        /// 能量=输出功率*加热实际
+        /// </summary>
+        [SugarColumn(DefaultValue = "0")]
+        public string Energy { get; set; }
     }
 }

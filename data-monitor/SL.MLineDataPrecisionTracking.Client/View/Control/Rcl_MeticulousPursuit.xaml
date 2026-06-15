@@ -272,6 +272,12 @@
                                 Header="辅喷冷却水量（L/分）"
                                 IsReadOnly="True" />
 
+                            <DataGridTextColumn
+                                MinWidth="120"
+                                Binding="{Binding Energy}"
+                                Header="能量（kJ）"
+                                IsReadOnly="True" />
+
                         </DataGrid.Columns>
                     </DataGrid>
                     <hc:Drawer

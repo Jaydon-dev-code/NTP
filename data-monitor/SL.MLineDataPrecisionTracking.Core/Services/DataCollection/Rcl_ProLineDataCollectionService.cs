@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Dtos;
@@ -33,6 +34,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         protected override async Task<bool> InsterCollectionData(object data)
         {
             var heatData = data as Tb_HeatTreatmentData;
+            heatData.Energy=$"{heatData.HeatingTime}*{heatData.OutputPower}".StringCompute().ToString();
             return await _rclRepository.InsertableAsync(heatData) > 0;
         }
 
