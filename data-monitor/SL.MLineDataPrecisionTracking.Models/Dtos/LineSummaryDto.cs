@@ -414,6 +414,42 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         [Description("振动上RH")]
         public string VibrationUpperRH { get; set; }
 
+        /// <summary>
+        /// 螺栓压装1
+        /// </summary>
+        [Description("螺栓压装1")]
+        public string BoltPressAssemble1 { get; set; }
+
+        /// <summary>
+        /// 螺栓压装2
+        /// </summary>
+        [Description("螺栓压装2")]
+        public string BoltPressAssemble2 { get; set; }
+
+        /// <summary>
+        /// 螺栓压装3
+        /// </summary>
+        [Description("螺栓压装3")]
+        public string BoltPressAssemble3 { get; set; }
+
+        /// <summary>
+        /// 螺栓压装4
+        /// </summary>
+        [Description("螺栓压装4")]
+        public string BoltPressAssemble4 { get; set; }
+
+        /// <summary>
+        /// 螺栓压装5
+        /// </summary>
+        [Description("螺栓压装5")]
+        public string BoltPressAssemble5 { get; set; }
+
+        /// <summary>
+        /// 螺栓压装avg
+        /// </summary>
+        [Description("螺栓压装AVG")]
+        public string BoltPressAssembleAVG { get; set; }
+
         private bool _isHave = true;
 
         public bool IsHave

@@ -42,7 +42,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// <summary>
         /// 屏蔽工位
         /// </summary>
-        [SugarColumn(ColumnDescription = "屏蔽工位B")]
+        [SugarColumn(ColumnDescription = "屏蔽工位B", ColumnDataType = "varchar(500)")]
         public string ShieldStationB { get; set; }
 
        

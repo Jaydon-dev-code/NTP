@@ -14,7 +14,6 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-
     <UserControl.Resources>
         <ResourceDictionary>
             <converters:BoolInverter x:Key="BoolInverter" />
@@ -29,17 +28,12 @@
                 x:Key="ResultEnum"
                 MethodName="GetNames"
                 ObjectType="{x:Type sys:Enum}">
-
                 <ObjectDataProvider.MethodParameters>
-
                     <x:Type TypeName="usmodels:ResultEnum" />
-
                 </ObjectDataProvider.MethodParameters>
-
             </ObjectDataProvider>
         </ResourceDictionary>
     </UserControl.Resources>
-
 
     <Grid Margin="0,5">
         <Grid.Resources>
@@ -72,7 +66,6 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="120" />
                 <ColumnDefinition Width="*" />
-
             </Grid.ColumnDefinitions>
             <TextBlock
                 Grid.Row="0"
@@ -234,8 +227,6 @@
                 SelectedIndex="0"
                 SelectedValue="{Binding QueryConditions.Result, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-
-
             <TextBlock
                 Grid.Row="8"
                 Grid.Column="0"
@@ -250,17 +241,12 @@
                 hc:TitleElement.TitlePlacement="Left"
                 hc:TitleElement.TitleWidth="120"
                 Text="{Binding QueryConditions.MarkingNo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-
-
-
                 <TextBox.InputBindings>
                     <KeyBinding
                         Key="Enter"
                         Command="{Binding MarkingNoQueryCommand}"
                         CommandParameter="{Binding ElementName=MarkingNo}" />
                 </TextBox.InputBindings>
-
-
             </TextBox>
             <Button
                 Grid.Row="0"
@@ -285,7 +271,6 @@
                 CommandParameter="{Binding ElementName=MarkingNo}"
                 Content="扫码查询"
                 IsChecked="{Binding QueryConditions.IsScanCode, Mode=TwoWay}" />
-
         </Grid>
         <hc:TransitioningContentControl Grid.Row="1" Margin="0,5">
             <hc:DrawerContainer>
@@ -313,7 +298,6 @@
                                     <DataTrigger Binding="{Binding IsHave}" Value="False">
                                         <Setter Property="Background" Value="Red" />
                                     </DataTrigger>
-
 
                                     <!--<DataTrigger Binding="{Binding IsHave}" Value="True">
                                         <Setter Property="Background" Value="Transparent" />
@@ -374,6 +358,19 @@
                                 Binding="{Binding ShieldStationA}"
                                 Header="屏蔽工位A"
                                 IsReadOnly="True" />
+
+                            <DataGridTextColumn
+                                MinWidth="120"
+                                Binding="{Binding OuterFlangeSemiFinishedCode}"
+                                Header="外法兰半成品码"
+                                IsReadOnly="True" />
+
+                            <DataGridTextColumn
+                                MinWidth="120"
+                                Binding="{Binding InnerFlangeSemiFinishedCode}"
+                                Header="内法兰半成品码"
+                                IsReadOnly="True" />
+
                             <DataGridTextColumn
                                 MinWidth="120"
                                 Binding="{Binding SmallInnerRingSortingData}"
@@ -444,6 +441,43 @@
                                 Binding="{Binding SmallInnerRingAssembleDisplacement}"
                                 Header="小内圈合套位移"
                                 IsReadOnly="True" />
+                            <DataGridTextColumn
+                                MinWidth="110"
+                                Binding="{Binding BoltPressAssemble1}"
+                                Header="螺栓压装1"
+                                IsReadOnly="True" />
+
+                            <DataGridTextColumn
+                                MinWidth="110"
+                                Binding="{Binding BoltPressAssemble2}"
+                                Header="螺栓压装2"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                MinWidth="110"
+                                Binding="{Binding BoltPressAssemble3}"
+                                Header="螺栓压装3"
+                                IsReadOnly="True" />
+
+                            <DataGridTextColumn
+                                MinWidth="110"
+                                Binding="{Binding BoltPressAssemble4}"
+                                Header="螺栓压装4"
+                                IsReadOnly="True" />
+
+                            <DataGridTextColumn
+                                MinWidth="110"
+                                Binding="{Binding BoltPressAssemble5}"
+                                Header="螺栓压装5"
+                                IsReadOnly="True" />
+
+
+                            <DataGridTextColumn
+                                MinWidth="110"
+                                Binding="{Binding BoltPressAssembleAVG}"
+                                Header="螺栓压装AVG"
+                                IsReadOnly="True" />
+
+
                             <DataGridTextColumn
                                 MinWidth="110"
                                 Binding="{Binding SealRingParallelDiff}"
@@ -641,7 +675,6 @@
                                     <RowDefinition Height="20" />
                                     <RowDefinition Height="*" />
                                     <RowDefinition Height="20" />
-
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" Orientation="Horizontal">
                                     <TextBlock VerticalAlignment="Center" Text="扫码记录（近100条）" />
@@ -649,7 +682,6 @@
                                         Command="{Binding SaveQueryValueCommand}"
                                         Content="导出"
                                         Style="{StaticResource ButtonInfo.Small}" />
-
                                 </StackPanel>
                                 <ListBox
                                     Grid.Row="1"
@@ -669,7 +701,6 @@
                                                     <ColumnDefinition Width="Auto" />
                                                     <!--  按钮自适应宽度  -->
                                                 </Grid.ColumnDefinitions>
-
 
                                                 <!--  文字：靠左  -->
                                                 <TextBlock
@@ -719,12 +750,8 @@
                             </Grid>
                         </Border>
                     </hc:Drawer>
-
                 </Grid>
-
             </hc:DrawerContainer>
-
-
         </hc:TransitioningContentControl>
 
         <WrapPanel
@@ -751,10 +778,6 @@
                 SelectedItem="{Binding PaginationPages.DataCountPerPage, Mode=TwoWay}" />
             <TextBlock Margin="0,0,5,0" Text="条" />
             <TextBlock Text="{Binding PaginationPages.TotalCount, StringFormat=共：{0}条}" />
-
-
         </WrapPanel>
-
     </Grid>
-
 </UserControl>

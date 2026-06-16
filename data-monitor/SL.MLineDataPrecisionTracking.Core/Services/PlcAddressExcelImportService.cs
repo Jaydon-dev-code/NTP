@@ -95,12 +95,12 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                     }
 
                     // 3. 批量插入点位
-                    var points = group
+                    List<Tb_PlcPoint> points = group
                         .Select(x => new Tb_PlcPoint
                         {
                             PlcConnectionId = plcId,
                             PointName = x.PointName,
-                            Description = x.Description,
+                            Description = x.Description==null?"":x.Description,
                             Area = x.Area,
                             Address = x.Address.ToString(),
                             DataType = x.DataType,

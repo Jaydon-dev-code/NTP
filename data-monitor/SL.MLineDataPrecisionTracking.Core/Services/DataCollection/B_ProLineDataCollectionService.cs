@@ -51,6 +51,20 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                 o => o.RecordTime
             );
             Tb_LineSummary tb_LineSummary = new Tb_LineSummary() { Result = ResultEnum.OK };
+            if (lineData.ShieldStationB != "0")
+            {
+                if (int.TryParse(lineData.ShieldStationB, out var shieldStationB))
+                {
+                    StringBuilder stringBuilder = new StringBuilder();
+                    stringBuilder.Append($"({lineData.ShieldStationB}) ");
+                    foreach (var item in shieldStationB.ParseBitEnum<Assembly_B_LinePassCodeEnum>())
+                    {
+                        stringBuilder.Append(item.Description + " ");
+                    }
+                    lineData.ShieldStationB = stringBuilder.ToString();
+
+                }
+            }
             if (lineData.NgCodeB != "0")
             {
                 if (int.TryParse(lineData.NgCodeB, out var ngCodeB))
@@ -58,6 +72,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                     lineData.NgCodeB =
                         $"({ngCodeB}) {((Assembly_B_LineNgCodeEnum)ngCodeB).GetDescription()}";
                 }
+                lineData.MarkingNo = "";
                 tb_LineSummary.Result = ResultEnum.NG;
             }
             if (aLineInfo != null )

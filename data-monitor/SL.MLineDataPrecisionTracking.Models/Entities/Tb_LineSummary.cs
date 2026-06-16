@@ -51,7 +51,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// <summary>
         /// 屏蔽工位
         /// </summary>
-        [SugarColumn(ColumnDescription = "屏蔽工位A")]
+        [SugarColumn(ColumnDescription = "屏蔽工位A", ColumnDataType = "varchar(500)")]
         public string ShieldStationA { get; set; } = "";
 
         /// <summary>
@@ -183,7 +183,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// <summary>
         /// 屏蔽工位
         /// </summary>
-        [SugarColumn(ColumnDescription = "屏蔽工位B")]
+        [SugarColumn(ColumnDescription = "屏蔽工位B", ColumnDataType = "varchar(500)")]
         public string ShieldStationB { get; set; } = "";
 
         /// <summary>
@@ -389,5 +389,41 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// </summary>
         [SugarColumn(ColumnDescription = "振动上RH")]
         public string VibrationUpperRH { get; set; } = "";
+
+        /// <summary>
+        /// 螺栓压装1
+        /// </summary>
+        [SugarColumn(ColumnDescription = "螺栓压装1", DefaultValue = "0")]
+        public string BoltPressAssemble1 { get; set; }
+
+        /// <summary>
+        /// 螺栓压装2
+        /// </summary>
+        [SugarColumn(ColumnDescription = "螺栓压装2", DefaultValue = "0")]
+        public string BoltPressAssemble2 { get; set; }
+
+        /// <summary>
+        /// 螺栓压装3
+        /// </summary>
+        [SugarColumn(ColumnDescription = "螺栓压装3", DefaultValue = "0")]
+        public string BoltPressAssemble3 { get; set; }
+
+        /// <summary>
+        /// 螺栓压装4
+        /// </summary>
+        [SugarColumn(ColumnDescription = "螺栓压装4", DefaultValue = "0")]
+        public string BoltPressAssemble4 { get; set; }
+
+        /// <summary>
+        /// 螺栓压装5
+        /// </summary>
+        [SugarColumn(ColumnDescription = "螺栓压装5", DefaultValue = "0")]
+        public string BoltPressAssemble5 { get; set; }
+
+        /// <summary>
+        /// 螺栓压装AVg
+        /// </summary>
+        [SugarColumn(ColumnDescription = "螺栓压装AVG", DefaultValue = "0")]
+        public string BoltPressAssembleAVG { get; set; }
     }
 }

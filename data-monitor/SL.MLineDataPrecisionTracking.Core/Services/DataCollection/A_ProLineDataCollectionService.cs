@@ -49,6 +49,21 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         protected override async Task<bool> InsterCollectionData(object data)
         {
             var lineData = data as Tb_LineA;
+            if (lineData.ShieldStationA!="0")
+            {
+                if (int.TryParse(lineData.ShieldStationA, out var shieldStationA))
+                {
+                    StringBuilder stringBuilder = new StringBuilder();
+                    stringBuilder.Append($"({lineData.ShieldStationA}) ");
+                    foreach (var item in shieldStationA.ParseBitEnum<Assembly_A_LinePassCodeEnum>())
+                    {
+                        stringBuilder.Append(item.Description + " ");
+                    }
+                    lineData.ShieldStationA=stringBuilder.ToString();
+
+                }
+            }
+
             if (lineData.NgCodeA != "0")
             {
                 if (int.TryParse(lineData.NgCodeA, out var ngCodeA))
