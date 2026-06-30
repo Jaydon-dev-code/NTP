@@ -73,6 +73,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
         public ICommand ImportEnergyRangeCommand { get; }
         public ICommand ToggleModelEnabledCommand { get; }
         public ICommand SetCurrentProductionCommand { get; }
+        public ICommand ExportTemplateCommand { get; }
 
         public FrmBr8Sec63HeatEnergyChartViewModel(HubClien hubClien, EnergyRangeApi energyRangeApi)
         {
@@ -91,6 +92,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 ToggleModelEnabledAsync
             );
             SetCurrentProductionCommand = new AsyncRelayCommand(SetCurrentProductionAsync);
+            ExportTemplateCommand = new RelayCommand(ExportTemplate);
 
             _ = LoadCurrentModelAsync();
         }
@@ -129,8 +131,13 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
         {
             return point =>
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                try
                 {
+                    if (Application.Current?.Dispatcher == null)
+                        return;
+
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
                     if (point.X > _maxTime)
                         return;
 
@@ -154,8 +161,10 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                         PlotControl.Plot.Axes.SetLimits(0, currentMaxX + 0.5, 0, dataMaxY + 30);
                     }
 
-                    PlotControl.Refresh();
-                });
+                        PlotControl.Refresh();
+                    });
+                }
+                catch { }
             };
         }
 
@@ -381,6 +390,29 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             }
         }
 
+        private void ExportTemplate()
+        {
+            var dialog = new SaveFileDialog
+            {
+                Filter = "Excel文件 (*.xlsx)|*.xlsx",
+                FileName = "能量范围.xlsx",
+                Title = "导出模板文件"
+            };
+
+            if (dialog.ShowDialog() != true) return;
+
+            string src = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "能量范围.xlsx");
+            if (System.IO.File.Exists(src))
+            {
+                System.IO.File.Copy(src, dialog.FileName, true);
+                HandyControl.Controls.MessageBox.Show("模板导出成功", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                HandyControl.Controls.MessageBox.Show($"模板文件不存在：{src}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private async Task SetCurrentProductionAsync()
         {
             if (SelectedProductModel == null) return;
@@ -447,7 +479,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 polygon.LineStyle.Pattern = LinePattern.Solid;
             }
 
-            SettingPlotControl.Plot.Axes.SetLimits(0, xMax + 0.5, 0, yMax + 5);
+            SettingPlotControl.Plot.Axes.SetLimits(0, xMax + 0.5, 0, yMax + 30);
             SettingPlotControl.Refresh();
         }
     }
