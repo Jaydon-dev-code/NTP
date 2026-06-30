@@ -1,23 +1,15 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Net;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using McpXLib;
 using McpXLib.Enums;
-using NPOI.XSSF.UserModel;
-using Org.BouncyCastle.Utilities.Net;
 using Serilog;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Dtos;
 using SqlSugar;
-using SqlSugar.Extensions;
 
 namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
 {
