@@ -47,6 +47,8 @@
     <Compile Include="PLCCommunication\McpCommunication.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Storage\BaseRepository.cs" />
+    <Compile Include="Storage\Tb_EnergyRangeDetailRepository.cs" />
+    <Compile Include="Storage\Tb_EnergyRangeRepository.cs" />
     <Compile Include="Storage\Tb_EquipmentRepository.cs" />
     <Compile Include="Storage\Tb_HeatTreatmentDatatRepository.cs" />
     <Compile Include="Storage\Tb_LineARepository.cs" />
