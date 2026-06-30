@@ -55,6 +55,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\DataCollection\A_ProLineDataCollectionService.cs" />
     <Compile Include="Services\DataCollection\B_ProLineDataCollectionService.cs" />
+    <Compile Include="Services\EnergyRangeExcelImportService.cs" />
     <Compile Include="Services\PlcAddressExcelImportService.cs" />
     <Compile Include="Services\DataCollection\ProLineDataCollectionServiceAbstract.cs" />
     <Compile Include="Services\DataCollection\Rcl_ProLineDataCollectionService.cs" />

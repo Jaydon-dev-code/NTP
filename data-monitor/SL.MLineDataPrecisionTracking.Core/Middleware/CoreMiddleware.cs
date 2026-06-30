@@ -19,6 +19,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Middleware
         public static void AddCoreMiddleware(this ContainerBuilder services)
         {
             services.RegisterType<PlcAddressExcelImportService>().SingleInstance();
+            services.RegisterType<EnergyRangeExcelImportService>().SingleInstance();
             services
            .Register(c => GlobalHost.ConnectionManager.GetHubContext<ChatHub>())
            .As<IHubContext>()
