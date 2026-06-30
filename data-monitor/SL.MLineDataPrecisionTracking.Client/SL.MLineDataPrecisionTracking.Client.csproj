@@ -102,6 +102,7 @@
     <Compile Include="Common\ViewLinkServerInfoAttribute.cs" />
     <Compile Include="Http\BaseHttp.cs" />
     <Compile Include="Http\DeviceCollectionConfigApi.cs" />
+    <Compile Include="Http\EnergyRangeApi.cs" />
     <Compile Include="Http\HubClien.cs" />
     <Compile Include="Http\MeticulousPursuitApi.cs" />
     <Compile Include="Http\Rcl_MeticulousPursuitApi.cs" />
@@ -109,11 +110,15 @@
     <Compile Include="Middleware\HttpMiddleware.cs" />
     <Compile Include="Middleware\ViewMiddleware.cs" />
     <Compile Include="ViewModel\Control\DeviceCollectionConfigViewModel.cs" />
+    <Compile Include="ViewModel\Control\FrmBr8Sec63HeatEnergyChartViewModel.cs" />
     <Compile Include="ViewModel\Control\MeticulousPursuitViewModel.cs" />
     <Compile Include="ViewModel\Control\Rcl_MeticulousPursuitViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="View\Control\DeviceCollectionConfig.xaml.cs">
       <DependentUpon>DeviceCollectionConfig.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Control\FrmBr8Sec63HeatEnergyChart.xaml.cs">
+      <DependentUpon>FrmBr8Sec63HeatEnergyChart.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Control\MeticulousPursuit.xaml.cs">
       <DependentUpon>MeticulousPursuit.xaml</DependentUpon>
@@ -148,6 +153,7 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <None Include="Resources\测试点位数据.xlsx" />
+    <None Include="Resources\能量范围.xlsx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -161,6 +167,10 @@
     <Page Include="View\Control\DeviceCollectionConfig.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Control\FrmBr8Sec63HeatEnergyChart.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Control\MeticulousPursuit.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -201,6 +211,9 @@
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.4</Version>
+    </PackageReference>
+    <PackageReference Include="ScottPlot.WPF">
+      <Version>5.1.59</Version>
     </PackageReference>
     <PackageReference Include="ValueConverters">
       <Version>3.1.22</Version>

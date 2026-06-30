@@ -1,0 +1,240 @@
+﻿<UserControl
+  x:Class="SL.MLineDataPrecisionTracking.Client.View.Control.FrmBr8Sec63HeatEnergyChart"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:converters="http://schemas.superdev.ch/valueconverters/2016/xaml"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:hc="https://handyorg.github.io/handycontrol"
+  xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+  xmlns:local="clr-namespace:SL.MLineDataPrecisionTracking.Client.View.Control"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  d:DesignHeight="450"
+  d:DesignWidth="800"
+  mc:Ignorable="d"
+>
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <converters:BoolInverter x:Key="BoolInverter" />
+      <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+      <converters:ValueConverterGroup x:Key="InverterBoolToVisibilityConverter">
+        <converters:BoolInverter />
+        <converters:BoolToVisibilityConverter />
+      </converters:ValueConverterGroup>
+      <Style BasedOn="{StaticResource TextBoxBaseStyle}" TargetType="TextBox">
+        <Setter Property="Margin" Value="2.5" />
+        <Setter Property="MinWidth" Value="50" />
+        <Setter Property="Height" Value="30" />
+      </Style>
+      <Style BasedOn="{StaticResource TextBlockBaseStyle}" TargetType="TextBlock">
+        <Setter Property="Margin" Value="2" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextAlignment" Value="Center" />
+      </Style>
+    </ResourceDictionary>
+  </UserControl.Resources>
+  <Grid>
+    <TabControl>
+      <TabItem Header="加热数据">
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+          </Grid.RowDefinitions>
+          <Grid Grid.Row="0">
+            <Grid.RowDefinitions>
+              <RowDefinition Height="*" />
+              <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="6*" />
+              <ColumnDefinition Width="5*" />
+            </Grid.ColumnDefinitions>
+
+            <UniformGrid Grid.Row="0" Grid.Column="0" Margin="5,0,0,0" Columns="6" Rows="2">
+              <TextBlock Text="直流电压(V)" />
+              <TextBlock Text="直流电流(A)" />
+              <TextBlock Text="启动频率(KHz)" />
+              <TextBlock Text="加热功率(KW)" />
+              <TextBlock Text="加热时间(S)" />
+              <TextBlock Text="输出能量(KWs)" />
+              <TextBox Text="{Binding DirectVoltage}" />
+              <TextBox Text="{Binding DirectCurrent}" />
+              <TextBox Text="{Binding StartFrequency}" />
+              <TextBox Text="{Binding HeatPower}" />
+              <TextBox Text="{Binding HeatTime}" />
+              <TextBox Text="{Binding OutputEnergy}" />
+            </UniformGrid>
+            <UniformGrid Grid.Row="0" Grid.Column="1" Margin="5,0,0,0" Columns="4" Rows="2">
+              <TextBlock Text="淬火温度(°C)" />
+              <TextBlock Text="冷却水温(°C)" />
+              <TextBlock Text="流量A1(L/Min)" />
+              <TextBlock Text="流量A2(L/Min)" />
+
+              <TextBox Text="{Binding QuenchingTemperature}" />
+              <TextBox Text="{Binding CoolingWaterTemperature}" />
+              <TextBox Text="{Binding FlowRateA1}" />
+              <TextBox Text="{Binding FlowRateA2}" />
+            </UniformGrid>
+            <hc:UniformSpacingPanel
+              Grid.Row="1"
+              Grid.Column="0"
+              Margin="5,0,0,0"
+              Orientation="Horizontal"
+              Spacing="10"
+            >
+              <TextBlock Text="比较区间" />
+              <TextBox Text="{Binding StartTime}" />
+              <TextBlock Text="—" />
+              <TextBox Text="{Binding EndTime}" />
+              <TextBlock Margin="-5,0,0,0" Text="S" />
+              <TextBlock Text="加热点" />
+              <TextBox Text="{Binding HeatPoint}" />
+              <TextBlock Text="加热时间基准" />
+              <TextBox Text="{Binding HeatTimeBase}" />
+              <TextBlock Text="输出能量基准" />
+              <TextBox Text="{Binding OutputEnergyBase}" />
+            </hc:UniformSpacingPanel>
+
+            <hc:UniformSpacingPanel
+              Grid.Row="1"
+              Grid.Column="1"
+              Margin="5,0,0,0"
+              Orientation="Horizontal"
+              Spacing="10"
+            >
+              <TextBlock Text="感应器线圈A1编号" />
+              <TextBox Text="{Binding SensorCoilA1No}" />
+              <TextBlock Text="总加热次数" />
+              <TextBox Text="{Binding TotalHeatCount}" />
+              <TextBlock Text="总加热时间" />
+              <TextBox Text="{Binding TotalHeatTime}" />
+            </hc:UniformSpacingPanel>
+          </Grid>
+          <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="200" />
+            </Grid.ColumnDefinitions>
+            <ContentControl Grid.Column="0" Content="{Binding PlotControl, Mode=OneWay}" />
+            <UniformGrid Grid.Column="1" Columns="2">
+              <TextBlock Text="次品件数A" />
+              <TextBox Text="{Binding DefectCountA}" />
+              <TextBlock Text="良品件数A" />
+              <TextBox Text="{Binding GoodCountA}" />
+              <TextBlock Text="总工件数A" />
+              <TextBox Text="{Binding TotalWorkpieceCountA}" />
+              <TextBlock Text="平均电压A" />
+              <TextBox Text="{Binding AvgVoltageA}" />
+              <TextBlock Text="平均电流A" />
+              <TextBox Text="{Binding AvgCurrentA}" />
+              <TextBlock Text="平均功率A" />
+              <TextBox Text="{Binding AvgPowerA}" />
+              <TextBlock Text="平均频率A" />
+              <TextBox Text="{Binding AvgFrequencyA}" />
+              <TextBlock Text="平均流量A1" />
+              <TextBox Text="{Binding AvgFlowA1}" />
+              <TextBlock Text="平均流量A2" />
+              <TextBox Text="{Binding AvgFlowA2}" />
+              <RadioButton Content="A工位" />
+              <RadioButton Content="B工位" />
+            </UniformGrid>
+          </Grid>
+        </Grid>
+      </TabItem>
+      <TabItem Header="设置">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+          <!--  Left panel: monitor item list + product models  -->
+          <Grid Grid.Column="0" Margin="5">
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="auto" />
+              <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Height="1" Margin="0,5" Background="Gray" />
+
+            <StackPanel Grid.Row="1" Orientation="Horizontal">
+              <TextBlock Margin="5,0,0,0" VerticalAlignment="Center" Text="产品型号" />
+              <Button
+                Margin="5,0,0,0"
+                Command="{Binding RefreshEnergyRangeCommand}"
+                Content="刷新"
+              />
+              <Button
+                Margin="5,0,0,0"
+                Command="{Binding ImportEnergyRangeCommand}"
+                Content="导入"
+              />
+              <Button
+                Margin="5,0,0,0"
+                Command="{Binding DeleteMonitorItemCommand}"
+                Content="删除"
+              />
+            </StackPanel>
+
+            <ListBox
+              Grid.Row="2"
+              Margin="0,5,0,0"
+              ItemsSource="{Binding ProductModels}"
+              SelectedItem="{Binding SelectedProductModel}"
+            >
+              <ListBox.ItemTemplate>
+                <DataTemplate>
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="Auto" />
+                      <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <CheckBox
+                      Grid.Column="0"
+                      Command="{Binding DataContext.ToggleModelEnabledCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                      CommandParameter="{Binding}"
+                      IsChecked="{Binding IsEnabled}"
+                      IsEnabled="False"
+                    />
+                    <TextBlock
+                      Grid.Column="1"
+                      Margin="5,0,0,0"
+                      VerticalAlignment="Center"
+                      Text="{Binding ProductModel}"
+                    />
+                  </Grid>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </Grid>
+
+          <!--  Right panel: chart + time axis configs  -->
+          <Grid Grid.Column="1" Margin="5">
+            <Grid Grid.Column="0">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+              </Grid.RowDefinitions>
+
+              <StackPanel Grid.Row="0" Margin="5" Orientation="Horizontal">
+                <TextBlock VerticalAlignment="Center" Text="当前型号：" />
+                <TextBlock
+                  VerticalAlignment="Center"
+                  FontWeight="Bold"
+                  Text="{Binding CurrentModelName}"
+                />
+                <Button
+                  Margin="5,0,0,0"
+                  Command="{Binding SetCurrentProductionCommand}"
+                  Content="设定为当前生产型号"
+                />
+              </StackPanel>
+
+              <ContentControl Grid.Row="1" Content="{Binding SettingPlotControl, Mode=OneWay}" />
+            </Grid>
+          </Grid>
+        </Grid>
+      </TabItem>
+    </TabControl>
+  </Grid>
+</UserControl>
