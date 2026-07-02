@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Diagnostics.SymbolStore;
+using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using NPOI.SS.Formula.Functions;
 using Org.BouncyCastle.Asn1.Ocsp;
-using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Dtos;
@@ -25,7 +25,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         DevPlcPointMcDto _plcCallPCTrayNoPoint;
         string _lastTrayNoPoint;
         List<Tb_ModelNoToName> _models;
-        protected override string _lineName { get; set; } = "A线";
+        protected override string[] _lineName { get; set; } = new string[] { "A线", "六分厂6-1装配A线" };
         protected override Type DataModelType => typeof(Tb_LineA);
 
         Tb_LineARepository _lineARepository;
@@ -41,6 +41,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         )
             : base(equipmentRepositor, mcp)
         {
+            ServiceName = "A线";
             _lineARepository = tb_LineARepository;
             _ineSummaryRepository = tb_LineSummaryRepository;
             _modelNoToNameRepository = tb_ModelNoToNameRepository;
@@ -49,16 +50,32 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         protected override async Task<bool> InsterCollectionData(object data)
         {
             var lineData = data as Tb_LineA;
+
+         
+
             if (lineData.ShieldStationA!="0")
             {
+              
                 if (int.TryParse(lineData.ShieldStationA, out var shieldStationA))
                 {
                     StringBuilder stringBuilder = new StringBuilder();
                     stringBuilder.Append($"({lineData.ShieldStationA}) ");
-                    foreach (var item in shieldStationA.ParseBitEnum<Assembly_A_LinePassCodeEnum>())
+                    if (ServiceName == "A线")
                     {
-                        stringBuilder.Append(item.Description + " ");
+                        foreach (var item in shieldStationA.ParseBitEnum<Assembly_A_LinePassCodeEnum>())
+                        {
+                            stringBuilder.Append(item.Description + " ");
+                        }
                     }
+                    else
+                    {
+                        foreach (var item in shieldStationA.ParseBitEnum<Assembly_6Factory6_1ALine_PassCodeEnum>())
+                        {
+                            stringBuilder.Append(item.Description + " ");
+                        }
+
+                    }
+                   
                     lineData.ShieldStationA=stringBuilder.ToString();
 
                 }
@@ -68,8 +85,17 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             {
                 if (int.TryParse(lineData.NgCodeA, out var ngCodeA))
                 {
-                    lineData.NgCodeA =
+                    if (ServiceName == "A线")
+                    {
+                        lineData.NgCodeA =
                         $"({ngCodeA}) {((Assembly_A_LineNgCodeEnum)ngCodeA).GetDescription()}";
+                    }
+                    else
+                    {
+                        lineData.NgCodeA =
+               $"({ngCodeA}) {((Assembly_6Factory6_1ALine_NgCodeEnum)ngCodeA).GetDescription()}";
+                    }
+                      
                 }
                 Tb_LineSummary tb_LineSummary = new Tb_LineSummary() { Result = ResultEnum.NG };
                 ABToSummary(lineData, null, tb_LineSummary);

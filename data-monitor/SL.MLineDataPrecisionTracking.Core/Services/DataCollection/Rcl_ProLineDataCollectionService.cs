@@ -18,7 +18,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         private DevPlcPointMcDto _plcCallPCMarkingNoPoint;
         private string _lastMarkingNo;
 
-        protected override string _lineName { get; set; } = "热处理";
+        protected override string[] _lineName { get; set; } = new string[] { "热处理" };
         protected override Type DataModelType => typeof(Tb_HeatTreatmentData);
 
         public Rcl_ProLineDataCollectionService(
@@ -28,6 +28,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         )
             : base(equipmentRepositor, mcp)
         {
+            ServiceName = "热处理";
             _rclRepository = rclRepository;
         }
 

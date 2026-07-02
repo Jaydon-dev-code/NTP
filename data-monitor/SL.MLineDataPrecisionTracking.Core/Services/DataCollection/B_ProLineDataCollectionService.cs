@@ -24,7 +24,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         Tb_LineSummaryRepository _lineSummaryRepository;
         Tb_ModelNoToNameRepository _modelNoToNameRepository;
         List<Tb_ModelNoToName> _models;
-        protected override string _lineName { get; set; } = "B线";
+        protected override string[] _lineName { get; set; } = new string[] { "B线", "六分厂6-1装配B线" };
         protected override Type DataModelType => typeof(Tb_LineB);
 
         public B_ProLineDataCollectionService(
@@ -37,6 +37,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         )
             : base(equipmentRepositor, mcp)
         {
+            ServiceName = "B线";
             _lineBRepository = tb_LineBRepository;
             _lineARepository = tb_LineARepository;
             _lineSummaryRepository = tb_LineSummaryRepository;
@@ -46,10 +47,15 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         protected override async Task<bool> InsterCollectionData(object data)
         {
             var lineData = data as Tb_LineB;
-            var aLineInfo = await _lineARepository.QueryableFirstAsync(
-                x => x.TrayNoA == lineData.LineATrayNo,
-                o => o.RecordTime
-            );
+            Tb_LineA aLineInfo = null;
+            if (lineData.LineATrayNo != "0" && !string.IsNullOrEmpty(lineData.LineATrayNo))
+            {
+                aLineInfo = await _lineARepository.QueryableFirstAsync(
+                    x => x.TrayNoA == lineData.LineATrayNo,
+                    o => o.RecordTime
+                );
+            }
+
             Tb_LineSummary tb_LineSummary = new Tb_LineSummary() { Result = ResultEnum.OK };
             if (lineData.ShieldStationB != "0")
             {
@@ -57,32 +63,51 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                 {
                     StringBuilder stringBuilder = new StringBuilder();
                     stringBuilder.Append($"({lineData.ShieldStationB}) ");
-                    foreach (var item in shieldStationB.ParseBitEnum<Assembly_B_LinePassCodeEnum>())
+                    if (ServiceName == "B线")
                     {
-                        stringBuilder.Append(item.Description + " ");
+                        foreach (var item in shieldStationB.ParseBitEnum<Assembly_B_LinePassCodeEnum>())
+                        {
+                            stringBuilder.Append(item.Description + " ");
+                        }
                     }
+                    else
+                    {
+                        foreach (var item in shieldStationB.ParseBitEnum<Assembly_6Factory6_1BLine_PassCodeEnum>())
+                        {
+                            stringBuilder.Append(item.Description + " ");
+                        }
+                    }
+                       
                     lineData.ShieldStationB = stringBuilder.ToString();
-
                 }
             }
             if (lineData.NgCodeB != "0")
             {
                 if (int.TryParse(lineData.NgCodeB, out var ngCodeB))
                 {
-                    lineData.NgCodeB =
+                    if (ServiceName == "B线")
+                    {
+                        lineData.NgCodeB =
                         $"({ngCodeB}) {((Assembly_B_LineNgCodeEnum)ngCodeB).GetDescription()}";
+                    }
+                    else
+                    {
+                        lineData.NgCodeB =
+                        $"({ngCodeB}) {((Assembly_6Factory6_1BLine_NgCodeEnum)ngCodeB).GetDescription()}";
+
+                    }
                 }
                 lineData.MarkingNo = "";
                 tb_LineSummary.Result = ResultEnum.NG;
             }
-            if (aLineInfo != null )
+            if (aLineInfo != null)
             {
                 lineData.ALineFID = aLineInfo.Id;
                 lineData.ALineRecordTime = aLineInfo.RecordTime;
             }
             var bLineFid = await _lineBRepository.InsertableReturnIdentityAsync(lineData);
             ABToSummary(aLineInfo, lineData, tb_LineSummary, new List<string>() { "A线托盘编号" });
-      
+
             tb_LineSummary.ModelNo = lineData.ModelNoB;
             var modelNameB = _models
                 .FirstOrDefault(x => x.ModelNo == tb_LineSummary.ModelNo)

@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 namespace SL.MLineDataPrecisionTracking.Models.Enum
 {
     public enum Br8Sec63HeatEnergyWorkEnum
-    {A
-            ，B
+    {
+        A,
+        B
     }
 }
