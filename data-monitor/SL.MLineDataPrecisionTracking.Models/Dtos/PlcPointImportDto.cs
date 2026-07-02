@@ -1,4 +1,5 @@
 ﻿using McpXLib.Enums;
+using SL.MLineDataPrecisionTracking.Models.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         public string PointName { get; set; }     // 点位名称
         public string Description { get; set; }   // 描述
         public string Area { get; set; }          // D/M/X/Y
-        public int Address { get; set; }          // 地址
+        public string Address { get; set; }          // 地址
         public string DataType { get; set; }      // Int16/Float/Bool
         public int Length { get; set; }
         public string WriteFormula { get; set; } = "";
