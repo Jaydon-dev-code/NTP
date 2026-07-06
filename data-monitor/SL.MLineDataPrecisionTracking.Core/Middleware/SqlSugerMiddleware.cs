@@ -12,9 +12,28 @@ namespace SL.MLineDataPrecisionTracking.Core.Middleware
 {
     public static class SqlSugerMiddleware
     {
-        static string connString = ConfigurationManager
+        static string _connString = ConfigurationManager
             .ConnectionStrings["DefaultConnection"]
             .ConnectionString;
+
+        static SqlSugar.DbType GetDbType()
+        {
+            string dbTypeStr = ConfigurationManager.AppSettings["DbType"] ?? "PostgreSQL";
+            switch (dbTypeStr.ToLower())
+            {
+                case "mysql":
+                    return SqlSugar.DbType.MySql;
+                case "sqlserver":
+                    return SqlSugar.DbType.SqlServer;
+                case "sqlite":
+                    return SqlSugar.DbType.Sqlite;
+                case "oracle":
+                    return SqlSugar.DbType.Oracle;
+                case "postgresql":
+                default:
+                    return SqlSugar.DbType.PostgreSQL;
+            }
+        }
 
         public static void AddSqlSugerMiddleware(this ContainerBuilder services)
         {
@@ -23,8 +42,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Middleware
                 SqlSugarScope db = new SqlSugarScope(
                     new ConnectionConfig()
                     {
-                        ConnectionString = connString,
-                        DbType = SqlSugar.DbType.PostgreSQL,
+                        ConnectionString = _connString,
+                        DbType = GetDbType(),
                         IsAutoCloseConnection = true,
                     }
                 );

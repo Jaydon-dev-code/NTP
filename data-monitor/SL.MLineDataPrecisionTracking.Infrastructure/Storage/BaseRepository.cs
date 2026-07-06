@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Linq.Expressions;
+using SqlSugar;
 
 namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
 {
-    using System.Linq.Expressions;
-    using SqlSugar;
+
 
     /// <summary>
     /// SqlSugar 通用仓储层
