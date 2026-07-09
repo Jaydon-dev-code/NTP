@@ -1,37 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SL.MLineDataPrecisionTracking.Client.Common
 {
+    public enum ViewMatchMode
+    {
+        Any,
+        All
+    }
+
     public class ViewLinkServerInfoAttribute : Attribute
     {
-        public ViewLinkServerInfoAttribute(string[] serverName, string heard, string icon)
-        {
-            _serversName = serverName;
-            _header = heard;
-            _icon = icon;
-        }
+        public string[] ServerNames { get; }
+        public string Header { get; }
+        public string Icon { get; }
+        public ViewMatchMode MatchMode { get; set; } = ViewMatchMode.Any;
 
-        public string[] _serversName { get; set; }
-
-        public string[] ServiceType
+        public ViewLinkServerInfoAttribute(string[] serverNames, string header, string icon)
         {
-            get => _serversName;
-        }
-
-        public string _header { get; set; }
-        public string Header
-        {
-            get => _header;
-        }
-
-        public string _icon { get; set; }
-        public string Icon
-        {
-            get => _icon;
+            ServerNames = serverNames;
+            Header = header;
+            Icon = icon;
         }
     }
 }

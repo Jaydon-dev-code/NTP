@@ -21,7 +21,7 @@ namespace SL.MLineDataPrecisionTracking.Client.View.Control
     /// <summary>
     /// MeticulousPursuit.xaml 的交互逻辑
     /// </summary>
-    [ViewLinkServerInfoAttribute(serverName: new string[] { nameof(A_ProLineDataCollectionService), nameof(B_ProLineDataCollectionService) }, heard: "装配线数据查询", icon: "Resources\\Image\\ProductionRecord.png")]
+    [ViewLinkServerInfoAttribute(serverNames: new[] { "Factory6Workshop6_3AssemblyLineA", "Factory6Workshop6_3AssemblyLineB", "Factory6Workshop6_1AssemblyLineA", "Factory6Workshop6_1AssemblyLineB" }, header: "装配线数据查询", icon: "Resources\\Image\\ProductionRecord.png", MatchMode = ViewMatchMode.Any)]
     public partial class MeticulousPursuit : UserControl
     {
        

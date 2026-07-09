@@ -211,64 +211,46 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel
         private async Task GetMeun()
         {
             _menus = new List<MenuItems>();
-            var serviceInfo = await _serviceApi.GetAllServicesAsync();
+            var serviceResult = await _serviceApi.GetAllServicesAsync();
 
-            if (serviceInfo.IsSuccess)
+            var enabledTypes = serviceResult.IsSuccess
+                ? serviceResult.Data
+                    .Where(s => s.IsEnabled)
+                    .Select(s => s.ServiceType)
+                    .ToHashSet()
+                : new HashSet<string>();
+
+            var assembly = typeof(MainWindowViewModel).Assembly;
+            string targetNamespaceView = "SL.MLineDataPrecisionTracking.Client.View.Control";
+            var types = assembly
+                .GetTypes()
+                .Where(t =>
+                    t.IsClass
+                    && !t.IsAbstract
+                    && !t.IsGenericType
+                    && !t.IsInterface
+                    && t.Namespace == targetNamespaceView
+                )
+                .Where(t => !t.Name.StartsWith("<"))
+                .ToList();
+
+            foreach (var type in types)
             {
-                Assembly assembly = Assembly.GetExecutingAssembly();
+                var attr = type.GetCustomAttribute<ViewLinkServerInfoAttribute>();
+                if (attr == null)
+                    continue;
 
-                // 2. 目标命名空间
-                string targetNamespaceView = "SL.MLineDataPrecisionTracking.Client.View.Control";
-                var types = assembly
-                    .GetTypes()
-                    .Where(t =>
-                        t.IsClass
-                        && // 是类
-                        !t.IsAbstract
-                        && // 不是抽象类
-                        !t.IsGenericType
-                        && // 不是泛型类
-                        !t.IsInterface
-                        && // 不是接口
-                        t.Namespace==targetNamespaceView // 匹配命名空间
-                    )
-                    .Where(t => !t.Name.StartsWith("<"))
-                    .ToList();
-                foreach (var type in types)
-                {
-                    var attr = type.GetCustomAttribute<ViewLinkServerInfoAttribute>();
-                    if (attr == null)
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        bool allServersValid = true;
+                if (!ViewServiceMapper.ShouldShow(type, enabledTypes))
+                    continue;
 
-                        foreach (var typeName in attr.ServiceType)
-                        {
-                            if (
-                                serviceInfo.Data.FirstOrDefault(x => x.ServiceType == typeName && x.IsEnabled)
-                                == null
-                            )
-                            {
-                                allServersValid = false;
-                                break;
-                            }
-                        }
-                        if (allServersValid)
-                        {
-                            _menus.Add(
-                                new MenuItems()
-                                {
-                                    Header = attr.Header,
-                                    Page = App.Container.Resolve(type),
-                                    Icon = $"{AppDomain.CurrentDomain.BaseDirectory}{attr.Icon}",
-                                }
-                            );
-                        }
+                _menus.Add(
+                    new MenuItems()
+                    {
+                        Header = attr.Header,
+                        Page = App.Container.Resolve(type),
+                        Icon = $"{AppDomain.CurrentDomain.BaseDirectory}{attr.Icon}",
                     }
-                }
+                );
             }
 
             _menus.Add(

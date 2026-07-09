@@ -1,14 +1,14 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Autofac;
 using SL.MLineDataPrecisionTracking.Core.Services;
 using SL.MLineDataPrecisionTracking.Core.Services.DataCollection;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Entities;
 using SL.MLineDataPrecisionTracking.Models.Enum;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SL.MLineDataPrecisionTracking.Service.Services
 {
@@ -47,51 +47,44 @@ namespace SL.MLineDataPrecisionTracking.Service.Services
             >();
             var serviceStatuses = new List<Tb_ServiceStatus>();
 
-    
-                foreach (var service in allServices)
+            foreach (var service in allServices)
+            {
+                var serviceType = service.GetType();
+                var serviceId = serviceType.Name;
+                var serviceName = service.ServiceName;
+
+                var dbStatus = _serviceStatusRepository.GetByServiceIdAsync(serviceId).Result;
+                var isEnabled = dbStatus?.IsEnabled ?? true;
+
+                _services[serviceId] = new DataCollectionServiceInfo
                 {
-                    var serviceType = service.GetType();
-                    var serviceId = serviceType.Name;
-                    var serviceName = service.ServiceName;
+                    ServiceId = serviceId,
+                    Name = serviceName,
+                    ServiceType = serviceType.Name,
+                    IsRunning = false,
+                    IsEnabled = isEnabled,
+                    ServiceInstance = service,
+                    LastUpdateTime = DateTime.Now,
+                    LastOperator = dbStatus?.LastOperator ?? "System",
+                    Remark = dbStatus?.Remark ?? "服务初始化",
+                };
 
-                    var dbStatus = _serviceStatusRepository.GetByServiceIdAsync(serviceId).Result;
-                    var isEnabled = dbStatus?.IsEnabled ?? true;
-
-                    _services[serviceId] = new DataCollectionServiceInfo
+                serviceStatuses.Add(
+                    new Tb_ServiceStatus
                     {
                         ServiceId = serviceId,
-                        Name = serviceName,
+                        ServiceName = serviceName,
                         ServiceType = serviceType.Name,
-                        IsRunning = false,
                         IsEnabled = isEnabled,
-                        ServiceInstance = service,
-                        LastUpdateTime = DateTime.Now,
+                        LastOperationTime = DateTime.Now,
                         LastOperator = dbStatus?.LastOperator ?? "System",
                         Remark = dbStatus?.Remark ?? "服务初始化",
-                    };
-
-                    serviceStatuses.Add(
-                        new Tb_ServiceStatus
-                        {
-                            ServiceId = serviceId,
-                            ServiceName = serviceName,
-                            ServiceType = serviceType.Name,
-                            IsEnabled = isEnabled,
-                            LastOperationTime = DateTime.Now,
-                            LastOperator = dbStatus?.LastOperator ?? "System",
-                            Remark = dbStatus?.Remark ?? "服务初始化",
-                        }
-                    );
-                }
-
-                _serviceStatusRepository.InitServiceStatusAsync(serviceStatuses);
+                    }
+                );
             }
-         
-           
-        }
 
-      
-    
+            _serviceStatusRepository.InitServiceStatusAsync(serviceStatuses);
+        }
 
         public async Task StartAllAsync()
         {
@@ -320,8 +313,7 @@ namespace SL.MLineDataPrecisionTracking.Service.Services
                     service.Remark = dbStatus.Remark;
                     service.LastUpdateTime = dbStatus.LastOperationTime;
                 }
-                service.IsRunning =
-                    service.ServiceInstance.Status == ServiceStatusEnum.Running;
+                service.IsRunning = service.ServiceInstance.Status == ServiceStatusEnum.Running;
             }
             return _services.Values.ToList();
         }
@@ -335,8 +327,7 @@ namespace SL.MLineDataPrecisionTracking.Service.Services
                 if (_services.TryGetValue(serviceId, out var foundService))
                 {
                     service = foundService;
-                    service.IsRunning =
-                        service.ServiceInstance.Status == ServiceStatusEnum.Running;
+                    service.IsRunning = service.ServiceInstance.Status == ServiceStatusEnum.Running;
                 }
             }
 

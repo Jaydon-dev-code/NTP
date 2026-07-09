@@ -5,7 +5,7 @@ using System.Windows.Controls;
 
 namespace SL.MLineDataPrecisionTracking.Client.View.Control
 {
-    [ViewLinkServerInfoAttribute(serverName: new string[] {}, heard: "加热数据", icon: "Resources\\Image\\ProductionRecord.png")]
+    //[ViewLinkServerInfoAttribute(serverNames: new[] { "Factory6Section6_3HeatTreatment" }, header: "加热数据", icon: "Resources\\Image\\ProductionRecord.png")]
     public partial class FrmBr8Sec63HeatEnergyChart : UserControl
     {
         public FrmBr8Sec63HeatEnergyChart(
