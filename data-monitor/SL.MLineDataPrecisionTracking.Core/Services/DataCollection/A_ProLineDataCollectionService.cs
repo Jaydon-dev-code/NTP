@@ -22,7 +22,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
 {
     public class A_ProLineDataCollectionService : ProLineDataCollectionServiceAbstract
     {
-        DevPlcPointMcDto _plcCallPCTrayNoPoint;
+        DevPlcPointDto _plcCallPCTrayNoPoint;
         string _lastTrayNoPoint;
         List<Tb_ModelNoToName> _models;
         protected override string[] _lineName { get; set; } = new string[] { "A线", "六分厂6-1装配A线" };

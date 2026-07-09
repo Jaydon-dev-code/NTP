@@ -7,16 +7,16 @@ using McpXLib.Enums;
 
 namespace SL.MLineDataPrecisionTracking.Models.Dtos
 {
-    public class DevPlcPointMcDto
+    public class DevPlcPointDto
     {
-        public DevPlcPointMcDto()
+        public DevPlcPointDto()
         { }
-        public DevPlcPointMcDto(
+        public DevPlcPointDto(
             string deviceName,
             string pointName,
             string ipAddress,
             int port,
-            Prefix prefix,
+            string prefix,
             TypeCode typeCode,
             string address,
             int length,
@@ -42,7 +42,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         public string PointName { get; set; }
         public string IpAddress { get; set; } // PLC_IP
         public int Port { get; set; } // 端口
-        public Prefix Prefix { get; set; } // D/M/X/Y
+        public string Prefix { get; set; } // D/M/X/Y
         public string Address { get; set; } // 地址
         public TypeCode DataType { get; set; } // Int16/Float/Bool
 

@@ -51,9 +51,9 @@
     <Compile Include="Domain\Result.cs" />
     <Compile Include="Domain\ScanRecord.cs" />
     <Compile Include="Domain\ServiceInfo.cs" />
-    <Compile Include="Dtos\DevPlcPointMcDto.cs" />
-    <Compile Include="Dtos\DevPlcPointMcReadDto.cs" />
-    <Compile Include="Dtos\DevPlcPointMcWriteDto.cs" />
+    <Compile Include="Dtos\DevPlcPointDto.cs" />
+    <Compile Include="Dtos\DevPlcPointReadDto.cs" />
+    <Compile Include="Dtos\DevPlcPointWriteDto.cs" />
     <Compile Include="Dtos\HeatTreatmentDataDto.cs" />
     <Compile Include="Dtos\LineSummaryDto.cs" />
     <Compile Include="Dtos\PlcPointImportDto.cs" />

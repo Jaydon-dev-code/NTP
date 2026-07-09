@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace SL.MLineDataPrecisionTracking.Models.Dtos
 {
-    public class DevPlcPointMcWriteDto
+    public class DevPlcPointWriteDto
     {
-        public DevPlcPointMcWriteDto(DevPlcPointMcDto devPlcPointMcDto)
+        public DevPlcPointWriteDto(DevPlcPointDto devPlcPointMcDto)
         {
             IpAddress = devPlcPointMcDto.IpAddress;
             Port = devPlcPointMcDto.Port;
@@ -24,7 +24,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
 
         public string IpAddress { get; set; }
         public int Port { get; set; }
-        public Prefix Prefix { get; set; }
+        public string Prefix { get; set; }
         public TypeCode DataType { get; set; }
         public int Address { get; set; }  
         public List<object> Value { get; set; }

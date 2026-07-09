@@ -22,9 +22,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
 
         Type _dataModelType = typeof(Tb_HeatTreatmentData);
 
-        List<DevPlcPointMcDto> _lineReadPlcInfo;
-        DevPlcPointMcDto _plcCallPCCanCollectionPoint;
-        DevPlcPointMcDto _plcCallPCMarkingNoPoint;
+        List<DevPlcPointDto> _lineReadPlcInfo;
+        DevPlcPointDto _plcCallPCCanCollectionPoint;
+        DevPlcPointDto _plcCallPCMarkingNoPoint;
 
         string _lastMarkingNo;
 
@@ -51,18 +51,18 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                 return Result.Fail("未找到设备点位信息");
             }
 
-            _lineReadPlcInfo = new List<DevPlcPointMcDto>();
+            _lineReadPlcInfo = new List<DevPlcPointDto>();
             foreach (var plcLinkeInfo in linePoint.PlcConnections)
             {
                 foreach (var plcAddres in plcLinkeInfo.Points)
                 {
                     _lineReadPlcInfo.Add(
-                        new DevPlcPointMcDto(
+                        new DevPlcPointDto(
                             linePoint.DeviceName,
                             plcAddres.PointName,
                             plcLinkeInfo.IpAddress,
                             plcLinkeInfo.Port,
-                            plcAddres.Area.ToPrefix(),
+                            plcAddres.Area,
                             plcAddres.DataType.ToTypeCode(),
                             plcAddres.Address,
                             plcAddres.Length,

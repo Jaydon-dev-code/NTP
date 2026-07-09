@@ -121,7 +121,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
 
         static DataTable _dataTable = new DataTable();
 
-        public static Result<object> SugarColumnReflectAssign(Result<List<DevPlcPointMcDto>> readValue, Type dataModelType )
+        public static Result<object> SugarColumnReflectAssign(Result<List<DevPlcPointDto>> readValue, Type dataModelType )
         {
             object t = Activator.CreateInstance(dataModelType);
             var props = dataModelType.GetProperties();

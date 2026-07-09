@@ -15,17 +15,13 @@ using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Dtos;
 using SL.MLineDataPrecisionTracking.Models.Entities;
+using SL.MLineDataPrecisionTracking.Models.Enum;
 using SqlSugar;
 using SqlSugar.Extensions;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services
 {
-    public enum ServiceStatus
-    {
-        Stopped,
-        Running,
-        Paused,
-    }
+ 
 
     public abstract class ProLineDataCollectionServiceAbstract
     {
@@ -35,14 +31,14 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         public string ServiceName;
         protected abstract string[] _lineName { get; set; }
         protected abstract Type DataModelType { get; }
-        protected List<DevPlcPointMcDto> _lineReadPlcInfo;
+        protected List<DevPlcPointDto> _lineReadPlcInfo;
         protected McpCommunication _mcp;
 
-        DevPlcPointMcDto _plcCallPCCanCollectionPoint;
-        DevPlcPointMcDto _pcCallPlcCollctionOk;
+        DevPlcPointDto _plcCallPCCanCollectionPoint;
+        DevPlcPointDto _pcCallPlcCollctionOk;
 
         // 服务状态管理
-        public ServiceStatus Status { get; private set; } = ServiceStatus.Stopped;
+        public ServiceStatusEnum Status { get; private set; } = ServiceStatusEnum.Stopped;
         private CancellationTokenSource _cancellationTokenSource;
         private Task _serviceTask;
 
@@ -109,7 +105,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         {
             try
             {
-                Status = ServiceStatus.Running;
+                Status = ServiceStatusEnum.Running;
 
                 _lineReadPlcInfo = await InitPlcAddre();
                 ServiceName= _lineReadPlcInfo.FirstOrDefault().DeviceName;
@@ -120,7 +116,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                         "[采集开始点位初始化]【{_lineName}】点位数据异常，本服务无法启动。",
                         _lineName
                     );
-                    Status = ServiceStatus.Stopped;
+                    Status = ServiceStatusEnum.Stopped;
                     return;
                 }
                 _plcCallPCCanCollectionPoint = _lineReadPlcInfo.First(x =>
@@ -186,14 +182,14 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             }
             finally
             {
-                Status = ServiceStatus.Stopped;
+                Status = ServiceStatusEnum.Stopped;
             }
         }
 
         // 手动操作方法
         public void Start()
         {
-            if (Status == ServiceStatus.Running)
+            if (Status == ServiceStatusEnum.Running)
             {
                 Serilog.Log.Warning($"服务 {_lineName} 已经在运行中");
                 return;
@@ -214,7 +210,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
 
         public void Stop()
         {
-            if (Status == ServiceStatus.Stopped)
+            if (Status == ServiceStatusEnum.Stopped)
             {
                 return;
             }
@@ -230,7 +226,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
 
             _cancellationTokenSource = null;
             _serviceTask = null;
-            Status = ServiceStatus.Stopped;
+            Status = ServiceStatusEnum.Stopped;
         }
 
         public void Restart()
@@ -348,22 +344,22 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             }
         }
 
-        protected virtual async Task<List<DevPlcPointMcDto>> InitPlcAddre()
+        protected virtual async Task<List<DevPlcPointDto>> InitPlcAddre()
         {
             var linePoint = await _equipmentRepository.GetEquipmentAllAsync(x =>
                 _lineName.Contains(x.DeviceName)
             );
             if (linePoint is null)
             {
-                return new List<DevPlcPointMcDto>();
+                return new List<DevPlcPointDto>();
             }
-            var re = new List<DevPlcPointMcDto>();
+            var re = new List<DevPlcPointDto>();
             foreach (var plcLinkeInfo in linePoint.PlcConnections)
             {
                 foreach (var plcAddres in plcLinkeInfo.Points)
                 {
                     re.Add(
-                        new DevPlcPointMcDto(
+                        new DevPlcPointDto(
                             linePoint.DeviceName,
                             plcAddres.PointName,
                             plcLinkeInfo.IpAddress,

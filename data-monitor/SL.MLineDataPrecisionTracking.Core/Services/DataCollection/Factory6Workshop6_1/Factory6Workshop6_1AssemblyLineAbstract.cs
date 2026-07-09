@@ -22,9 +22,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
         protected Tb_LineSummaryRepository _lineSummaryRepository;
         protected Tb_ModelNoToNameRepository _modelNoToNameRepository;
 
-        protected List<DevPlcPointMcDto> _lineReadPlcInfo;
-        protected DevPlcPointMcDto _plcCallPCCanCollectionPoint;
-        protected DevPlcPointMcDto _plcCallPCTrayNoPoint;
+        protected List<DevPlcPointDto> _lineReadPlcInfo;
+        protected DevPlcPointDto _plcCallPCCanCollectionPoint;
+        protected DevPlcPointDto _plcCallPCTrayNoPoint;
         /// <summary>
         /// 上次得托盘号
         /// </summary>
@@ -66,13 +66,13 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                 return Result.Fail("未找到设备点位信息");
             }
 
-            _lineReadPlcInfo = new List<DevPlcPointMcDto>();
+            _lineReadPlcInfo = new List<DevPlcPointDto>();
             foreach (var plcLinkeInfo in linePoint.PlcConnections)
             {
                 foreach (var plcAddres in plcLinkeInfo.Points)
                 {
                     _lineReadPlcInfo.Add(
-                        new DevPlcPointMcDto(
+                        new DevPlcPointDto(
                             linePoint.DeviceName,
                             plcAddres.PointName,
                             plcLinkeInfo.IpAddress,

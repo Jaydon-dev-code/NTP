@@ -15,7 +15,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
     public class Rcl_ProLineDataCollectionService : ProLineDataCollectionServiceAbstract
     {
         Tb_HeatTreatmentDataRepository _rclRepository;
-        private DevPlcPointMcDto _plcCallPCMarkingNoPoint;
+        private DevPlcPointDto _plcCallPCMarkingNoPoint;
         private string _lastMarkingNo;
 
         protected override string[] _lineName { get; set; } = new string[] { "热处理" };

@@ -17,7 +17,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
 {
     public class B_ProLineDataCollectionService : ProLineDataCollectionServiceAbstract
     {
-        DevPlcPointMcDto _plcCallPCTrayNoPoint;
+        DevPlcPointDto _plcCallPCTrayNoPoint;
         string _lastTrayNoPoint;
         Tb_LineBRepository _lineBRepository;
         Tb_LineARepository _lineARepository;
