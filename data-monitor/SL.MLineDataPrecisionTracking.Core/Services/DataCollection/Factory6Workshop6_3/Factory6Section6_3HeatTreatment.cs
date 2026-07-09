@@ -28,7 +28,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
 
         string _lastMarkingNo;
 
-        protected override string _serviceName => "热处理";
+        protected override string _serviceName => "六分厂6-3热处理";
 
         public Factory6Section6_3HeatTreatment(
             Tb_EquipmentRepository equipmentRepositor,

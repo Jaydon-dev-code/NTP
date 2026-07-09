@@ -25,16 +25,16 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
 
         protected override string _trayPointName => throw new NotImplementedException();
 
-        protected override string _serviceName => throw new NotImplementedException();
+        protected override string _serviceName => "六分厂6-1装配B线";
 
         protected override Task<object> InsterValue(Result<object> interact)
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         protected override void UpLastNo(object data)
         {
-            throw new NotImplementedException();
+            return ;
         }
     }
 }

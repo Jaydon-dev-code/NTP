@@ -17,7 +17,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
         protected override string _lineName => "A线";
         protected override Type _dataModelType => typeof(Tb_LineA);
         protected override string _trayPointName => "托盘号A";
-        protected override string _serviceName => "六分厂6-1装配A线";
+        protected override string _serviceName => "六分厂6-3装配A线";
         protected virtual Type _passCodeEnumType => typeof(Assembly_6Factory6_1ALine_PassCodeEnum);
         protected virtual Type _ngCodeEnumType => typeof(Assembly_6Factory6_1ALine_NgCodeEnum);
 

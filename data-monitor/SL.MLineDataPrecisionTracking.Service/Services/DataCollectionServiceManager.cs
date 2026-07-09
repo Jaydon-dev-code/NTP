@@ -1,7 +1,9 @@
 using Autofac;
 using SL.MLineDataPrecisionTracking.Core.Services;
+using SL.MLineDataPrecisionTracking.Core.Services.DataCollection;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Entities;
+using SL.MLineDataPrecisionTracking.Models.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +19,7 @@ namespace SL.MLineDataPrecisionTracking.Service.Services
         public string ServiceType { get; set; }
         public bool IsRunning { get; set; }
         public bool IsEnabled { get; set; }
-        public ProLineDataCollectionServiceAbstract ServiceInstance { get; set; }
+        public DataCollectionServiceAbstract ServiceInstance { get; set; }
         public DateTime LastUpdateTime { get; set; }
         public string LastOperator { get; set; }
         public string Remark { get; set; }
@@ -41,78 +43,55 @@ namespace SL.MLineDataPrecisionTracking.Service.Services
         private void InitializeServices()
         {
             var allServices = Startup.Container.Resolve<
-                IEnumerable<ProLineDataCollectionServiceAbstract>
+                IEnumerable<DataCollectionServiceAbstract>
             >();
             var serviceStatuses = new List<Tb_ServiceStatus>();
 
-            foreach (var service in allServices)
-            {
-                var serviceType = service.GetType();
-                var serviceId = GetServiceId(serviceType.Name);
-                var serviceName = GetServiceName(serviceType.Name);
-
-                var dbStatus = _serviceStatusRepository.GetByServiceIdAsync(serviceId).Result;
-                var isEnabled = dbStatus?.IsEnabled ?? true;
-
-                _services[serviceId] = new DataCollectionServiceInfo
+    
+                foreach (var service in allServices)
                 {
-                    ServiceId = serviceId,
-                    Name = serviceName,
-                    ServiceType = serviceType.Name,
-                    IsRunning = false,
-                    IsEnabled = isEnabled,
-                    ServiceInstance = service,
-                    LastUpdateTime = DateTime.Now,
-                    LastOperator = dbStatus?.LastOperator ?? "System",
-                    Remark = dbStatus?.Remark ?? "服务初始化",
-                };
+                    var serviceType = service.GetType();
+                    var serviceId = serviceType.Name;
+                    var serviceName = service.ServiceName;
 
-                serviceStatuses.Add(
-                    new Tb_ServiceStatus
+                    var dbStatus = _serviceStatusRepository.GetByServiceIdAsync(serviceId).Result;
+                    var isEnabled = dbStatus?.IsEnabled ?? true;
+
+                    _services[serviceId] = new DataCollectionServiceInfo
                     {
                         ServiceId = serviceId,
-                        ServiceName = serviceName,
+                        Name = serviceName,
                         ServiceType = serviceType.Name,
+                        IsRunning = false,
                         IsEnabled = isEnabled,
-                        LastOperationTime = DateTime.Now,
+                        ServiceInstance = service,
+                        LastUpdateTime = DateTime.Now,
                         LastOperator = dbStatus?.LastOperator ?? "System",
                         Remark = dbStatus?.Remark ?? "服务初始化",
-                    }
-                );
-            }
+                    };
 
-            _serviceStatusRepository.InitServiceStatusAsync(serviceStatuses);
+                    serviceStatuses.Add(
+                        new Tb_ServiceStatus
+                        {
+                            ServiceId = serviceId,
+                            ServiceName = serviceName,
+                            ServiceType = serviceType.Name,
+                            IsEnabled = isEnabled,
+                            LastOperationTime = DateTime.Now,
+                            LastOperator = dbStatus?.LastOperator ?? "System",
+                            Remark = dbStatus?.Remark ?? "服务初始化",
+                        }
+                    );
+                }
+
+                _serviceStatusRepository.InitServiceStatusAsync(serviceStatuses);
+            }
+         
+           
         }
 
-        private string GetServiceId(string typeName)
-        {
-            switch (typeName)
-            {
-                case "A_ProLineDataCollectionService":
-                    return "LineA";
-                case "B_ProLineDataCollectionService":
-                    return "LineB";
-                case "Rcl_ProLineDataCollectionService":
-                    return "HeatTreatment";
-                default:
-                    return typeName;
-            }
-        }
-
-        private string GetServiceName(string typeName)
-        {
-            switch (typeName)
-            {
-                case "A_ProLineDataCollectionService":
-                    return "A线数据采集服务";
-                case "B_ProLineDataCollectionService":
-                    return "B线数据采集服务";
-                case "Rcl_ProLineDataCollectionService":
-                    return "热处理数据采集服务";
-                default:
-                    return typeName;
-            }
-        }
+      
+    
 
         public async Task StartAllAsync()
         {
@@ -342,7 +321,7 @@ namespace SL.MLineDataPrecisionTracking.Service.Services
                     service.LastUpdateTime = dbStatus.LastOperationTime;
                 }
                 service.IsRunning =
-                    service.ServiceInstance.Status == Core.Services.ServiceStatus.Running;
+                    service.ServiceInstance.Status == ServiceStatusEnum.Running;
             }
             return _services.Values.ToList();
         }
@@ -357,7 +336,7 @@ namespace SL.MLineDataPrecisionTracking.Service.Services
                 {
                     service = foundService;
                     service.IsRunning =
-                        service.ServiceInstance.Status == Core.Services.ServiceStatus.Running;
+                        service.ServiceInstance.Status == ServiceStatusEnum.Running;
                 }
             }
 
