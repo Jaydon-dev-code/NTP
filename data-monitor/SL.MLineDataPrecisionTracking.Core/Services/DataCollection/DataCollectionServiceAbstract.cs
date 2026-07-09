@@ -19,7 +19,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
         /// <summary>
         /// 间隔时间
         /// </summary>
-        TimeSpan _sleepTimeSpan { get; set; }= TimeSpan.FromSeconds(500);
+        TimeSpan _sleepTimeSpan { get; set; }= TimeSpan.FromMilliseconds(500);
 
         /// <summary>服务运行状态</summary>
         public ServiceStatusEnum Status { get; private set; } = ServiceStatusEnum.Stopped;

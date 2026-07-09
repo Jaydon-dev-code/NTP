@@ -10,9 +10,9 @@ using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Entities;
 using SL.MLineDataPrecisionTracking.Models.Enum;
 
-namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Workshop6_1
+namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Workshop6_3
 {
-    public class Factory6Workshop6_1AssemblyLineB : Factory6Workshop6_1AssemblyLineAbstract
+    public class Factory6Workshop6_3AssemblyLineB : Factory6Workshop6_3AssemblyLineAbstract
     {
         Tb_LineBRepository _lineBRepository;
 
@@ -20,8 +20,10 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
         protected override Type _dataModelType => typeof(Tb_LineB);
         protected override string _trayPointName => "托盘号B";
         protected override string _serviceName => "六分厂6-1装配B线";
+        protected virtual Type _passCodeEnumType => typeof(Assembly_6Factory6_1BLine_PassCodeEnum);
+        protected virtual Type _ngCodeEnumType => typeof(Assembly_6Factory6_1BLine_NgCodeEnum);
 
-        public Factory6Workshop6_1AssemblyLineB(
+        public Factory6Workshop6_3AssemblyLineB(
             Tb_EquipmentRepository equipmentRepositor,
             McpCommunication mcp,
             Tb_LineBRepository tb_LineBRepository,
@@ -61,7 +63,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                 {
                     StringBuilder stringBuilder = new StringBuilder();
                     stringBuilder.Append($"({lineData.ShieldStationB}) ");
-                    foreach (var item in shieldStationB.ParseBitEnum<Assembly_6Factory6_1BLine_PassCodeEnum>())
+                    foreach (var item in ParseBitEnum(shieldStationB, _passCodeEnumType))
                     {
                         stringBuilder.Append(item.Description + " ");
                     }
@@ -74,7 +76,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                 if (int.TryParse(lineData.NgCodeB, out var ngCodeB))
                 {
                     lineData.NgCodeB =
-                        $"({ngCodeB}) {((Assembly_6Factory6_1BLine_NgCodeEnum)ngCodeB).GetDescription()}";
+                        $"({ngCodeB}) {GetEnumDescription(ngCodeB, _ngCodeEnumType)}";
                 }
                 lineData.MarkingNo = "";
                 tb_LineSummary.Result = ResultEnum.NG;

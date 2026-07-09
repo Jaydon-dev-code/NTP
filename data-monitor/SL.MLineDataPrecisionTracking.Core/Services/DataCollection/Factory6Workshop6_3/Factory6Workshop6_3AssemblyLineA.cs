@@ -10,16 +10,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Workshop6_1
+namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Workshop6_3
 {
-    public class Factory6Workshop6_1AssemblyLineA : Factory6Workshop6_1AssemblyLineAbstract
+    public class Factory6Workshop6_3AssemblyLineA : Factory6Workshop6_3AssemblyLineAbstract
     {
         protected override string _lineName => "A线";
         protected override Type _dataModelType => typeof(Tb_LineA);
         protected override string _trayPointName => "托盘号A";
         protected override string _serviceName => "六分厂6-1装配A线";
+        protected virtual Type _passCodeEnumType => typeof(Assembly_6Factory6_1ALine_PassCodeEnum);
+        protected virtual Type _ngCodeEnumType => typeof(Assembly_6Factory6_1ALine_NgCodeEnum);
 
-        public Factory6Workshop6_1AssemblyLineA(
+        public Factory6Workshop6_3AssemblyLineA(
             Tb_EquipmentRepository equipmentRepositor,
             McpCommunication mcp,
             Tb_LineARepository tb_LineARepository,
@@ -44,7 +46,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                 {
                     StringBuilder stringBuilder = new StringBuilder();
                     stringBuilder.Append($"({lineData.ShieldStationA}) ");
-                    foreach (var item in shieldStationA.ParseBitEnum<Assembly_6Factory6_1ALine_PassCodeEnum>())
+                    foreach (var item in ParseBitEnum(shieldStationA, _passCodeEnumType))
                     {
                         stringBuilder.Append(item.Description + " ");
                     }
@@ -57,7 +59,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                 if (int.TryParse(lineData.NgCodeA, out var ngCodeA))
                 {
                     lineData.NgCodeA =
-                        $"({ngCodeA}) {((Assembly_6Factory6_1ALine_NgCodeEnum)ngCodeA).GetDescription()}";
+                        $"({ngCodeA}) {GetEnumDescription(ngCodeA, _ngCodeEnumType)}";
                 }
 
                 Tb_LineSummary tb_LineSummary = new Tb_LineSummary() { Result = ResultEnum.NG };

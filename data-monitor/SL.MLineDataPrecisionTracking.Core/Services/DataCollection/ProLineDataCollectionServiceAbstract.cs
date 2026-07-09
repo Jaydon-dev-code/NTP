@@ -364,7 +364,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                             plcAddres.PointName,
                             plcLinkeInfo.IpAddress,
                             plcLinkeInfo.Port,
-                            plcAddres.Area.ToPrefix(),
+                            plcAddres.Area,
                             plcAddres.DataType.ToTypeCode(),
                             plcAddres.Address,
                             plcAddres.Length,

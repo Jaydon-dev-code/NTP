@@ -12,9 +12,9 @@ using SL.MLineDataPrecisionTracking.Models.Entities;
 using SqlSugar;
 using SqlSugar.Extensions;
 
-namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Workshop6_1
+namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Workshop6_3
 {
-    public class Factory6Section6_1HeatTreatment : DataCollectionServiceAbstract
+    public class Factory6Section6_3HeatTreatment : DataCollectionServiceAbstract
     {
         Tb_EquipmentRepository _equipmentRepository;
         McpCommunication _mcp;
@@ -30,7 +30,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
 
         protected override string _serviceName => "热处理";
 
-        public Factory6Section6_1HeatTreatment(
+        public Factory6Section6_3HeatTreatment(
             Tb_EquipmentRepository equipmentRepositor,
             Tb_HeatTreatmentDataRepository rclRepository,
             McpCommunication mcp

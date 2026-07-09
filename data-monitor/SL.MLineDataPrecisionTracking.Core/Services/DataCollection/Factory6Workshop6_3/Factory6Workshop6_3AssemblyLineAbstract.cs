@@ -12,36 +12,50 @@ using SL.MLineDataPrecisionTracking.Models.Entities;
 using SqlSugar;
 using SqlSugar.Extensions;
 
-namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Workshop6_1
+namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Workshop6_3
 {
-    public abstract class Factory6Workshop6_1AssemblyLineAbstract : DataCollectionServiceAbstract
+    public abstract class Factory6Workshop6_3AssemblyLineAbstract : DataCollectionServiceAbstract
     {
         protected Tb_EquipmentRepository _equipmentRepository;
         protected McpCommunication _mcp;
         protected Tb_LineARepository _lineARepository;
         protected Tb_LineSummaryRepository _lineSummaryRepository;
         protected Tb_ModelNoToNameRepository _modelNoToNameRepository;
-
+        /// <summary>
+        /// plc数据集合
+        /// </summary>
         protected List<DevPlcPointDto> _lineReadPlcInfo;
+        /// <summary>
+        /// 可以采集的信号点位
+        /// </summary>
         protected DevPlcPointDto _plcCallPCCanCollectionPoint;
+        /// <summary>
+        /// 托盘号的点位
+        /// </summary>
         protected DevPlcPointDto _plcCallPCTrayNoPoint;
         /// <summary>
         /// 上次得托盘号
         /// </summary>
         protected string _lastTrayNoPoint;
+        /// <summary>
+        /// 型号列表
+        /// </summary>
         protected List<Tb_ModelNoToName> _models;
-        
+        /// <summary>
+        /// 线体名称
+        /// </summary>
         protected abstract string _lineName { get; }
         /// <summary>
         /// 模型类型
         /// </summary>
         protected abstract Type _dataModelType { get; }
         /// <summary>
-        /// 
+        /// 托盘号的中文名称
         /// </summary>
         protected abstract string _trayPointName { get; }
 
-        protected Factory6Workshop6_1AssemblyLineAbstract(
+     
+        protected Factory6Workshop6_3AssemblyLineAbstract(
             Tb_EquipmentRepository equipmentRepositor,
             McpCommunication mcp,
             Tb_LineARepository tb_LineARepository,
@@ -77,7 +91,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                             plcAddres.PointName,
                             plcLinkeInfo.IpAddress,
                             plcLinkeInfo.Port,
-                            plcAddres.Area.ToPrefix(),
+                            plcAddres.Area,
                             plcAddres.DataType.ToTypeCode(),
                             plcAddres.Address,
                             plcAddres.Length,
@@ -189,6 +203,31 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
         /// <param name="interact"></param>
         /// <returns></returns>
         protected abstract Task<object> InsterValue(Result<object> interact);
+
+        protected static List<(int BitIndex, string EnumName, string Description)> ParseBitEnum(int bitValue, Type enumType)
+        {
+            var result = new List<(int BitIndex, string EnumName, string Description)>();
+            foreach (var item in Enum.GetValues(enumType))
+            {
+                int enumVal = Convert.ToInt32(item);
+                if ((bitValue & enumVal) == 0)
+                    continue;
+
+                int bitIndex = 0;
+                int temp = enumVal;
+                while ((temp >>= 1) > 0)
+                    bitIndex++;
+
+                string desc = ((Enum)item).GetDescription();
+                result.Add((bitIndex, item.ToString(), desc));
+            }
+            return result;
+        }
+
+        protected static string GetEnumDescription(int value, Type enumType)
+        {
+            return ((Enum)Enum.ToObject(enumType, value)).GetDescription();
+        }
 
         static object GetValue(object obj, string fieldName)
         {

@@ -56,10 +56,12 @@
     <Compile Include="Services\DataCollection\A_ProLineDataCollectionService.cs" />
     <Compile Include="Services\DataCollection\B_ProLineDataCollectionService.cs" />
     <Compile Include="Services\DataCollection\DataCollectionServiceAbstract.cs" />
-    <Compile Include="Services\DataCollection\Factory6Workshop6_1\Factory6Section6_1HeatTreatment.cs" />
-    <Compile Include="Services\DataCollection\Factory6Workshop6_1\Factory6Workshop6_1AssemblyLineA.cs" />
-    <Compile Include="Services\DataCollection\Factory6Workshop6_1\Factory6Workshop6_1AssemblyLineAbstract.cs" />
-    <Compile Include="Services\DataCollection\Factory6Workshop6_1\Factory6Workshop6_1AssemblyLineB.cs" />
+    <Compile Include="Services\DataCollection\Factory6Workshop6_1\Factory6Workshop6_3AssemblyLineA.cs" />
+    <Compile Include="Services\DataCollection\Factory6Workshop6_1\Factory6Workshop6_3AssemblyLineB.cs" />
+    <Compile Include="Services\DataCollection\Factory6Workshop6_3\Factory6Section6_3HeatTreatment.cs" />
+    <Compile Include="Services\DataCollection\Factory6Workshop6_3\Factory6Workshop6_3AssemblyLineA.cs" />
+    <Compile Include="Services\DataCollection\Factory6Workshop6_3\Factory6Workshop6_3AssemblyLineAbstract.cs" />
+    <Compile Include="Services\DataCollection\Factory6Workshop6_3\Factory6Workshop6_3AssemblyLineB.cs" />
     <Compile Include="Services\DataCollection\ProLineDataCollectionServiceAbstract.cs" />
     <Compile Include="Services\DataCollection\Rcl_ProLineDataCollectionService.cs" />
     <Compile Include="Services\EnergyRangeExcelImportService.cs" />
@@ -86,6 +88,7 @@
       <Version>1.2.2</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
