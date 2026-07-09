@@ -72,11 +72,17 @@
     <Compile Include="Entities\Tb_PlcConnection.cs" />
     <Compile Include="Entities\Tb_PlcPoint.cs" />
     <Compile Include="Entities\Tb_ServiceStatus.cs" />
+    <Compile Include="Enum\Assembly_6Factory6_1ALine_NgCodeEnum.cs" />
+    <Compile Include="Enum\Assembly_6Factory6_1ALine_PassCodeEnum.cs" />
+    <Compile Include="Enum\Assembly_6Factory6_1BLine_NgCodeEnum.cs" />
+    <Compile Include="Enum\Assembly_6Factory6_1BLine_PassCodeEnum.cs" />
     <Compile Include="Enum\Assembly_A_LineNgCodeEnum.cs" />
     <Compile Include="Enum\Assembly_A_LinePassCodeEnum.cs" />
     <Compile Include="Enum\Assembly_B_LineNgCodeEnum.cs" />
     <Compile Include="Enum\Assembly_B_LinePassCodeEnum.cs" />
+    <Compile Include="Enum\Br8Sec63HeatEnergyWorkEnum.cs" />
     <Compile Include="Enum\ResultEnum.cs" />
+    <Compile Include="Enum\ServiceStatusEnum.cs" />
     <Compile Include="ModelsAssemblyMarker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

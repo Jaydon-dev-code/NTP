@@ -2,6 +2,8 @@
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 using SL.MLineDataPrecisionTracking.Models.Domain;
+using SL.MLineDataPrecisionTracking.Models.Dtos;
+using SqlSugar;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -26,7 +28,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
 #endif
             sjisEncoding = Encoding.GetEncoding("shift_jis");
         }
-
+            static   Type _dfStringtype = typeof(string);
         public static Result ExportToExcel<T>(List<T> dataList, string saveFileName)
         { 
             try
@@ -119,6 +121,67 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
 
         static DataTable _dataTable = new DataTable();
 
+        public static Result<object> SugarColumnReflectAssign(Result<List<DevPlcPointMcDto>> readValue, Type dataModelType )
+        {
+            object t = Activator.CreateInstance(dataModelType);
+            var props = dataModelType.GetProperties();
+            foreach (PropertyInfo prop in props)
+            {
+                var attr = prop.GetCustomAttribute<SugarColumn>();
+                if (attr?.ColumnDescription == null)
+                {
+                    continue;
+                }
+                try
+                {
+                    var readInfo = readValue.Data.FirstOrDefault(x =>
+                        x.PointName == attr.ColumnDescription
+                    );
+                    if (readInfo == null)
+                    {
+                        if (_dfStringtype == prop.PropertyType)
+                        {
+                            prop.SetValue(t, "");
+                        }
+                    }
+                    else
+                    {
+                        if (readInfo.Length == 1)
+                        {
+                            if (readInfo.ReadFormula == null || readInfo.ReadFormula.Length == 0)
+                            {
+                                prop.SetValue(t, readInfo.Value[0].ToString());
+                            }
+                            else
+                            {
+                                var val = readInfo.ReadFormula.StringCompute(
+                                    readInfo.Value[0].ToString()
+                                );
+                                prop.SetValue(t, val.ToString());
+                            }
+                        }
+                        else
+                        {
+                            if (readInfo.DataType == TypeCode.String)
+                            {
+                                var val = string.Concat(readInfo.Value);
+                                prop.SetValue(t, val);
+                            }
+                            else
+                            {
+                                prop.SetValue(t, readInfo.Value.ToString());
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return Result<object>.Fail($"反射数据失败:{ex.Message}");
+                }
+            }
+
+            return Result<object>.Success(t);
+        }
         public static object StringCompute(this string expression, params string[] param)
         {
             var format = string.Format(expression, param);

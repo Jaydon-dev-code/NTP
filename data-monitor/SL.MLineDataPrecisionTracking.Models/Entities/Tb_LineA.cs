@@ -18,7 +18,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         public DateTime RecordTime { get; set; } = DateTime.Now;
 
         /// <summary>
-        /// 托盘号
+        /// 型号
         /// </summary>
         [SugarColumn(ColumnDescription = "型号A")]
         public string ModelNoA { get; set; }
