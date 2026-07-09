@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using SL.MLineDataPrecisionTracking.Models.Domain;
+using SL.MLineDataPrecisionTracking.Models.Enum;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
 {
@@ -14,14 +15,14 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
         /// <summary>
         /// 服务名称
         /// </summary>
-        string _serviceName { get; set; }
+       protected abstract string _serviceName { get; }
         /// <summary>
         /// 间隔时间
         /// </summary>
         TimeSpan _sleepTimeSpan { get; set; }= TimeSpan.FromSeconds(500);
 
         /// <summary>服务运行状态</summary>
-        public ServiceStatus Status { get; private set; } = ServiceStatus.Stopped;
+        public ServiceStatusEnum Status { get; private set; } = ServiceStatusEnum.Stopped;
 
         /// <summary>当前步骤描述，用于外部观察执行进度</summary>
         public string Description { get; private set; } = string.Empty;
@@ -32,7 +33,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
         /// <summary>启动服务</summary>
         public void Start()
         {
-            if (Status == ServiceStatus.Running)
+            if (Status == ServiceStatusEnum.Running)
             {
                 Serilog.Log.Warning("[服务控制]【{_serverName}】服务已在运行中", _serviceName);
                 return;
@@ -50,7 +51,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
         /// <summary>停止服务</summary>
         public void Stop()
         {
-            if (Status == ServiceStatus.Stopped)
+            if (Status == ServiceStatusEnum.Stopped)
                 return;
 
             if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
@@ -61,7 +62,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
 
             _cancellationTokenSource = null;
             _serviceTask = null;
-            Status = ServiceStatus.Stopped;
+            Status = ServiceStatusEnum.Stopped;
             Description = "已停止";
         }
 
@@ -77,13 +78,13 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
         {
             try
             {
-                Status = ServiceStatus.Running;
+                Status = ServiceStatusEnum.Running;
                 Description = "正在初始化...";
 
                 if ((await InitAsync()).IsSuccess is false)
                 {
                     Description = "初始化失败";
-                    Status = ServiceStatus.Stopped;
+                    Status = ServiceStatusEnum.Stopped;
                     return;
                 }
 
@@ -115,7 +116,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
                                 interact.Data
                             );
 
-                            await NotifyAsync();
+                            await NotifyAsync(interact);
                             Description = "通知完成，等待下次握手";
                         }
                         else
@@ -154,7 +155,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
             }
             finally
             {
-                Status = ServiceStatus.Stopped;
+                Status = ServiceStatusEnum.Stopped;
                 Description = "已停止";
             }
         }
@@ -162,13 +163,22 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
         /// <summary>初始化资源，返回 false 则服务无法启动</summary>
         protected abstract Task<Result> InitAsync();
 
-        /// <summary>握手 — 判断当前是否具备交互条件</summary>
+        /// <summary>
+        /// 握手 — 判断当前是否具备交互条件
+        /// </summary>
+        /// <returns></returns>
         protected abstract Task<Result> HandshakeAsync();
 
-        /// <summary>交互 — 执行核心数据交互逻辑</summary>
+        /// <summary>
+        /// 交互 — 执行核心数据交互逻辑
+        /// </summary>
+        /// <returns></returns>
         protected abstract Task<Result<object>> InteractAsync();
 
-        /// <summary>通知 — 交互完成后的后续处理</summary>
-        protected abstract Task NotifyAsync();
+        /// <summary>
+        /// 通知 — 交互完成后的后续处理
+        /// </summary>
+        /// <returns></returns>
+        protected abstract Task NotifyAsync(Result<object> interact);
     }
 }
