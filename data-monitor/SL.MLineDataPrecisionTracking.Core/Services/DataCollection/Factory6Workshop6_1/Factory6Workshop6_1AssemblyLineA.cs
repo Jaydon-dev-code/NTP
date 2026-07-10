@@ -15,7 +15,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
 {
     public class Factory6Workshop6_1AssemblyLineA : Factory6Workshop6_3AssemblyLineAbstract
     {
-        public Factory6Workshop6_1AssemblyLineA(Tb_EquipmentRepository equipmentRepositor, McpCommunication mcp, Tb_LineARepository tb_LineARepository, Tb_LineSummaryRepository tb_LineSummaryRepository, Tb_ModelNoToNameRepository tb_ModelNoToNameRepository) : base(equipmentRepositor, mcp, tb_LineARepository, tb_LineSummaryRepository, tb_ModelNoToNameRepository)
+        public Factory6Workshop6_1AssemblyLineA(Tb_EquipmentRepository equipmentRepositor, McpCommunication mcp,  Tb_ModelNoToNameRepository tb_ModelNoToNameRepository) : base(equipmentRepositor, mcp,  tb_ModelNoToNameRepository)
         {
         }
 

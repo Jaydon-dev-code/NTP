@@ -18,8 +18,6 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
     {
         protected Tb_EquipmentRepository _equipmentRepository;
         protected McpCommunication _mcp;
-        protected Tb_LineARepository _lineARepository;
-        protected Tb_LineSummaryRepository _lineSummaryRepository;
         protected Tb_ModelNoToNameRepository _modelNoToNameRepository;
         /// <summary>
         /// plc数据集合
@@ -58,15 +56,11 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
         protected Factory6Workshop6_3AssemblyLineAbstract(
             Tb_EquipmentRepository equipmentRepositor,
             McpCommunication mcp,
-            Tb_LineARepository tb_LineARepository,
-            Tb_LineSummaryRepository tb_LineSummaryRepository,
             Tb_ModelNoToNameRepository tb_ModelNoToNameRepository
         )
         {
             _equipmentRepository = equipmentRepositor;
             _mcp = mcp;
-            _lineARepository = tb_LineARepository;
-            _lineSummaryRepository = tb_LineSummaryRepository;
             _modelNoToNameRepository = tb_ModelNoToNameRepository;
         }
 

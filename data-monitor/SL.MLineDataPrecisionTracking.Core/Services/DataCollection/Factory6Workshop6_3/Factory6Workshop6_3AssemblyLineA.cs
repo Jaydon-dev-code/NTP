@@ -21,14 +21,18 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
         protected virtual Type _passCodeEnumType => typeof(Assembly_6Factory6_1ALine_PassCodeEnum);
         protected virtual Type _ngCodeEnumType => typeof(Assembly_6Factory6_1ALine_NgCodeEnum);
 
+        protected Tb_LineSummaryRepository _lineSummaryRepository;
+        protected Tb_LineARepository _lineARepository;
         public Factory6Workshop6_3AssemblyLineA(
             Tb_EquipmentRepository equipmentRepositor,
             McpCommunication mcp,
             Tb_LineARepository tb_LineARepository,
             Tb_LineSummaryRepository tb_LineSummaryRepository,
             Tb_ModelNoToNameRepository tb_ModelNoToNameRepository
-        ) : base(equipmentRepositor, mcp, tb_LineARepository, tb_LineSummaryRepository, tb_ModelNoToNameRepository)
+        ) : base(equipmentRepositor, mcp, tb_ModelNoToNameRepository)
         {
+            _lineSummaryRepository= tb_LineSummaryRepository; ;
+            _lineARepository= tb_LineARepository;
         }
 
         protected override void UpLastNo(object data)

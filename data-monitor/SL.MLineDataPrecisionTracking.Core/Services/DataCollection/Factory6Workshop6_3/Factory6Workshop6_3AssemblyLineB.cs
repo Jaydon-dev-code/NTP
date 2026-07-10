@@ -23,6 +23,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
         protected virtual Type _passCodeEnumType => typeof(Assembly_6Factory6_1BLine_PassCodeEnum);
         protected virtual Type _ngCodeEnumType => typeof(Assembly_6Factory6_1BLine_NgCodeEnum);
 
+        Tb_LineBRepository _LineBRepository;
+        Tb_LineARepository _lineARepository;
+        Tb_LineSummaryRepository _lineSummaryRepository;
         public Factory6Workshop6_3AssemblyLineB(
             Tb_EquipmentRepository equipmentRepositor,
             McpCommunication mcp,
@@ -30,8 +33,10 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
             Tb_LineARepository tb_LineARepository,
             Tb_LineSummaryRepository tb_LineSummaryRepository,
             Tb_ModelNoToNameRepository tb_ModelNoToNameRepository
-        ) : base(equipmentRepositor, mcp, tb_LineARepository, tb_LineSummaryRepository, tb_ModelNoToNameRepository)
+        ) : base(equipmentRepositor, mcp, tb_ModelNoToNameRepository)
         {
+            _LineBRepository= tb_LineBRepository;
+            _lineARepository= tb_LineARepository;
             _lineBRepository = tb_LineBRepository;
         }
 
