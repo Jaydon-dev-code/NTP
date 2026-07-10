@@ -60,6 +60,7 @@
   <ItemGroup>
     <Compile Include="Controllers\DeviceCollectionConfigController.cs" />
     <Compile Include="Controllers\EnergyRangeController.cs" />
+    <Compile Include="Controllers\Factory6Workshop6_1AssemblyLineController.cs" />
     <Compile Include="Controllers\MeticulousPursuitController.cs" />
     <Compile Include="Controllers\Rcl_MeticulousPursuitController.cs" />
     <Compile Include="Controllers\ServiceController.cs" />

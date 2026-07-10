@@ -1,0 +1,189 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using SL.MLineDataPrecisionTracking.Models.Entities.Factory6Workshop6_1AssemblyLine;
+using SL.MLineDataPrecisionTracking.Models.Enum;
+using System;
+using System.ComponentModel;
+using System.Reflection;
+
+namespace SL.MLineDataPrecisionTracking.Models.Dtos
+{
+    public class Factory6Workshop6_1AssemblyLineDto : ObservableObject
+    {
+        public Factory6Workshop6_1AssemblyLineDto(Tb_Factory6Workshop6_1AssemblyLineABSummary entity)
+        {
+            AutoMapProperties(entity, this);
+        }
+
+        public static Factory6Workshop6_1AssemblyLineDto NotFindMakringNo(string makingNo)
+        {
+            return new Factory6Workshop6_1AssemblyLineDto()
+            {
+                MarkingNo = makingNo,
+                IsHave = false,
+                Result = ResultEnum.NG,
+            };
+        }
+
+        Factory6Workshop6_1AssemblyLineDto() { }
+
+        private void AutoMapProperties(object source, object target)
+        {
+            if (source == null || target == null)
+                return;
+
+            PropertyInfo[] sourceProperties = source.GetType().GetProperties();
+            PropertyInfo[] targetProperties = target.GetType().GetProperties();
+
+            foreach (var sourceProp in sourceProperties)
+            {
+                var targetProp = Array.Find(
+                    targetProperties,
+                    p => p.Name == sourceProp.Name && p.CanWrite && sourceProp.CanRead
+                );
+
+                if (targetProp != null)
+                {
+                    object value = sourceProp.GetValue(source);
+                    targetProp.SetValue(target, value);
+                }
+            }
+        }
+
+        [Description("记录时间")]
+        public DateTime? RecordTime { get; set; }
+
+        [Description("型号名称")]
+        public string ModelName { get; set; }
+
+        [Description("型号编号")]
+        public string ModelNo { get; set; }
+
+        [Description("检测结果")]
+        public ResultEnum Result { get; set; }
+
+        [Description("序列码")]
+        public string MarkingNo { get; set; }
+
+        [Description("外法兰半成品码")]
+        public string OuterFlangeSemiFinishedCode { get; set; }
+
+        [Description("内法兰半成品码")]
+        public string InnerFlangeSemiFinishedCode { get; set; }
+
+        [Description("A线成品时间")]
+        public DateTime? ALineRecordTime { get; set; }
+
+        [Description("屏蔽工位A")]
+        public string ShieldStationA { get; set; }
+
+        [Description("NG代码A")]
+        public string NgCodeA { get; set; }
+
+        [Description("A面钢球组差")]
+        public string ASideSteelBallGroupDiff { get; set; }
+
+        [Description("B面钢球组差")]
+        public string BSideSteelBallGroupDiff { get; set; }
+
+        [Description("A面钢球注脂量")]
+        public string ASideSteelBallGreaseVolume { get; set; }
+
+        [Description("密封圈平行差")]
+        public string SealRingParallelDiff { get; set; }
+
+        [Description("B面钢球注脂量")]
+        public string BSideSteelBallGreaseVolume { get; set; }
+
+        [Description("托盘号B")]
+        public string TrayNoB { get; set; }
+
+        [Description("屏蔽工位B")]
+        public string ShieldStationB { get; set; }
+
+        [Description("NG代码B")]
+        public string NgCodeB { get; set; }
+
+        [Description("A线托盘编号")]
+        public string LineATrayNo { get; set; }
+
+        [Description("识别代码")]
+        public string IdentificationCode { get; set; }
+
+        [Description("正游隙检测值")]
+        public string PositiveClearanceValue { get; set; }
+
+        [Description("位移量")]
+        public string DisplacementValue { get; set; }
+
+        [Description("负游隙检测值")]
+        public string NegativeClearanceValue { get; set; }
+
+        [Description("铆接前成型高度")]
+        public string PreRivetingHeight { get; set; }
+
+        [Description("密封圈压装压力")]
+        public string SealRingPressPressure { get; set; }
+
+        [Description("密封圈压装位移B")]
+        public string SealRingPressDisplacementB { get; set; }
+
+        [Description("磁性圈平行差检测传感器1")]
+        public string MagneticRingParallelSensor1 { get; set; }
+
+        [Description("磁性圈平行差检测传感器2")]
+        public string MagneticRingParallelSensor2 { get; set; }
+
+        [Description("磁性圈平行差检测传感器3")]
+        public string MagneticRingParallelSensor3 { get; set; }
+
+        [Description("磁性圈平行差")]
+        public string MagneticRingParallelDiff { get; set; }
+
+        [Description("振动下LOAD")]
+        public string VibrationLowerLOAD { get; set; }
+
+        [Description("振动下LH")]
+        public string VibrationLowerLH { get; set; }
+
+        [Description("振动下RH")]
+        public string VibrationLowerRH { get; set; }
+
+        [Description("振动上LOAD")]
+        public string VibrationUpperLOAD { get; set; }
+
+        [Description("振动上LH")]
+        public string VibrationUpperLH { get; set; }
+
+        [Description("振动上RH")]
+        public string VibrationUpperRH { get; set; }
+
+        [Description("ABS检测峰值")]
+        public string AbsPeakValue { get; set; }
+
+        [Description("ABS检测谷值")]
+        public string AbsValleyValue { get; set; }
+
+        [Description("ABS检测齿数")]
+        public string AbsToothCount { get; set; }
+
+        [Description("径跳值")]
+        public string RadialRunout { get; set; }
+
+        [Description("端跳值轴")]
+        public string EndRunoutAxis { get; set; }
+
+        [Description("端跳值平面")]
+        public string EndRunoutPlane { get; set; }
+
+        [Description("端跳值高度")]
+        public string EndRunoutHeight { get; set; }
+
+        private bool _isHave = true;
+
+        public bool IsHave
+        {
+            get => _isHave;
+            set => SetProperty(ref _isHave, value);
+        }
+    }
+}

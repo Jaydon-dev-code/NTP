@@ -14,18 +14,17 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
 {
     public class Factory6Workshop6_3AssemblyLineB : Factory6Workshop6_3AssemblyLineAbstract
     {
-        Tb_LineBRepository _lineBRepository;
-
         protected override string _lineName => "B线";
         protected override Type _dataModelType => typeof(Tb_LineB);
         protected override string _trayPointName => "托盘号B";
         protected override string _serviceName => "六分厂6-3装配B线";
-        protected virtual Type _passCodeEnumType => typeof(Assembly_6Factory6_1BLine_PassCodeEnum);
-        protected virtual Type _ngCodeEnumType => typeof(Assembly_6Factory6_1BLine_NgCodeEnum);
+        protected virtual Type _passCodeEnumType => typeof(Assembly_B_LinePassCodeEnum);
+        protected virtual Type _ngCodeEnumType => typeof(Assembly_B_LineNgCodeEnum);
 
         Tb_LineBRepository _LineBRepository;
         Tb_LineARepository _lineARepository;
         Tb_LineSummaryRepository _lineSummaryRepository;
+
         public Factory6Workshop6_3AssemblyLineB(
             Tb_EquipmentRepository equipmentRepositor,
             McpCommunication mcp,
@@ -33,14 +32,13 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
             Tb_LineARepository tb_LineARepository,
             Tb_LineSummaryRepository tb_LineSummaryRepository,
             Tb_ModelNoToNameRepository tb_ModelNoToNameRepository
-        ) : base(equipmentRepositor, mcp, tb_ModelNoToNameRepository)
+        )
+            : base(equipmentRepositor, mcp, tb_ModelNoToNameRepository)
         {
-            _LineBRepository= tb_LineBRepository;
-            _lineARepository= tb_LineARepository;
-            _lineBRepository = tb_LineBRepository;
+            _LineBRepository = tb_LineBRepository;
+            _lineARepository = tb_LineARepository;
+            _lineSummaryRepository = tb_LineSummaryRepository;
         }
-
-
 
         protected override void UpLastNo(object data)
         {
@@ -93,7 +91,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                 lineData.ALineRecordTime = aLineInfo.RecordTime;
             }
 
-            var bLineFid = await _lineBRepository.InsertableReturnIdentityAsync(lineData);
+            var bLineFid = await _LineBRepository.InsertableReturnIdentityAsync(lineData);
             ABToSummary(aLineInfo, lineData, tb_LineSummary, new List<string>() { "A线托盘编号" });
 
             tb_LineSummary.ModelNo = lineData.ModelNoB;
@@ -104,8 +102,6 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
             tb_LineSummary.BLineFID = bLineFid;
             await _lineSummaryRepository.InsertableAsync(tb_LineSummary);
             return lineData;
-
-
         }
     }
 }

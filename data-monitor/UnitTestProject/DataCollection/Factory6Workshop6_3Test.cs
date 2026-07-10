@@ -1,30 +1,30 @@
-﻿using Autofac;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Autofac;
 using HslCommunication.Profinet.Melsec;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SL.MLineDataPrecisionTracking.Core.Middleware;
 using SL.MLineDataPrecisionTracking.Core.Services;
 using SL.MLineDataPrecisionTracking.Core.Services.DataCollection;
-using SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Workshop6_1;
+using SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Workshop6_3;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Dtos;
 using SL.MLineDataPrecisionTracking.Models.Entities;
 using SqlSugar.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace UnitTestProject.DataCollection
 {
     [TestClass]
-    public class Factory6Workshop6_1Test
+    public class Factory6Workshop6_3Test
     {
         private IContainer Container { get; set; }
         private List<MelsecMcServer> _servers;
 
-        public Factory6Workshop6_1Test()
+        public Factory6Workshop6_3Test()
         {
             var builder = new ContainerBuilder();
             builder.AddInfrastructureMiddleware();
@@ -34,7 +34,7 @@ namespace UnitTestProject.DataCollection
             Container = builder.Build();
 
             _servers = new List<MelsecMcServer>();
-            foreach (var port in new int[] { 8002, 8001 })
+            foreach (var port in new int[] { 2000, 6000, 4990 })
             {
                 var server = new MelsecMcServer
                 {
@@ -55,7 +55,7 @@ namespace UnitTestProject.DataCollection
         {
             var aService = Container
                 .Resolve<IEnumerable<DataCollectionServiceAbstract>>()
-                .First(x => x.GetType().Name == nameof(Factory6Workshop6_1AssemblyLineA));
+                .First(x => x.GetType().Name == nameof(Factory6Workshop6_3AssemblyLineA));
 
             aService.Start();
 
@@ -70,25 +70,22 @@ namespace UnitTestProject.DataCollection
             var mcp = Container.Resolve<McpCommunication>();
             var aService = Container
                 .Resolve<IEnumerable<DataCollectionServiceAbstract>>()
-                .First(x => x.GetType().Name == nameof(Factory6Workshop6_1AssemblyLineA));
+                .First(x => x.GetType().Name == nameof(Factory6Workshop6_3AssemblyLineA));
 
             aService.Start();
 
-            var lineInfo = await InitPlcAddre("六分厂6-1装配A线");
-
+            var lineInfo = await InitPlcAddre("A线");
+            var endPoint = lineInfo.FirstOrDefault(x => x.PointName == "采集结束");
             var startPoint = lineInfo.FirstOrDefault(x => x.PointName == "采集开始");
             var trayNoPoint = lineInfo.FirstOrDefault(x => x.PointName == "托盘号A");
-
+            lineInfo.Remove(endPoint);
             lineInfo.Remove(startPoint);
             lineInfo.Remove(trayNoPoint);
-
-            //EndServer(endPoint, startPoint, mcp);
-
-            int val = 1000;
+            startPoint.Value = new List<object>() { false };
+            mcp.Write(startPoint);
+            int val = 1;
             for (int i = 0; i < 100; i++)
             {
-                //if ((mcp.Read(startPoint)).Data.Value[0].ObjToBool() is false)
-                //{
                 trayNoPoint.Value = new List<object>() { val };
                 mcp.Write(trayNoPoint);
 
@@ -105,14 +102,8 @@ namespace UnitTestProject.DataCollection
 
                 startPoint.Value = new List<object>() { true };
                 mcp.Write(startPoint);
-                await Task.Delay(2*1000);
+                await Task.Delay(1000);
             }
-            //else
-            //{
-            //i--;
-
-        
-            
         }
 
         #endregion
@@ -124,7 +115,7 @@ namespace UnitTestProject.DataCollection
         {
             var bService = Container
                 .Resolve<IEnumerable<DataCollectionServiceAbstract>>()
-                .First(x => x.GetType().Name == nameof(Factory6Workshop6_1AssemblyLineB));
+                .First(x => x.GetType().Name == nameof(Factory6Workshop6_3AssemblyLineB));
 
             bService.Start();
 
@@ -139,29 +130,26 @@ namespace UnitTestProject.DataCollection
             var mcp = Container.Resolve<McpCommunication>();
             var bService = Container
                 .Resolve<IEnumerable<DataCollectionServiceAbstract>>()
-                .First(x => x.GetType().Name == nameof(Factory6Workshop6_1AssemblyLineB));
+                .First(x => x.GetType().Name == nameof(Factory6Workshop6_3AssemblyLineB));
 
             bService.Start();
 
-            var lineInfo = await InitPlcAddre("六分厂6-1装配B线");
-            //var endPoint = lineInfo.FirstOrDefault(x => x.PointName == "采集结束");
+            var lineInfo = await InitPlcAddre("B线");
+            var endPoint = lineInfo.FirstOrDefault(x => x.PointName == "采集结束");
             var startPoint = lineInfo.FirstOrDefault(x => x.PointName == "采集开始");
             var trayNoPoint = lineInfo.FirstOrDefault(x => x.PointName == "托盘号B");
-            //lineInfo.Remove(endPoint);
+            lineInfo.Remove(endPoint);
             lineInfo.Remove(startPoint);
             lineInfo.Remove(trayNoPoint);
 
-      
-            //EndServer(endPoint, startPoint, mcp);
+            EndServer(endPoint, startPoint, mcp);
 
             int val = 1000;
             for (int i = 0; i < 100; i++)
             {
-                startPoint.Value = new List<object>() { true };
-                var a = mcp.Write(startPoint);
-                //if ((mcp.Read(startPoint)).Data.Value[0].ObjToBool() is false)
-                //{
-                trayNoPoint.Value = new List<object>() { val };
+                if ((mcp.Read(startPoint)).Data.Value[0].ObjToBool() is false)
+                {
+                    trayNoPoint.Value = new List<object>() { val };
                     mcp.Write(trayNoPoint);
 
                     foreach (var item in lineInfo)
@@ -175,14 +163,15 @@ namespace UnitTestProject.DataCollection
                         val++;
                     }
 
-                await Task.Delay(2*1000);
+                    startPoint.Value = new List<object>() { true };
+                    mcp.Write(startPoint);
+                }
+                else
+                {
+                    i--;
+                    await Task.Delay(200);
+                }
             }
-            //    else
-            //    {
-            //        i--;
-                    
-            //    }
-            //}
         }
 
         #endregion
@@ -196,29 +185,41 @@ namespace UnitTestProject.DataCollection
 
             var aService = Container
                 .Resolve<IEnumerable<DataCollectionServiceAbstract>>()
-                .First(x => x.GetType().Name == nameof(Factory6Workshop6_1AssemblyLineA));
+                .First(x => x.GetType().Name == nameof(Factory6Workshop6_3AssemblyLineA));
 
             var bService = Container
                 .Resolve<IEnumerable<DataCollectionServiceAbstract>>()
-                .First(x => x.GetType().Name == nameof(Factory6Workshop6_1AssemblyLineB));
+                .First(x => x.GetType().Name == nameof(Factory6Workshop6_3AssemblyLineB));
 
             int[] aTrayNos = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             int[] bTrayNos = new int[] { 10, 20, 30, 40, 50, 60, 70, 80, 90 };
 
             var mcp = Container.Resolve<McpCommunication>();
 
-            Task aTask = RunAsync("六分厂6-1装配A线", aService, aTrayNos);
+            Task aTask = RunAsync("A线", aService, aTrayNos);
             await Task.Delay(5000);
-            Task bTask = RunAsync("六分厂6-1装配B线", bService, bTrayNos,
+            Task bTask = RunAsync(
+                "B线",
+                bService,
+                bTrayNos,
                 async (lineInfo, index) =>
                 {
                     await Task.Delay(100);
                     var aTrayNoPoint = lineInfo.FirstOrDefault(x => x.PointName == "A线托盘编号");
-                    if (aTrayNoPoint != null)
+                    try
                     {
-                        aTrayNoPoint.Value = new List<object>() { aTrayNos[index] };
-                        mcp.Write(aTrayNoPoint);
+                        if (aTrayNoPoint != null)
+                        {
+                            aTrayNoPoint.Value = new List<object>() { aTrayNos[index] };
+                            mcp.Write(aTrayNoPoint);
+                        }
                     }
+                    catch (Exception ex)
+                    {
+
+                        throw;
+                    }
+                 
                 }
             );
 
@@ -233,20 +234,23 @@ namespace UnitTestProject.DataCollection
 
             var aService = Container
                 .Resolve<IEnumerable<DataCollectionServiceAbstract>>()
-                .First(x => x.GetType().Name == nameof(Factory6Workshop6_1AssemblyLineA));
+                .First(x => x.GetType().Name == nameof(Factory6Workshop6_3AssemblyLineA));
 
             var bService = Container
                 .Resolve<IEnumerable<DataCollectionServiceAbstract>>()
-                .First(x => x.GetType().Name == nameof(Factory6Workshop6_1AssemblyLineB));
+                .First(x => x.GetType().Name == nameof(Factory6Workshop6_3AssemblyLineB));
 
             int[] aTrayNos = new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
             int[] bTrayNos = new int[] { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
 
             var mcp = Container.Resolve<McpCommunication>();
 
-            Task aTask = RunAsync("六分厂6-1装配A线", aService, aTrayNos);
+            Task aTask = RunAsync("A线", aService, aTrayNos);
             await Task.Delay(5000);
-            Task bTask = RunAsync("六分厂6-1装配B线", bService, bTrayNos,
+            Task bTask = RunAsync(
+                "B线",
+                bService,
+                bTrayNos,
                 async (lineInfo, index) =>
                 {
                     await Task.Delay(100);
@@ -277,9 +281,8 @@ namespace UnitTestProject.DataCollection
             lineServer.Start();
 
             var lineInfo = await InitPlcAddre(lineName);
+            var endPoint = lineInfo.FirstOrDefault(x => x.PointName == "采集结束");
             var startPoint = lineInfo.FirstOrDefault(x => x.PointName == "采集开始");
-
-    
             var pallNotPoint = lineInfo.FirstOrDefault(x => x.PointName.Contains("托盘号"));
             var modelNoPoint = lineInfo.FirstOrDefault(x => x.PointName.Contains("型号"));
             var ngCodeoPoint = lineInfo.FirstOrDefault(x => x.PointName.Contains("NG代码"));
@@ -287,7 +290,8 @@ namespace UnitTestProject.DataCollection
             modelNoPoint.Value = new List<object>() { 4 };
             ngCodeoPoint.Value = new List<object>() { 0 };
 
-     
+            lineInfo.Remove(endPoint);
+            lineInfo.Remove(startPoint);
             lineInfo.Remove(pallNotPoint);
             lineInfo.Remove(ngCodeoPoint);
             lineInfo.Remove(modelNoPoint);
@@ -296,24 +300,42 @@ namespace UnitTestProject.DataCollection
 
             mcp.Write(modelNoPoint);
             mcp.Write(ngCodeoPoint);
+
             startPoint.Value = new List<object>() { true };
             mcp.Write(startPoint);
-
-            int val = 1;
-            for (int i = 0; i < pallNo.Length; i++)
+            //EndServer(endPoint, startPoint, mcp);
+            int a = 0;
+            try
             {
               
+
+                int val = 1;
+                for (int i = 0; i < pallNo.Length - 1; i++)
+                {
+                    a = i;
+                    //if ((mcp.Read(startPoint)).Data.Value[0].ObjToBool() is false)
+                    //{
                     val = await WriteValueAsync(lineInfo, pallNotPoint, mcp, val, pallNo[i]);
 
                     if (func != null)
                     {
                         await func(lineInfo, i);
                     }
+                    await Task.Delay(2 * 1000);
+                }
+                //else
+                //{
+                //    i--;
 
-             
-                    await Task.Delay(2*1000);
-               
+                //}
             }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+           
         }
 
         private static async Task<int> WriteValueAsync(

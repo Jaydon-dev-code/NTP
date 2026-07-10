@@ -220,6 +220,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
 
         protected static string GetEnumDescription(int value, Type enumType)
         {
+            if (!Enum.IsDefined(enumType, value))
+                return string.Empty;
             return ((Enum)Enum.ToObject(enumType, value)).GetDescription();
         }
 
