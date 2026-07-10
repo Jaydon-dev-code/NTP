@@ -779,47 +779,50 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                 });
                 foreach (var group in groups)
                 {
-                    var startAddre = group.Min(x => x.Address);
-                    var endAddressInfo = group.OrderByDescending(x => x.Address).First();
-                    //mcpx 是按照short 也就是可读取最小寄存器 来解析的所以要加上shourt偏移
-                    var lenght =
-                        endAddressInfo.Address
-                        // string 的长度等于 byte 所以的 /2
-                        + (
-                            endAddressInfo.DataType == TypeCode.String
-                                ? (int)Math.Ceiling((double)endAddressInfo.Length / 2)
-                                : (endAddressInfo.Length * endAddressInfo.ShortOffset)
-                        )
-                        - startAddre;
+                    foreach (var groupAddre in GroupByAddress(group))
+                    {
+                        var startAddre = groupAddre.Min(x => x.Address);
+                        var endAddressInfo = groupAddre.OrderByDescending(x => x.Address).First();
+                        //mcpx 是按照short 也就是可读取最小寄存器 来解析的所以要加上shourt偏移
+                        var lenght =
+                            endAddressInfo.Address
+                            // string 的长度等于 byte 所以的 /2
+                            + (
+                                endAddressInfo.DataType == TypeCode.String
+                                    ? (int)Math.Ceiling((double)endAddressInfo.Length / 2)
+                                    : (endAddressInfo.Length * endAddressInfo.ShortOffset)
+                            )
+                            - startAddre;
 
-                    var readValue = await PaginatedReading(
-                        group.Key.IpAddress,
-                        group.Key.Port,
-                        group.Key.Prefix.ToPrefix(),
-                        startAddre,
-                        lenght
-                    );
-                    if (readValue.IsSuccess is false)
-                    {
-                        byte[] bytes = new byte[lenght * 2];
-                        foreach (DevPlcPointReadDto item in group)
+                        var readValue = await PaginatedReading(
+                            group.Key.IpAddress,
+                            group.Key.Port,
+                            group.Key.Prefix.ToPrefix(),
+                            startAddre,
+                            lenght
+                        );
+                        if (readValue.IsSuccess is false)
                         {
-                            item.Value = bytes.ConvertToValues(
-                                (item.Address - startAddre) * item.ShortOffset,
-                                item.DataType,
-                                item.Length
-                            );
+                            byte[] bytes = new byte[lenght * 2];
+                            foreach (DevPlcPointReadDto item in groupAddre)
+                            {
+                                item.Value = bytes.ConvertToValues(
+                                    (item.Address - startAddre) * item.ShortOffset,
+                                    item.DataType,
+                                    item.Length
+                                );
+                            }
                         }
-                    }
-                    else
-                    {
-                        foreach (DevPlcPointReadDto item in group)
+                        else
                         {
-                            item.Value = readValue.Data.ConvertToValues(
-                                ((item.Address - startAddre) * 2),
-                                item.DataType,
-                                item.Length
-                            );
+                            foreach (DevPlcPointReadDto item in groupAddre)
+                            {
+                                item.Value = readValue.Data.ConvertToValues(
+                                    ((item.Address - startAddre) * 2),
+                                    item.DataType,
+                                    item.Length
+                                );
+                            }
                         }
                     }
                 }
