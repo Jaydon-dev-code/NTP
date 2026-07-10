@@ -72,7 +72,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Middleware
                             && // 不是泛型类
                             !t.IsInterface
                             && // 不是接口
-                            t.Namespace==targetNamespace
+                            t.Namespace.Contains(targetNamespace)
                         )
                         {
                             types.Add(t);
