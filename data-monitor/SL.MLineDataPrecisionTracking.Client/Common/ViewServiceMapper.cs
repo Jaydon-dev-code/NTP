@@ -28,8 +28,8 @@ namespace SL.MLineDataPrecisionTracking.Client.Common
             var matchMode = GetMatchMode(viewType);
 
             if (matchMode == ViewMatchMode.All)
-                return serverNames.All(s => enabledServiceTypes.Contains(s));
-            return serverNames.Any(s => enabledServiceTypes.Contains(s));
+                return serverNames.All(s => enabledServiceTypes.Any(e => e == s));
+            return serverNames.Any(s => enabledServiceTypes.Any(e => e == s));
         }
     }
 }

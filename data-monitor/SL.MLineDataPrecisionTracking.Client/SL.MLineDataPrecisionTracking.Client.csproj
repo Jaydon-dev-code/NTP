@@ -104,6 +104,7 @@
     <Compile Include="Http\BaseHttp.cs" />
     <Compile Include="Http\DeviceCollectionConfigApi.cs" />
     <Compile Include="Http\EnergyRangeApi.cs" />
+    <Compile Include="Http\Factory6Workshop6_1AssemblyLineApi.cs" />
     <Compile Include="Http\HubClien.cs" />
     <Compile Include="Http\MeticulousPursuitApi.cs" />
     <Compile Include="Http\Rcl_MeticulousPursuitApi.cs" />
@@ -111,12 +112,16 @@
     <Compile Include="Middleware\HttpMiddleware.cs" />
     <Compile Include="Middleware\ViewMiddleware.cs" />
     <Compile Include="ViewModel\Control\DeviceCollectionConfigViewModel.cs" />
+    <Compile Include="ViewModel\Control\Factory6Workshop6_1AssemblyLineViewModel.cs" />
     <Compile Include="ViewModel\Control\FrmBr8Sec63HeatEnergyChartViewModel.cs" />
     <Compile Include="ViewModel\Control\MeticulousPursuitViewModel.cs" />
     <Compile Include="ViewModel\Control\Rcl_MeticulousPursuitViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="View\Control\DeviceCollectionConfig.xaml.cs">
       <DependentUpon>DeviceCollectionConfig.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Control\Factory6Workshop6_1AssemblyLine.xaml.cs">
+      <DependentUpon>Factory6Workshop6_1AssemblyLine.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Control\FrmBr8Sec63HeatEnergyChart.xaml.cs">
       <DependentUpon>FrmBr8Sec63HeatEnergyChart.xaml</DependentUpon>
@@ -168,6 +173,10 @@
     <Page Include="View\Control\DeviceCollectionConfig.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Control\Factory6Workshop6_1AssemblyLine.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Control\FrmBr8Sec63HeatEnergyChart.xaml">
       <SubType>Designer</SubType>

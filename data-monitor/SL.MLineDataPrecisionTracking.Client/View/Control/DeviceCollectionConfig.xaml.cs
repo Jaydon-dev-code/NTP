@@ -1,4 +1,5 @@
-﻿using SL.MLineDataPrecisionTracking.Client.ViewModel.Control;
+﻿using SL.MLineDataPrecisionTracking.Client.Common;
+using SL.MLineDataPrecisionTracking.Client.ViewModel.Control;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,7 @@ namespace SL.MLineDataPrecisionTracking.Client.View.Control
     /// <summary>
     /// DeviceCollectionConfig.xaml 的交互逻辑
     /// </summary>
+    [ViewLinkServerInfoAttribute(serverNames: new[] { "", "", }, header: "设置", icon: "Resources\\Image\\ProductionRecord.png", MatchMode = ViewMatchMode.Any)]
     public partial class DeviceCollectionConfig : UserControl
     {
         public DeviceCollectionConfig(DeviceCollectionConfigViewModel deviceCollectionConfigViewModel)
