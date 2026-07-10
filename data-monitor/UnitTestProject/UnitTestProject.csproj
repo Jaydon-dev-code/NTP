@@ -44,12 +44,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataCollection\Factory6Workshop6_1Test.cs" />
+    <Compile Include="DataCollection\Factory6Workshop6_3Test.cs" />
     <Compile Include="HubTest.cs" />
     <Compile Include="LogTest.cs" />
     <Compile Include="PLC\McpCommunicationTest.cs" />
     <Compile Include="PLC\OmronCommunicationTest.cs" />
     <Compile Include="PLC\S7CommunicationTest.cs" />
-    <Compile Include="PlcOPTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
