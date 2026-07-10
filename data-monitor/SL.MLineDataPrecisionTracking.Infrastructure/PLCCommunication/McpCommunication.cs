@@ -13,7 +13,7 @@ using SqlSugar;
 
 namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
 {
-    public class McpCommunication
+    public class McpCommunication: IPlcCommunication
     {
         private readonly object _lockObj = new object();
         private readonly Dictionary<string, McpX> _mcpDic = new Dictionary<string, McpX>();
@@ -26,9 +26,9 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
         /// <summary>
         /// 同步读取单个点位
         /// </summary>
-        public Result<DevPlcPointMcDto> Read(DevPlcPointMcDto readPlcInfo)
+        public Result<DevPlcPointDto> Read(DevPlcPointDto readPlcInfo)
         {
-            Result<DevPlcPointMcReadDto> re = new Result<DevPlcPointMcReadDto>() { Data = new DevPlcPointMcReadDto() };
+            Result<DevPlcPointReadDto> re = new Result<DevPlcPointReadDto>() { Data = new DevPlcPointReadDto() };
             if (int.TryParse(readPlcInfo.Address, out int result) is false)
             {
                 byte[] data = null;
@@ -37,7 +37,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                     data = ReadWithRetrySync(
                         readPlcInfo.IpAddress,
                         readPlcInfo.Port,
-                        readPlcInfo.Prefix,
+                        readPlcInfo.Prefix.ToPrefix(),
                         readPlcInfo.Address,
                         (ushort)readPlcInfo.Length
                     );
@@ -64,7 +64,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             }
             else
             {
-                var readDto = new DevPlcPointMcReadDto(
+                var readDto = new DevPlcPointReadDto(
                     readPlcInfo,
                     readPlcInfo.DataType.GetTypeOfShortOffset()
                 );
@@ -73,27 +73,27 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
 
             if (!re.IsSuccess)
             {
-                return Result<DevPlcPointMcDto>.Fail(re.Message);
+                return Result<DevPlcPointDto>.Fail(re.Message);
             }
 
             readPlcInfo.Value = re.Data.Value;
-            return Result<DevPlcPointMcDto>.Success(readPlcInfo);
+            return Result<DevPlcPointDto>.Success(readPlcInfo);
         }
 
         /// <summary>
         /// 同步读取多个点位（自动分组批量读取）
         /// </summary>
-        public Result<List<DevPlcPointMcDto>> Read(List<DevPlcPointMcDto> readPlcInfo)
+        public Result<List<DevPlcPointDto>> Read(List<DevPlcPointDto> readPlcInfo)
         {
             var readDtos = readPlcInfo
-                .Select(x => new DevPlcPointMcReadDto(x, x.DataType.GetTypeOfShortOffset()))
+                .Select(x => new DevPlcPointReadDto(x, x.DataType.GetTypeOfShortOffset()))
                 .ToList();
 
             var re = Read(readDtos);
 
             if (!re.IsSuccess)
             {
-                return Result<List<DevPlcPointMcDto>>.Fail(re.Message);
+                return Result<List<DevPlcPointDto>>.Fail(re.Message);
             }
 
             for (int i = 0; i < readPlcInfo.Count; i++)
@@ -101,20 +101,20 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                 readPlcInfo[i].Value = re.Data[i].Value;
             }
 
-            return Result<List<DevPlcPointMcDto>>.Success(readPlcInfo);
+            return Result<List<DevPlcPointDto>>.Success(readPlcInfo);
         }
 
         /// <summary>
         /// 同步单个读取核心
         /// </summary>
-        private Result<DevPlcPointMcReadDto> Read(DevPlcPointMcReadDto readPlcInfo)
+        private Result<DevPlcPointReadDto> Read(DevPlcPointReadDto readPlcInfo)
         {
             try
             {
                 var readValue = PaginatedReadingSync(
                     readPlcInfo.IpAddress,
                     readPlcInfo.Port,
-                    readPlcInfo.Prefix,
+                    readPlcInfo.Prefix.ToPrefix(),
                     readPlcInfo.Address,
                     readPlcInfo.Length
                 );
@@ -137,19 +137,19 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                     );
                 }
 
-                return Result<DevPlcPointMcReadDto>.Success(readPlcInfo);
+                return Result<DevPlcPointReadDto>.Success(readPlcInfo);
             }
             catch (Exception ex)
             {
                 Log.Warning("[Mcp通讯异常]同步解析数据错误：{Message}", ex.Message);
-                return Result<DevPlcPointMcReadDto>.Fail(ex.Message);
+                return Result<DevPlcPointReadDto>.Fail(ex.Message);
             }
         }
 
         /// <summary>
         /// 同步批量读取核心（分组连续地址）
         /// </summary>
-        private Result<List<DevPlcPointMcReadDto>> Read(List<DevPlcPointMcReadDto> lineReadPlcInfo)
+        private Result<List<DevPlcPointReadDto>> Read(List<DevPlcPointReadDto> lineReadPlcInfo)
         {
             try
             {
@@ -179,7 +179,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                         var readValue = PaginatedReadingSync(
                             group.Key.IpAddress,
                             group.Key.Port,
-                            group.Key.Prefix,
+                            group.Key.Prefix.ToPrefix(),
                             startAddre,
                             length
                         );
@@ -210,12 +210,12 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                     }
                 }
 
-                return Result<List<DevPlcPointMcReadDto>>.Success(lineReadPlcInfo);
+                return Result<List<DevPlcPointReadDto>>.Success(lineReadPlcInfo);
             }
             catch (Exception ex)
             {
                 Log.Warning("[Mcp通讯异常]同步批量解析数据错误：{Message}", ex.Message);
-                return Result<List<DevPlcPointMcReadDto>>.Fail(ex.Message);
+                return Result<List<DevPlcPointReadDto>>.Fail(ex.Message);
             }
         }
 
@@ -223,21 +223,21 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
         /// PLC 地址分组工具（间隔 >128 断开）
         /// </summary>
         /// <summary>
-        /// 对 DevPlcPointMcReadDto 集合按 Address 连续分组
+        /// 对 DevPlcPointReadDto 集合按 Address 连续分组
         /// 规则：后地址 - 前地址 <= 128 → 同一组
         ///      后地址 - 前地址 > 128 → 新组
         /// </summary>
-        List<List<DevPlcPointMcReadDto>> GroupByAddress(IEnumerable<DevPlcPointMcReadDto> pointList)
+        List<List<DevPlcPointReadDto>> GroupByAddress(IEnumerable<DevPlcPointReadDto> pointList)
         {
             // 1. 必须按地址从小到大排序
             var sorted = pointList.OrderBy(p => p.Address).ToList();
-            var result = new List<List<DevPlcPointMcReadDto>>();
+            var result = new List<List<DevPlcPointReadDto>>();
 
             if (!sorted.Any())
                 return result;
 
             // 2. 初始化第一组
-            var currentGroup = new List<DevPlcPointMcReadDto> { sorted[0] };
+            var currentGroup = new List<DevPlcPointReadDto> { sorted[0] };
             result.Add(currentGroup);
 
             // 3. 遍历分组
@@ -249,7 +249,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                 // 地址差 > 128 → 断开，新建组
                 if (curr.Address - prev.Address > 128)
                 {
-                    currentGroup = new List<DevPlcPointMcReadDto>();
+                    currentGroup = new List<DevPlcPointReadDto>();
                     result.Add(currentGroup);
                 }
 
@@ -370,22 +370,22 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
         }
         #endregion
         #region 同步写
-        public async Task<Result> WriteAsync(DevPlcPointMcDto devPlcPointMcDto)
+        public async Task<Result> WriteAsync(DevPlcPointDto devPlcPointMcDto)
         {
-            return await WriteAsync(new DevPlcPointMcWriteDto(devPlcPointMcDto));
+            return await WriteAsync(new DevPlcPointWriteDto(devPlcPointMcDto));
         }
 
-        public Result Write(DevPlcPointMcDto devPlcPointMcDto)
+        public Result Write(DevPlcPointDto devPlcPointMcDto)
         {
-            return Write(new DevPlcPointMcWriteDto(devPlcPointMcDto));
+            return Write(new DevPlcPointWriteDto(devPlcPointMcDto));
         }
 
-        private Result Write(DevPlcPointMcWriteDto pointMcWriteDto)
+        private Result Write(DevPlcPointWriteDto pointMcWriteDto)
         {
             return PaginatedWriteing(
                 pointMcWriteDto.IpAddress,
                 pointMcWriteDto.Port,
-                pointMcWriteDto.Prefix,
+                pointMcWriteDto.Prefix.ToPrefix(),
                 pointMcWriteDto.DataType,
                 pointMcWriteDto.Address,
                 pointMcWriteDto.Value
@@ -531,12 +531,12 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
         }
 
         #endregion
-        private async Task<Result> WriteAsync(DevPlcPointMcWriteDto pointMcWriteDto)
+        private async Task<Result> WriteAsync(DevPlcPointWriteDto pointMcWriteDto)
         {
             return await PaginatedWriteingAsync(
                 pointMcWriteDto.IpAddress,
                 pointMcWriteDto.Port,
-                pointMcWriteDto.Prefix,
+                pointMcWriteDto.Prefix.ToPrefix(),
                 pointMcWriteDto.DataType,
                 pointMcWriteDto.Address,
                 pointMcWriteDto.Value
@@ -686,24 +686,24 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             throw new Exception("重试失败");
         }
 
-        //public async Task<Result<DevPlcPointMcDto>> ReadAsync(DevPlcPointMcDto readPlcInfo)
+        //public async Task<Result<DevPlcPointDto>> ReadAsync(DevPlcPointDto readPlcInfo)
         //{
         //    var re = await ReadAsync(
-        //        new DevPlcPointMcReadDto(readPlcInfo, readPlcInfo.DataType.GetTypeOfShortOffset())
+        //        new DevPlcPointReadDto(readPlcInfo, readPlcInfo.DataType.GetTypeOfShortOffset())
         //    );
         //    if (re.IsSuccess is false)
         //    {
-        //        return Result<DevPlcPointMcDto>.Fail(re.Message);
+        //        return Result<DevPlcPointDto>.Fail(re.Message);
         //    }
         //    else
         //    {
         //        readPlcInfo.Value = re.Data.Value;
 
-        //        return Result<DevPlcPointMcDto>.Success(readPlcInfo);
+        //        return Result<DevPlcPointDto>.Success(readPlcInfo);
         //    }
         //}
 
-        async Task<Result<DevPlcPointMcReadDto>> ReadAsync(DevPlcPointMcReadDto readPlcInfo)
+        async Task<Result<DevPlcPointReadDto>> ReadAsync(DevPlcPointReadDto readPlcInfo)
         {
             Result<byte[]> readValue;
             try
@@ -711,7 +711,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                 readValue = await PaginatedReading(
                     readPlcInfo.IpAddress,
                     readPlcInfo.Port,
-                    readPlcInfo.Prefix,
+                    readPlcInfo.Prefix.ToPrefix(),
                     readPlcInfo.Address,
                     readPlcInfo.Length
                 );
@@ -733,27 +733,27 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                         readPlcInfo.Length
                     );
                 }
-                return Result<DevPlcPointMcReadDto>.Success(readPlcInfo);
+                return Result<DevPlcPointReadDto>.Success(readPlcInfo);
             }
             catch (Exception ex)
             {
                 Log.Warning("[Mcp通讯异常]解析数据错误：{ex.Message}", ex.Message);
-                return Result<DevPlcPointMcReadDto>.Fail(ex.Message);
+                return Result<DevPlcPointReadDto>.Fail(ex.Message);
             }
         }
 
-        //public async Task<Result<List<DevPlcPointMcDto>>> ReadAsync(
-        //    List<DevPlcPointMcDto> readPlcInfo
+        //public async Task<Result<List<DevPlcPointDto>>> ReadAsync(
+        //    List<DevPlcPointDto> readPlcInfo
         //)
         //{
         //    var re = await ReadAsync(
         //        readPlcInfo
-        //            .Select(x => new DevPlcPointMcReadDto(x, x.DataType.GetTypeOfShortOffset()))
+        //            .Select(x => new DevPlcPointReadDto(x, x.DataType.GetTypeOfShortOffset()))
         //            .ToList()
         //    );
         //    if (re.IsSuccess is false)
         //    {
-        //        return Result<List<DevPlcPointMcDto>>.Fail(re.Message);
+        //        return Result<List<DevPlcPointDto>>.Fail(re.Message);
         //    }
         //    else
         //    {
@@ -761,12 +761,12 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
         //        {
         //            readPlcInfo[i].Value = re.Data[i].Value;
         //        }
-        //        return Result<List<DevPlcPointMcDto>>.Success(readPlcInfo);
+        //        return Result<List<DevPlcPointDto>>.Success(readPlcInfo);
         //    }
         //}
 
-        async Task<Result<List<DevPlcPointMcReadDto>>> ReadAsync(
-            List<DevPlcPointMcReadDto> lineReadPlcInfo
+        async Task<Result<List<DevPlcPointReadDto>>> ReadAsync(
+            List<DevPlcPointReadDto> lineReadPlcInfo
         )
         {
             try
@@ -795,14 +795,14 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                     var readValue = await PaginatedReading(
                         group.Key.IpAddress,
                         group.Key.Port,
-                        group.Key.Prefix,
+                        group.Key.Prefix.ToPrefix(),
                         startAddre,
                         lenght
                     );
                     if (readValue.IsSuccess is false)
                     {
                         byte[] bytes = new byte[lenght * 2];
-                        foreach (DevPlcPointMcReadDto item in group)
+                        foreach (DevPlcPointReadDto item in group)
                         {
                             item.Value = bytes.ConvertToValues(
                                 (item.Address - startAddre) * item.ShortOffset,
@@ -813,7 +813,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                     }
                     else
                     {
-                        foreach (DevPlcPointMcReadDto item in group)
+                        foreach (DevPlcPointReadDto item in group)
                         {
                             item.Value = readValue.Data.ConvertToValues(
                                 ((item.Address - startAddre) * 2),
@@ -823,12 +823,12 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                         }
                     }
                 }
-                return Result<List<DevPlcPointMcReadDto>>.Success(lineReadPlcInfo);
+                return Result<List<DevPlcPointReadDto>>.Success(lineReadPlcInfo);
             }
             catch (Exception ex)
             {
                 Log.Warning("[Mcp通讯异常]解析数据错误：{ex.Message}", ex.Message);
-                return Result<List<DevPlcPointMcReadDto>>.Fail(ex.Message);
+                return Result<List<DevPlcPointReadDto>>.Fail(ex.Message);
             }
         }
 
@@ -985,6 +985,11 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                 }
                 catch { }
             }
+        }
+
+        public Result Write(List<DevPlcPointDto> pointMcWriteDto)
+        {
+            throw new NotImplementedException();
         }
     }
 }
