@@ -52,7 +52,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
         protected override async Task<object> InsterValue(Result<object> interact)
         {
             var lineData = (Tb_Factory6Workshop6_1AssemblyLineB)interact.Data;
-
+            Tb_Factory6Workshop6_1AssemblyLineABSummary tb_LineSummary =
+              new Tb_Factory6Workshop6_1AssemblyLineABSummary() { Result = ResultEnum.OK };
             Tb_Factory6Workshop6_1AssemblyLineA aLineInfo = null;
             if (lineData.LineATrayNo != "0" && !string.IsNullOrEmpty(lineData.LineATrayNo))
             {
@@ -61,9 +62,12 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                     o => o.RecordTime
                 );
             }
+            else
+            {
+                tb_LineSummary.TrayNoA = lineData.LineATrayNo;
+            }
 
-            Tb_Factory6Workshop6_1AssemblyLineABSummary tb_LineSummary =
-                new Tb_Factory6Workshop6_1AssemblyLineABSummary() { Result = ResultEnum.OK };
+          
 
             if (lineData.ShieldStationB != "0")
             {

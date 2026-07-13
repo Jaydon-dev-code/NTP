@@ -38,6 +38,12 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities.Factory6Workshop6_1Assem
         /// <summary>
         /// 托盘号
         /// </summary>
+        [SugarColumn(ColumnDescription = "托盘号A", DefaultValue = " ")]
+        public string TrayNoA { get; set; }
+
+        /// <summary>
+        /// 托盘号
+        /// </summary>
         [SugarColumn(ColumnDescription = "型号")]
         public string ModelNo { get; set; } = "";
 

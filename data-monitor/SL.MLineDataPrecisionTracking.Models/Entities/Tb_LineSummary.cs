@@ -394,36 +394,36 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// 螺栓压装1
         /// </summary>
         [SugarColumn(ColumnDescription = "螺栓压装1", DefaultValue = "0")]
-        public string BoltPressAssemble1 { get; set; }
+        public string BoltPressAssemble1 { get; set; } = "";
 
         /// <summary>
         /// 螺栓压装2
         /// </summary>
         [SugarColumn(ColumnDescription = "螺栓压装2", DefaultValue = "0")]
-        public string BoltPressAssemble2 { get; set; }
+        public string BoltPressAssemble2 { get; set; } = "";
 
         /// <summary>
         /// 螺栓压装3
         /// </summary>
         [SugarColumn(ColumnDescription = "螺栓压装3", DefaultValue = "0")]
-        public string BoltPressAssemble3 { get; set; }
+        public string BoltPressAssemble3 { get; set; } = "";
 
         /// <summary>
         /// 螺栓压装4
         /// </summary>
         [SugarColumn(ColumnDescription = "螺栓压装4", DefaultValue = "0")]
-        public string BoltPressAssemble4 { get; set; }
+        public string BoltPressAssemble4 { get; set; } = "";
 
         /// <summary>
         /// 螺栓压装5
         /// </summary>
         [SugarColumn(ColumnDescription = "螺栓压装5", DefaultValue = "0")]
-        public string BoltPressAssemble5 { get; set; }
+        public string BoltPressAssemble5 { get; set; } = "";
 
         /// <summary>
         /// 螺栓压装AVg
         /// </summary>
         [SugarColumn(ColumnDescription = "螺栓压装AVG", DefaultValue = "0")]
-        public string BoltPressAssembleAVG { get; set; }
+        public string BoltPressAssembleAVG { get; set; } = "";
     }
 }

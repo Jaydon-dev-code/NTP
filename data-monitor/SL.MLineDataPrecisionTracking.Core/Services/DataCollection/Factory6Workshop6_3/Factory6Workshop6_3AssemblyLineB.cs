@@ -49,7 +49,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
         {
             var lineData = (Tb_LineB)interact.Data;
 
+            Tb_LineSummary tb_LineSummary = new Tb_LineSummary() { Result = ResultEnum.OK };
             Tb_LineA aLineInfo = null;
+            //如果有数据且不等于0
             if (lineData.LineATrayNo != "0" && !string.IsNullOrEmpty(lineData.LineATrayNo))
             {
                 aLineInfo = await _lineARepository.QueryableFirstAsync(
@@ -57,8 +59,11 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                     o => o.RecordTime
                 );
             }
-
-            Tb_LineSummary tb_LineSummary = new Tb_LineSummary() { Result = ResultEnum.OK };
+            else
+            {
+                tb_LineSummary.TrayNoA = lineData.LineATrayNo;
+            }
+          
 
             if (lineData.ShieldStationB != "0")
             {
