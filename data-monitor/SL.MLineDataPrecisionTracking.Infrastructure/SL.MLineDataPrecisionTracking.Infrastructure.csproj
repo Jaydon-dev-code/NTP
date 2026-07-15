@@ -50,6 +50,11 @@
     <Compile Include="PLCCommunication\S7Communication.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Storage\BaseRepository.cs" />
+    <Compile Include="Storage\Factory4Workshop4_10Line\Tb_Factory4Workshop4_10LineSummaryRepository.cs" />
+    <Compile Include="Storage\Factory4Workshop4_10Line\Tb_Factory4Workshop4_10Line_ABSRepository.cs" />
+    <Compile Include="Storage\Factory4Workshop4_10Line\Tb_Factory4Workshop4_10Line_ClearanceRepository.cs" />
+    <Compile Include="Storage\Factory4Workshop4_10Line\Tb_Factory4Workshop4_10Line_RivetAndCrackRepository.cs" />
+    <Compile Include="Storage\Factory4Workshop4_10Line\Tb_Factory4Workshop4_10Line_VibRepository.cs" />
     <Compile Include="Storage\Factory6Workshop6_1AssemblyLine\Tb_Factory6Workshop6_1AssemblyLineARepository.cs" />
     <Compile Include="Storage\Factory6Workshop6_1AssemblyLine\Tb_Factory6Workshop6_1AssemblyLineBRepository.cs" />
     <Compile Include="Storage\Factory6Workshop6_1AssemblyLine\Tb_Factory6Workshop6_1AssemblyLineABSummaryRepository.cs" />
@@ -104,5 +109,6 @@
   <ItemGroup>
     <None Include="Resources\DBPackages\System.Data.SQLite.dll" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

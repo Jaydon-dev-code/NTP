@@ -44,6 +44,8 @@
     <Compile Include="Domain\ApiResult.cs" />
     <Compile Include="Domain\ChartMonitorItem.cs" />
     <Compile Include="Domain\EnergyRangePoint.cs" />
+    <Compile Include="Domain\Factory4Workshop4_10LineBase.cs" />
+    <Compile Include="Domain\Factory4Workshop4_10Line\Factory4Workshop4_10LineBase.cs" />
     <Compile Include="Domain\MenuItem.cs" />
     <Compile Include="Domain\TimeAxisConfig.cs" />
     <Compile Include="Domain\PaginationPage.cs" />
@@ -63,6 +65,13 @@
     <Compile Include="Dtos\Response\Factory6Workshop6_1AssemblyLineResponseDto.cs" />
     <Compile Include="Dtos\Response\HeatTreatmentDataQueryResponseDto.cs" />
     <Compile Include="Dtos\Response\LineSummaryQueryResponseDto.cs" />
+    <Compile Include="Entities\Base\DataCollectionBase.cs" />
+    <Compile Include="Entities\Factory4Workshop4_10Line\Factory4Workshop4_10LineBase.cs" />
+    <Compile Include="Entities\Factory4Workshop4_10Line\Tb_Factory4Workshop4_10LineSummary.cs" />
+    <Compile Include="Entities\Factory4Workshop4_10Line\Tb_Factory4Workshop4_10Line_ABS.cs" />
+    <Compile Include="Entities\Factory4Workshop4_10Line\Tb_Factory4Workshop4_10Line_Clearance.cs" />
+    <Compile Include="Entities\Factory4Workshop4_10Line\Tb_Factory4Workshop4_10Line_RivetAndCrack.cs" />
+    <Compile Include="Entities\Factory4Workshop4_10Line\Tb_Factory4Workshop4_10Line_Vib.cs" />
     <Compile Include="Entities\Factory6Workshop6_1AssemblyLine\Tb_Factory6Workshop6_1AssemblyLineABSummary.cs" />
     <Compile Include="Entities\Tb_EnergyRange.cs" />
     <Compile Include="Entities\Tb_EnergyRangeDetail.cs" />
