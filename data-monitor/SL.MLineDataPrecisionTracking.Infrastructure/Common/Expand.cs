@@ -1,10 +1,4 @@
-﻿using McpXLib.Enums;
-using NPOI.SS.UserModel;
-using NPOI.XSSF.UserModel;
-using SL.MLineDataPrecisionTracking.Models.Domain;
-using SL.MLineDataPrecisionTracking.Models.Dtos;
-using SqlSugar;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,24 +9,33 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using McpXLib.Enums;
+using NPOI.SS.UserModel;
+using NPOI.XSSF.UserModel;
+using SL.MLineDataPrecisionTracking.Models.Domain;
+using SL.MLineDataPrecisionTracking.Models.Dtos;
+using SqlSugar;
 
 namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
 {
     public static class Expand
     {
         private static readonly Encoding sjisEncoding;
-         static Expand()
+
+        static Expand()
         {
 #if !NETSTANDARD2_0
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 #endif
             sjisEncoding = Encoding.GetEncoding("shift_jis");
         }
-            static   Type _dfStringtype = typeof(string);
+
+        static Type _dfStringtype = typeof(string);
+
         public static Result ExportToExcel<T>(List<T> dataList, string saveFileName)
-        { 
+        {
             try
-           {
+            {
                 IWorkbook workbook = new XSSFWorkbook();
                 ISheet sheet = workbook.CreateSheet("Sheet1");
 
@@ -41,18 +44,18 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
 
                 // 2. 创建表头（读取 Description 中文）
                 IRow headerRow = sheet.CreateRow(0);
-                List<PropertyInfo> ignoreInfo=new List<PropertyInfo>();
+                List<PropertyInfo> ignoreInfo = new List<PropertyInfo>();
                 for (int i = 0; i < properties.Count; i++)
                 {
                     var desc = properties[i].GetCustomAttribute<DescriptionAttribute>();
-                    if (desc==null)
+                    if (desc == null)
                     {
                         ignoreInfo.Add(properties[i]);
                         continue;
                     }
                     string headerName = desc?.Description ?? properties[i].Name; // 自动取中文
 
-                    ICell cell = headerRow.CreateCell(i- ignoreInfo.Count);
+                    ICell cell = headerRow.CreateCell(i - ignoreInfo.Count);
                     cell.SetCellValue(headerName);
                 }
                 foreach (var item in ignoreInfo)
@@ -91,6 +94,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
                 return Result.Fail(ex.Message);
             }
         }
+
         public static int GetTypeByteLength(this Type type)
         {
             int typeSize;
@@ -165,7 +169,11 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
                     throw new NotSupportedException($"未支持的TypeCode：{code}");
             }
         }
-        public static Result<object> SugarColumnReflectAssign(Result<List<DevPlcPointDto>> readValue, Type dataModelType )
+
+        public static Result<object> SugarColumnReflectAssign(
+            Result<List<DevPlcPointDto>> readValue,
+            Type dataModelType
+        )
         {
             object t = Activator.CreateInstance(dataModelType);
             var props = dataModelType.GetProperties();
@@ -226,6 +234,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
 
             return Result<object>.Success(t);
         }
+
         public static object StringCompute(this string expression, params string[] param)
         {
             var format = string.Format(expression, param);
@@ -311,9 +320,9 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
             return result;
         }
 
-        /// <summary>
+        /// <soure>
         /// 大端模式 Byte数组 转 short (PLC默认大端)
-        /// </summary>
+        /// </soure>
         public static short ToInt16(this byte[] buffer, int startIndex)
         {
             //if (BitConverter.IsLittleEndian)
@@ -321,9 +330,9 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
             return BitConverter.ToInt16(buffer, startIndex);
         }
 
-        /// <summary>
+        /// <soure>
         /// 大端模式 Byte数组 转 int
-        /// </summary>
+        /// </soure>
         public static int ToInt32(this byte[] buffer, int startIndex)
         {
             //if (BitConverter.IsLittleEndian)
@@ -331,9 +340,9 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
             return BitConverter.ToInt32(buffer, startIndex);
         }
 
-        /// <summary>
+        /// <soure>
         /// 大端模式 Byte数组 转 float
-        /// </summary>
+        /// </soure>
         public static float ToSingle(this byte[] buffer, int startIndex)
         {
             //if (BitConverter.IsLittleEndian)
@@ -353,9 +362,9 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
             }
         }
 
-        /// <summary>
+        /// <soure>
         /// 从字节数组解析出【数组类型】
-        /// </summary>
+        /// </soure>
         /// <param name="buffer">PLC原始字节数组</param>
         /// <param name="startIndex">起始索引</param>
         /// <param name="type">数据类型</param>
@@ -392,6 +401,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
                     throw new NotSupportedException($"不支持解析类型数组: {type}");
             }
         }
+
         public static bool[] ByteToBits(this byte value)
         {
             bool[] bits = new bool[8];
@@ -405,9 +415,9 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
             return bits;
         }
 
-        /// <summary>
+        /// <soure>
         /// 通用数组解析（自动步进字节）
-        /// </summary>
+        /// </soure>
         private static List<object> ParseArray(
             byte[] buffer,
             int startIndex,
@@ -448,7 +458,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
                 case TypeCode.Double:
                     return BitConverter.ToDouble(buffer, startIndex);
                 case TypeCode.String:
-                    return ConvertString(new byte[] { buffer[startIndex] } );
+                    return ConvertString(new byte[] { buffer[startIndex] });
                 default:
                     throw new NotSupportedException($"不支持解析类型: {type}");
             }
@@ -462,14 +472,12 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
                 length = bytes.Length;
             }
 
-            return sjisEncoding.GetString(
-                bytes.Take(length).ToArray()
-            );
+            return sjisEncoding.GetString(bytes.Take(length).ToArray());
         }
 
-        /// <summary>
+        /// <soure>
         /// PLC大端 Double
-        /// </summary>
+        /// </soure>
         public static double ToDouble(byte[] buffer, int startIndex)
         {
             //if (BitConverter.IsLittleEndian)
@@ -489,10 +497,9 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
             }
         }
 
-
-        /// <summary>
+        /// <soure>
         /// 获取枚举描述
-        /// </summary>
+        /// </soure>
         public static string GetDescription(this Enum enumValue)
         {
             if (enumValue == null)
@@ -503,14 +510,16 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
             return descAttr?.Description ?? enumValue.ToString();
         }
 
-        /// <summary>
+        /// <soure>
         /// 解析位域枚举：根据int位值，获取所有激活的枚举项信息（泛型通用版）
-        /// </summary>
+        /// </soure>
         /// <typeparam name="TEnum">位枚举类型</typeparam>
         /// <param name="bitValue">原始整型位值</param>
         /// <returns>位索引、枚举名称、描述</returns>
-        public static List<(int BitIndex, string EnumName, string Description)> ParseBitEnum<TEnum>(this int bitValue)
-            where TEnum : Enum  // 约束为枚举类型
+        public static List<(int BitIndex, string EnumName, string Description)> ParseBitEnum<TEnum>(
+            this int bitValue
+        )
+            where TEnum : Enum // 约束为枚举类型
         {
             var result = new List<(int BitIndex, string EnumName, string Description)>();
             var enumType = typeof(TEnum);
@@ -534,6 +543,54 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
             }
 
             return result;
+        }
+
+        static object GetValue(object obj, string fieldName)
+        {
+            if (obj == null)
+                return null;
+
+            var prop = obj.GetType().GetProperty(fieldName);
+            return prop?.CanRead == true ? prop.GetValue(obj) : null;
+        }
+
+        public static void ItemToSoure(
+            object soure,
+            List<string> ignoreFields = null,
+            params object[] sourceItem
+        )
+        {
+            if (ignoreFields == null)
+            {
+                ignoreFields = new List<string>();
+            }
+
+            var summaryProperties = soure
+                .GetType()
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.CanWrite && p.IsDefined(typeof(SugarColumn), true))
+                .ToList();
+
+            foreach (var prop in summaryProperties)
+            {
+                var fieldName = prop.Name;
+
+                if (
+                    ignoreFields.Any(ig => ig.Equals(fieldName, StringComparison.OrdinalIgnoreCase))
+                )
+                    continue;
+                foreach (var item in sourceItem)
+                {
+                    object value = GetValue(item, fieldName);
+                    if (value == null)
+                        continue;
+                    else
+                    {
+                        prop.SetValue(soure, value);
+                        break;
+                    }
+                }
+            }
         }
     }
 }
