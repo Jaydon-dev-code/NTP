@@ -73,8 +73,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                 null,
                 (Tb_Factory4Workshop4_10Line_Clearance)interact.Data
             );
-            //第一个工位直接插入，工序不能乱序
-         //   await _lineSummaryRepository.UpDataAsync(lineSummary,x=>x.SN,);
+      //
+            //await _lineSummaryRepository.UpDataAsync(lineSummary, x => x.SN,);
         }
     }
 }

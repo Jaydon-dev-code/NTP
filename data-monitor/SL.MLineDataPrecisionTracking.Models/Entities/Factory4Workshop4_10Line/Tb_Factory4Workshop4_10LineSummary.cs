@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 
 namespace SL.MLineDataPrecisionTracking.Models.Entities.Factory4Workshop4_10Line
 {
-    [SugarTable("Factory4Workshop4_10Line_RivetAndCrack")]
+    [SugarIndex("idx_Factory4Workshop4_10LineSummary_SN_Asc", nameof(Tb_Factory4Workshop4_10LineSummary.SN), OrderByType.Asc)]
+    [SugarTable("Factory4Workshop4_10LineSummary")]
     public class Tb_Factory4Workshop4_10LineSummary: Factory4Workshop4_10LineBase
     {
     }
