@@ -13,8 +13,8 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         [SugarColumn(ColumnDescription = "产品型号")]
         public string ProductModel { get; set; }
 
-        [SugarColumn(ColumnDescription = "是否启用", DefaultValue = "true")]
-        public bool IsEnabled { get; set; } = true;
+        [SugarColumn(ColumnDescription = "工位分配", IsNullable = true)]
+        public string Station { get; set; }
 
         public DateTime CreateTime { get; set; } = DateTime.Now;
 

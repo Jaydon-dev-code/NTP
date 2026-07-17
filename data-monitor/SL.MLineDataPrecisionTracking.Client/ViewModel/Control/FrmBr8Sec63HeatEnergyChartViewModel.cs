@@ -1,44 +1,76 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Sources;
 using System.Windows;
-using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using NPOI.SS.Formula.Functions;
+using NPOI.XSSF.Streaming.Values;
 using ScottPlot;
 using ScottPlot.Plottables;
 using ScottPlot.WPF;
+using SixLabors.ImageSharp;
 using SkiaSharp;
 using SL.MLineDataPrecisionTracking.Client.Http;
 using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Entities;
+using SL.MLineDataPrecisionTracking.Models.Enum;
 
 namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 {
     public class FrmBr8Sec63HeatEnergyChartViewModel : ObservableObject
     {
-        private WpfPlot _PlotControl;
+        //a工位坐标
+        ConcurrentQueue<PointData<double, double>> _pointsA =
+            new ConcurrentQueue<PointData<double, double>>();
 
-        public WpfPlot PlotControl
-        {
-            get => _PlotControl;
-            set => SetProperty(ref _PlotControl, value);
-        }
+        //b工位坐标
+        ConcurrentQueue<PointData<double, double>> _pointsB =
+            new ConcurrentQueue<PointData<double, double>>();
 
-        List<PointData<double, double>> _points = new List<PointData<double, double>>();
-        const double XScale = 0.1;
-        double _maxTime = 0;
-        List<Tb_EnergyRangeDetail> _currentRangeDetails;
+        List<Tb_EnergyRangeDetail> _currentRangeDetailsA;
+        List<Tb_EnergyRangeDetail> _currentRangeDetailsB;
+        List<Tb_EnergyRangeDetail> _currentRangeDetails =>
+            _selectedWorkStation == Br8Sec63HeatEnergyWorkEnum.A
+                ? _currentRangeDetailsA
+                : _currentRangeDetailsB;
+
         PointData<double, double> _firstPoint = new PointData<double, double>() { X = 0, Y = 0 };
 
-        private readonly EnergyRangeApi _energyRangeApi;
-        private readonly object _pointsLock = new object();
+        //x轴的间隔
+        const double XScale = 0.1;
+
+        //a工位 x 轴的最大值
+        double _maxTimeA = 0;
+
+        //b工位 x 轴的最大值
+        double _maxTimeB = 0;
+
+        DispatcherTimer _renderTimer;
+
+        //图标对象
+        private WpfPlot _PlotControlA;
+
+        public WpfPlot PlotControlA
+        {
+            get => _PlotControlA;
+            set => SetProperty(ref _PlotControlA, value);
+        }
+
+        private WpfPlot _potControlB;
+
+        public WpfPlot PlotControlB
+        {
+            get => _potControlB;
+            set => SetProperty(ref _potControlB, value);
+        }
 
         private WpfPlot _settingPlotControl;
         public WpfPlot SettingPlotControl
@@ -46,6 +78,9 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             get => _settingPlotControl;
             set => SetProperty(ref _settingPlotControl, value);
         }
+
+        List<PointData<double, double>> _currentPointsA = new List<PointData<double, double>>();
+        List<PointData<double, double>> _currentPointsB = new List<PointData<double, double>>();
 
         public ObservableCollection<Tb_EnergyRange> ProductModels { get; } =
             new ObservableCollection<Tb_EnergyRange>();
@@ -66,35 +101,114 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 
         public string CurrentModelName => SelectedProductModel?.ProductModel ?? "未选择";
 
+        private Br8Sec63HeatEnergyWorkEnum _selectedWorkStation = Br8Sec63HeatEnergyWorkEnum.A;
+        public Br8Sec63HeatEnergyWorkEnum SelectedWorkStation
+        {
+            get => _selectedWorkStation;
+            set => SetProperty(ref _selectedWorkStation, value);
+        }
+
         public ICommand DeleteMonitorItemCommand { get; }
-        public ICommand StartEditCommand { get; }
-        public ICommand ConfirmRenameCommand { get; }
         public ICommand RefreshEnergyRangeCommand { get; }
         public ICommand ImportEnergyRangeCommand { get; }
         public ICommand ToggleModelEnabledCommand { get; }
-        public ICommand SetCurrentProductionCommand { get; }
+        public ICommand SetStationACommand { get; }
+        public ICommand SetStationBCommand { get; }
         public ICommand ExportTemplateCommand { get; }
+        public ICommand LoadedCommand { get; }
+        public ICommand WorkChangeCommand { get; }
+
+        private readonly EnergyRangeApi _energyRangeApi;
 
         public FrmBr8Sec63HeatEnergyChartViewModel(HubClien hubClien, EnergyRangeApi energyRangeApi)
         {
-            PlotControl = IntiPlot();
-            SettingPlotControl = IntiPlot();
-            hubClien.Start<PointData<double, double>>("EnergyRangeUpdated", EnergyRangeUpdated());
+           
+            hubClien.Start<PointData<double, double>>("SetEbergyDataA", SetEbergyDataA);
+            hubClien.Start<PointData<double, double>>("SetEbergyDataB", SetEbergyDataB);
 
             _energyRangeApi = energyRangeApi;
 
+            LoadedCommand = new AsyncRelayCommand(LoadAsync);
+            WorkChangeCommand = new AsyncRelayCommand(WorkChange);
             DeleteMonitorItemCommand = new AsyncRelayCommand(DeleteMonitorItem);
-            StartEditCommand = new RelayCommand<ChartMonitorItem>(StartEdit);
-            ConfirmRenameCommand = new RelayCommand<ChartMonitorItem>(ConfirmRename);
             RefreshEnergyRangeCommand = new AsyncRelayCommand(RefreshEnergyRangeAsync);
             ImportEnergyRangeCommand = new AsyncRelayCommand(ImportEnergyRangeAsync);
             ToggleModelEnabledCommand = new AsyncRelayCommand<Tb_EnergyRange>(
                 ToggleModelEnabledAsync
             );
-            SetCurrentProductionCommand = new AsyncRelayCommand(SetCurrentProductionAsync);
+            SetStationACommand = new AsyncRelayCommand(() => SetStationAsync("A"));
+            SetStationBCommand = new AsyncRelayCommand(() => SetStationAsync("B"));
             ExportTemplateCommand = new RelayCommand(ExportTemplate);
+        }
 
-            _ = LoadCurrentModelAsync();
+        private async Task LoadAsync()
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                PlotControlA = IntiPlot();
+                PlotControlB = IntiPlot();
+                SettingPlotControl = IntiPlot();
+                _renderTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+                _renderTimer.Tick += RenderTick;
+                _renderTimer.Start();
+            });
+            await LoadCurrentModelAsync();
+        }
+
+        private void SetEbergyDataA(PointData<double, double> data)
+        {
+            if (data.X > _maxTimeA) return;
+            _pointsA.Enqueue(data);
+        }
+
+        private void SetEbergyDataB(PointData<double, double> data)
+        {
+            if (data.X > _maxTimeB) return;
+            _pointsB.Enqueue(data);
+        }
+
+        private void RenderTick(object sender, EventArgs e)
+        {
+            DrainQueue(_pointsA, _currentPointsA, PlotControlA, _currentRangeDetailsA);
+            DrainQueue(_pointsB, _currentPointsB, PlotControlB, _currentRangeDetailsB);
+        }
+
+        private void DrainQueue(
+            ConcurrentQueue<PointData<double, double>> queue,
+            List<PointData<double, double>> displayPoints,
+            WpfPlot plot,
+            List<Tb_EnergyRangeDetail> rangeDetails)
+        {
+            var batch = new List<PointData<double, double>>();
+            while (queue.TryDequeue(out var p))
+                batch.Add(p);
+
+            if (batch.Count == 0) return;
+
+            foreach (var point in batch)
+            {
+                if (point.X <= 0.1)
+                {
+                    displayPoints.Clear();
+                    plot.Plot.Clear();
+                    displayPoints.Add(_firstPoint);
+                }
+                displayPoints.Add(point);
+            }
+
+            double currentMaxX = displayPoints.Max(p => p.X);
+
+            DrawPartialRange(currentMaxX, plot, rangeDetails);
+            DrawDataLine(plot, displayPoints);
+
+            double dataMaxY = displayPoints.Max(p => p.Y);
+            plot.Plot.Axes.SetLimits(0, currentMaxX + 0.5, 0, dataMaxY + 30);
+            plot.Refresh();
+        }
+
+        private async Task WorkChange()
+        {
+            SwitchStation(SelectedWorkStation);
         }
 
         private async Task LoadCurrentModelAsync()
@@ -102,7 +216,8 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             try
             {
                 var result = await _energyRangeApi.GetAllAsync();
-                if (!result.IsSuccess || result.Data == null) return;
+                if (!result.IsSuccess || result.Data == null)
+                    return;
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -110,86 +225,125 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                     foreach (var model in result.Data)
                         ProductModels.Add(model);
                 });
-
-                var enabled = result.Data.FirstOrDefault(m => m.IsEnabled);
-                if (enabled == null) return;
-
-                _currentRangeDetails = enabled.Details.OrderBy(d => d.Time).ToList();
-                double xMax = 0;
-                foreach (var d in _currentRangeDetails)
+                var stationA = result.Data.FirstOrDefault(m => m.Station == "A");
+                if (stationA != null)
                 {
-                    var x = d.Time * XScale;
-                    if (x > xMax) xMax = x;
+                    _currentRangeDetailsA = stationA.Details?.OrderBy(d => d.Time).ToList();
+                    double xMax = 0;
+                    if (_currentRangeDetailsA != null)
+                        foreach (var d in _currentRangeDetailsA)
+                        {
+                            var x = d.Time * XScale;
+                            if (x > xMax)
+                                xMax = x;
+                        }
+                    _maxTimeA = xMax + 0.5;
                 }
-                _maxTime = xMax + 0.5;
-                SelectedProductModel = enabled;
+
+                var stationB = result.Data.FirstOrDefault(m => m.Station == "B");
+                if (stationB != null)
+                {
+                    _currentRangeDetailsB = stationB.Details?.OrderBy(d => d.Time).ToList();
+                    double xMax = 0;
+                    if (_currentRangeDetailsB != null)
+                        foreach (var d in _currentRangeDetailsB)
+                        {
+                            var x = d.Time * XScale;
+                            if (x > xMax)
+                                xMax = x;
+                        }
+                    _maxTimeB = xMax + 0.5;
+                }
+
+                SelectedProductModel = stationA ?? stationB;
             }
             catch { }
         }
 
-        private Action<PointData<double, double>> EnergyRangeUpdated()
+        private void SwitchStation(Br8Sec63HeatEnergyWorkEnum station)
         {
-            return point =>
+            var stationStr = station == Br8Sec63HeatEnergyWorkEnum.A ? "A" : "B";
+            var model = ProductModels.FirstOrDefault(m => m.Station == stationStr);
+            var rangeDetails = model?.Details?.OrderBy(d => d.Time).ToList();
+            if (rangeDetails == null)
             {
-                try
+                model = ProductModels.FirstOrDefault();
+                if (model == null)
+                    return;
+                rangeDetails =
+                    model.Details?.OrderBy(d => d.Time).ToList()
+                    ?? new List<Tb_EnergyRangeDetail>();
+            }
+
+            double xMax = 0;
+            foreach (var d in rangeDetails)
+            {
+                var x = d.Time * XScale;
+                if (x > xMax)
+                    xMax = x;
+            }
+
+            if (station == Br8Sec63HeatEnergyWorkEnum.A)
+            {
+                _currentRangeDetailsA = rangeDetails;
+                _maxTimeA = xMax + 0.5;
+            }
+            else
+            {
+                _currentRangeDetailsB = rangeDetails;
+                _maxTimeB = xMax + 0.5;
+            }
+
+            SelectedProductModel = model;
+
+            var plot = station == Br8Sec63HeatEnergyWorkEnum.A ? PlotControlA : PlotControlB;
+            var pts = station == Br8Sec63HeatEnergyWorkEnum.A ? _currentPointsA : _currentPointsB;
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                plot.Plot.Clear();
+                if (pts.Count > 0)
                 {
-                    if (Application.Current?.Dispatcher == null)
-                        return;
-
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                    if (point.X > _maxTime)
-                        return;
-
-                    lock (_pointsLock)
-                    {
-                        if (point.X <= 0.1)
-                        {
-                            _points.Clear();
-                            PlotControl.Plot.Clear();
-                            _points.Add(_firstPoint);
-                        }
-
-                        _points.Add(point);
-
-                        double currentMaxX = _points.Max(p => p.X);
-
-                        DrawPartialRange(currentMaxX);
-                        DrawDataLine();
-
-                        double dataMaxY = _points.Max(p => p.Y);
-                        PlotControl.Plot.Axes.SetLimits(0, currentMaxX + 0.5, 0, dataMaxY + 30);
-                    }
-
-                        PlotControl.Refresh();
-                    });
+                    double currentMaxX = pts.Max(p => p.X);
+                    DrawPartialRange(currentMaxX, plot, rangeDetails);
+                    DrawDataLine(plot, pts);
+                    double dataMaxY = pts.Max(p => p.Y);
+                    plot.Plot.Axes.SetLimits(0, currentMaxX + 0.5, 0, dataMaxY + 30);
                 }
-                catch { }
-            };
+                plot.Refresh();
+            });
         }
 
-        private void DrawPartialRange(double currentMaxX)
+        private void DrawPartialRange(
+            double currentMaxX,
+            WpfPlot plot,
+            List<Tb_EnergyRangeDetail> rangeDetails
+        )
         {
-            if (_currentRangeDetails == null || _currentRangeDetails.Count == 0)
+            if (rangeDetails == null || rangeDetails.Count == 0)
                 return;
 
             var lowerPts = new List<Coordinates>();
             var upperPts = new List<Coordinates>();
             bool reachedEnd = true;
 
-            for (int i = 0; i < _currentRangeDetails.Count; i++)
+            for (int i = 0; i < rangeDetails.Count; i++)
             {
-                var d = _currentRangeDetails[i];
+                var d = rangeDetails[i];
                 var x = d.Time * XScale;
                 if (x > currentMaxX)
                 {
                     reachedEnd = false;
                     if (i > 0)
                     {
-                        var prev = _currentRangeDetails[i - 1];
+                        var prev = rangeDetails[i - 1];
                         double t = (currentMaxX - prev.Time * XScale) / (x - prev.Time * XScale);
-                        double l = (double)prev.LowerLimit + t * ((double)d.LowerLimit - (double)prev.LowerLimit);
-                        double u = (double)prev.UpperLimit + t * ((double)d.UpperLimit - (double)prev.UpperLimit);
+                        double l =
+                            (double)prev.LowerLimit
+                            + t * ((double)d.LowerLimit - (double)prev.LowerLimit);
+                        double u =
+                            (double)prev.UpperLimit
+                            + t * ((double)d.UpperLimit - (double)prev.UpperLimit);
                         lowerPts.Add(new Coordinates(currentMaxX, l));
                         upperPts.Add(new Coordinates(currentMaxX, u));
                     }
@@ -204,47 +358,56 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 
             if (lowerPts.Count >= 2)
             {
-                var lowerLine = PlotControl.Plot.Add.Scatter(
+                var lowerLine = plot.Plot.Add.Scatter(
                     lowerPts.Select(p => p.X).ToArray(),
                     lowerPts.Select(p => p.Y).ToArray(),
-                    Colors.Red);
+                    Colors.Red
+                );
                 lowerLine.LineWidth = 2;
                 lowerLine.MarkerSize = 0;
             }
 
             if (upperPts.Count >= 2)
             {
-                var upperLine = PlotControl.Plot.Add.Scatter(
+                var upperLine = plot.Plot.Add.Scatter(
                     upperPts.Select(p => p.X).ToArray(),
                     upperPts.Select(p => p.Y).ToArray(),
-                    Colors.Red);
+                    Colors.Red
+                );
                 upperLine.LineWidth = 2;
                 upperLine.MarkerSize = 0;
             }
 
-            var startLine = PlotControl.Plot.Add.Line(
-                lowerPts[0].X, lowerPts[0].Y,
-                upperPts[0].X, upperPts[0].Y);
+            var startLine = plot.Plot.Add.Line(
+                lowerPts[0].X,
+                lowerPts[0].Y,
+                upperPts[0].X,
+                upperPts[0].Y
+            );
             startLine.LineWidth = 2;
             startLine.LineColor = Colors.Red;
 
             if (reachedEnd && lowerPts.Count >= 2)
             {
-                var endLine = PlotControl.Plot.Add.Line(
-                    lowerPts[lowerPts.Count - 1].X, lowerPts[lowerPts.Count - 1].Y,
-                    upperPts[upperPts.Count - 1].X, upperPts[upperPts.Count - 1].Y);
+                var endLine = plot.Plot.Add.Line(
+                    lowerPts[lowerPts.Count - 1].X,
+                    lowerPts[lowerPts.Count - 1].Y,
+                    upperPts[upperPts.Count - 1].X,
+                    upperPts[upperPts.Count - 1].Y
+                );
                 endLine.LineWidth = 2;
                 endLine.LineColor = Colors.Red;
             }
         }
 
-        private void DrawDataLine()
+        private void DrawDataLine(WpfPlot plot, List<PointData<double, double>> pts)
         {
-            if (_points.Count < 2) return;
+            if (pts.Count < 2)
+                return;
 
-            var xs = _points.Select(p => p.X).ToArray();
-            var ys = _points.Select(p => p.Y).ToArray();
-            var scatter = PlotControl.Plot.Add.Scatter(xs, ys, Colors.Green);
+            var xs = pts.Select(p => p.X).ToArray();
+            var ys = pts.Select(p => p.Y).ToArray();
+            var scatter = plot.Plot.Add.Scatter(xs, ys, Colors.Green);
             scatter.LineWidth = 2;
             scatter.MarkerSize = 0;
         }
@@ -305,24 +468,10 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             }
         }
 
-        private void StartEdit(ChartMonitorItem item)
-        {
-            if (item == null) return;
-            item.EditingName = item.Name;
-            item.IsEditing = true;
-        }
-
-        private void ConfirmRename(ChartMonitorItem item)
-        {
-            if (item == null) return;
-            if (!string.IsNullOrWhiteSpace(item.EditingName))
-                item.Name = item.EditingName.Trim();
-            item.IsEditing = false;
-        }
-
         private async Task DeleteMonitorItem()
         {
-            if (SelectedProductModel == null) return;
+            if (SelectedProductModel == null)
+                return;
 
             var result = HandyControl.Controls.MessageBox.Show(
                 $"确定要删除监控项 \"{SelectedProductModel.ProductModel}\" 吗？",
@@ -347,7 +496,8 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 Title = "选择能量范围Excel文件",
             };
 
-            if (dialog.ShowDialog() != true) return;
+            if (dialog.ShowDialog() != true)
+                return;
 
             var result = await _energyRangeApi.ImportAsync(dialog.FileName, false);
 
@@ -368,27 +518,26 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 
             if (result.IsSuccess)
             {
-                HandyControl.Controls.MessageBox.Show(result.Message, "导入成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                HandyControl.Controls.MessageBox.Show(
+                    result.Message,
+                    "导入成功",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information
+                );
                 await RefreshEnergyRangeAsync();
             }
             else
             {
-                HandyControl.Controls.MessageBox.Show(result.Message, "导入失败", MessageBoxButton.OK, MessageBoxImage.Error);
+                HandyControl.Controls.MessageBox.Show(
+                    result.Message,
+                    "导入失败",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
             }
         }
 
-        private async Task ToggleModelEnabledAsync(Tb_EnergyRange model)
-        {
-            if (model == null) return;
-            try
-            {
-                await _energyRangeApi.ToggleEnabledAsync(model.Id, model.IsEnabled);
-            }
-            catch (Exception ex)
-            {
-                HandyControl.Controls.MessageBox.Show($"更新失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
+        private async Task ToggleModelEnabledAsync(Tb_EnergyRange model) { }
 
         private void ExportTemplate()
         {
@@ -396,37 +545,66 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             {
                 Filter = "Excel文件 (*.xlsx)|*.xlsx",
                 FileName = "能量范围.xlsx",
-                Title = "导出模板文件"
+                Title = "导出模板文件",
             };
 
-            if (dialog.ShowDialog() != true) return;
+            if (dialog.ShowDialog() != true)
+                return;
 
-            string src = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "能量范围.xlsx");
+            string src = System.IO.Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "Resources",
+                "能量范围.xlsx"
+            );
             if (System.IO.File.Exists(src))
             {
                 System.IO.File.Copy(src, dialog.FileName, true);
-                HandyControl.Controls.MessageBox.Show("模板导出成功", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                HandyControl.Controls.MessageBox.Show(
+                    "模板导出成功",
+                    "提示",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information
+                );
             }
             else
             {
-                HandyControl.Controls.MessageBox.Show($"模板文件不存在：{src}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                HandyControl.Controls.MessageBox.Show(
+                    $"模板文件不存在：{src}",
+                    "错误",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
             }
         }
 
-        private async Task SetCurrentProductionAsync()
+        private async Task SetStationAsync(string station)
         {
-            if (SelectedProductModel == null) return;
+            if (SelectedProductModel == null)
+                return;
 
-            await _energyRangeApi.SetCurrentModelAsync(SelectedProductModel.Id);
+            await _energyRangeApi.SetCurrentStationModelAsync(SelectedProductModel.Id, station);
 
-            _currentRangeDetails = SelectedProductModel.Details.OrderBy(d => d.Time).ToList();
+            SelectedWorkStation =
+                station == "A" ? Br8Sec63HeatEnergyWorkEnum.A : Br8Sec63HeatEnergyWorkEnum.B;
+
+            var details = SelectedProductModel.Details.OrderBy(d => d.Time).ToList();
             double xMax = 0;
-            foreach (var d in _currentRangeDetails)
+            foreach (var d in details)
             {
                 var x = d.Time * XScale;
-                if (x > xMax) xMax = x;
+                if (x > xMax)
+                    xMax = x;
             }
-            _maxTime = xMax + 0.5;
+            if (station == "A")
+            {
+                _currentRangeDetailsA = details;
+                _maxTimeA = xMax + 0.5;
+            }
+            else
+            {
+                _currentRangeDetailsB = details;
+                _maxTimeB = xMax + 0.5;
+            }
 
             var result = await _energyRangeApi.GetAllAsync();
             if (result.IsSuccess && result.Data != null)
@@ -437,10 +615,6 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                     foreach (var model in result.Data)
                         ProductModels.Add(model);
                 });
-
-                var enabled = result.Data.FirstOrDefault(m => m.IsEnabled);
-                if (enabled != null)
-                    SelectedProductModel = enabled;
             }
         }
 
@@ -462,8 +636,10 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             {
                 var tmp = new Coordinates(d.Time * XScale, (double)d.LowerLimit);
                 coords.Add(tmp);
-                if (tmp.X > xMax) xMax = tmp.X;
-                if (tmp.Y > yMax) yMax = tmp.Y;
+                if (tmp.X > xMax)
+                    xMax = tmp.X;
+                if (tmp.Y > yMax)
+                    yMax = tmp.Y;
             }
             foreach (var d in Enumerable.Reverse(sorted))
             {

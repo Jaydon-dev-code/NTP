@@ -1,7 +1,3 @@
-using Microsoft.AspNet.SignalR;
-using SL.MLineDataPrecisionTracking.Core.Services;
-using SL.MLineDataPrecisionTracking.Models.Domain;
-using SL.MLineDataPrecisionTracking.Models.Entities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,6 +6,10 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
+using Microsoft.AspNet.SignalR;
+using SL.MLineDataPrecisionTracking.Core.Services;
+using SL.MLineDataPrecisionTracking.Models.Domain;
+using SL.MLineDataPrecisionTracking.Models.Entities;
 
 namespace SL.MLineDataPrecisionTracking.Service.Controllers
 {
@@ -19,7 +19,10 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
         IHubContext _hubContext;
         static CancellationTokenSource _simulationCts;
 
-        public EnergyRangeController(EnergyRangeExcelImportService importService, IHubContext hubContext)
+        public EnergyRangeController(
+            EnergyRangeExcelImportService importService,
+            IHubContext hubContext
+        )
         {
             _importService = importService;
             _hubContext = hubContext;
@@ -93,25 +96,11 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
         }
 
         [HttpPost]
-        public async Task<ApiResult> ToggleEnabled(int id, bool isEnabled)
+        public async Task<ApiResult> SetCurrentStationModel(int id, string station)
         {
             try
             {
-                await _importService.ToggleEnabledAsync(id, isEnabled);
-                return ApiResult.Success();
-            }
-            catch (Exception ex)
-            {
-                return ApiResult.Fail($"更新失败: {ex.Message}");
-            }
-        }
-
-        [HttpPost]
-        public async Task<ApiResult> SetCurrentModel(int id)
-        {
-            try
-            {
-                await _importService.SetCurrentModelAsync(id);
+                await _importService.SetCurrentStationModelAsync(id, station);
                 return ApiResult.Success();
             }
             catch (Exception ex)
@@ -133,43 +122,50 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
             _simulationCts = new CancellationTokenSource();
             var token = _simulationCts.Token;
 
-            Task.Run(async () =>
-            {
-                var rnd = new Random();
-
-                while (!token.IsCancellationRequested)
+            Task.Run(
+                async () =>
                 {
-                    double y = rnd.NextDouble() * 5;
-                    double targetAt05 = 80 + rnd.NextDouble() * 5;
+                    var rnd = new Random();
 
-                    for (int i = 0; i < 90; i++)
+                    while (!token.IsCancellationRequested)
                     {
-                        if (token.IsCancellationRequested) return;
+                        double y = rnd.NextDouble() * 5;
+                        double targetAt05 = 80 + rnd.NextDouble() * 5;
 
-                        double x = i * 0.1;
-
-                        if (i > 0 && i <= 5)
+                        for (int i = 0; i < 90; i++)
                         {
-                            double progress = i / 5.0;
-                            y = (1 - progress) * y + progress * targetAt05;
-                            y += (rnd.NextDouble() - 0.5) * 2;
-                        }
-                        else if (i > 5)
-                        {
-                            double next = 90 + rnd.NextDouble() * 10;
-                            if (Math.Abs(next - y) > 2)
-                                next = y + (next > y ? 1 : -1) * (1 + rnd.NextDouble());
-                            next = Math.Max(90, Math.Min(100, next));
-                            y = next;
-                        }
+                            if (token.IsCancellationRequested)
+                                return;
 
-                        var simPoint = new PointData<double, double>(Math.Round(x, 1), Math.Round(y, 1));
-                        _hubContext.Clients.All.EnergyRangeUpdated(simPoint);
+                            double x = i * 0.1;
 
-                        await Task.Delay(100, token);
+                            if (i > 0 && i <= 5)
+                            {
+                                double progress = i / 5.0;
+                                y = (1 - progress) * y + progress * targetAt05;
+                                y += (rnd.NextDouble() - 0.5) * 2;
+                            }
+                            else if (i > 5)
+                            {
+                                double next = 90 + rnd.NextDouble() * 10;
+                                if (Math.Abs(next - y) > 2)
+                                    next = y + (next > y ? 1 : -1) * (1 + rnd.NextDouble());
+                                next = Math.Max(90, Math.Min(100, next));
+                                y = next;
+                            }
+
+                            var simPoint = new PointData<double, double>(
+                                Math.Round(x, 1),
+                                Math.Round(y, 1)
+                            );
+                            _hubContext.Clients.All.EnergyRangeUpdated(simPoint);
+
+                            await Task.Delay(100, token);
+                        }
                     }
-                }
-            }, token);
+                },
+                token
+            );
 
             return ApiResult.Success("模拟推送已启动");
         }
@@ -188,30 +184,30 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
             return ApiResult.Success("模拟推送已停止");
         }
 
+        [HttpPost]
+        public async Task<ApiResult> SetEbergyDataOnePice()
+        {
+            SetEbergyDataAOnePice();
+            await Task.Delay(100);
+            SetEbergyDataBOnePice();
+            return ApiResult.Success("模拟AB工位推送已启动");
+        }
+
         /// <summary>
         /// POST /api/EnergyRange/StartSimulationOnePice
         /// </summary>
         [HttpPost]
-        public ApiResult StartSimulationOnePice()
+        public ApiResult SetEbergyDataAOnePice()
         {
-            if (_simulationCts != null)
-            {
-                _simulationCts.Cancel();
-            }
-            _simulationCts = new CancellationTokenSource();
-            var token = _simulationCts.Token;
-
             Task.Run(async () =>
             {
                 var rnd = new Random();
-
 
                 double y = rnd.NextDouble() * 5;
                 double targetAt05 = 80 + rnd.NextDouble() * 5;
 
                 for (int i = 0; i < 100; i++)
                 {
-
                     double x = i * 0.1;
 
                     if (i > 0 && i <= 5)
@@ -229,14 +225,62 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
                         y = next;
                     }
 
-                    var simPoint = new PointData<double, double>(Math.Round(x, 1), Math.Round(y, 1));
-                    _hubContext.Clients.All.EnergyRangeUpdated(simPoint);
+                    var simPoint = new PointData<double, double>(
+                        Math.Round(x, 1),
+                        Math.Round(y, 1)
+                    );
+                    _hubContext.Clients.All.SetEbergyDataA(simPoint);
 
-                    await Task.Delay(100, token);
+                    await Task.Delay(100);
                 }
             });
             return ApiResult.Success("模拟推送已启动");
         }
+
+        /// <summary>
+        /// POST /api/EnergyRange/StartSimulationOnePice
+        /// </summary>
+        [HttpPost]
+        public ApiResult SetEbergyDataBOnePice()
+        {
+            Task.Run(async () =>
+            {
+                var rnd = new Random();
+
+                double y = rnd.NextDouble() * 5;
+                double targetAt05 = 80 + rnd.NextDouble() * 5;
+
+                for (int i = 0; i < 100; i++)
+                {
+                    double x = i * 0.1;
+
+                    if (i > 0 && i <= 5)
+                    {
+                        double progress = i / 5.0;
+                        y = (1 - progress) * y + progress * targetAt05;
+                        y += (rnd.NextDouble() - 0.5) * 2;
+                    }
+                    else if (i > 5)
+                    {
+                        double next = 90 + rnd.NextDouble() * 10;
+                        if (Math.Abs(next - y) > 2)
+                            next = y + (next > y ? 1 : -1) * (1 + rnd.NextDouble());
+                        next = Math.Max(90, Math.Min(100, next));
+                        y = next;
+                    }
+
+                    var simPoint = new PointData<double, double>(
+                        Math.Round(x, 1),
+                        Math.Round(y, 1)
+                    );
+                    _hubContext.Clients.All.SetEbergyDataB(simPoint);
+
+                    await Task.Delay(100);
+                }
+            });
+            return ApiResult.Success("模拟推送已启动");
+        }
+
         private string GetQueryString(string key)
         {
             var query = Request.GetQueryNameValuePairs();

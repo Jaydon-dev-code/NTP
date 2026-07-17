@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using NPOI.SS.UserModel;
@@ -11,6 +12,8 @@ using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Dtos;
 using SL.MLineDataPrecisionTracking.Models.Entities;
+using SL.MLineDataPrecisionTracking.Models.Enum.Plc;
+using SL.MLineDataPrecisionTracking.Models.UsAttribute;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services
 {
@@ -56,6 +59,16 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                     string ip = group.Key.IpAddress;
                     int port = group.Key.Port;
 
+                    var firstRow = group.First();
+                    var plcType = firstRow.PlcType;
+                    var networkType = firstRow.NetworkType;
+
+                    // 校验 NetworkType 特性是否与 PlcType 匹配
+                    if (!ValidateNetworkType(plcType, networkType))
+                    {
+                        throw new InvalidOperationException($"PLC类型 \"{plcType}\" 与网络类型 \"{networkType}\" 不匹配 (设备: {deviceName})");
+                    }
+
                     // 1. 找设备，没有就新增
                     var device = await _equipmentRepository.QueryableFirstAsync(x =>
                         x.DeviceName == deviceName
@@ -84,8 +97,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                             EquipmentId = deviceId,
                             IpAddress = ip,
                             Port = port,
-                            PlcType = "三菱",
-                            NetworkType = "MC",
+                            PlcType = plcType.ToString(),
+                            NetworkType = networkType.ToString(),
                         };
                         plcId = await _plcConnectionRepository.ExecuteReturnIdentityAsync(plc);
                     }
@@ -150,6 +163,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                         Length = int.TryParse(row.GetCell(8)?.ToString(), out int len) ? len : 1,
                         ReadFormula = row.GetCell(9)?.ToString()?.Trim()??"",
                         WriteFormula = row.GetCell(10)?.ToString()?.Trim()??"",
+                        PlcType = Enum.TryParse<PlcTypeEnum>(row.GetCell(11)?.ToString()?.Trim(), out var plcType) ? plcType : PlcTypeEnum.三菱,
+                        NetworkType = Enum.TryParse<NetworkTypeEnum>(row.GetCell(12)?.ToString()?.Trim(), out var netType) ? netType : NetworkTypeEnum.MC,
                     };
 
                     if (!string.IsNullOrEmpty(dto.PointName) && !string.IsNullOrEmpty(dto.Area))
@@ -157,6 +172,16 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                 }
 
                 return list;
+        }
+
+        /// <summary>
+        /// 校验 NetworkType 的 NetworkTypeInfoAttribute 是否包含指定的 PlcType
+        /// </summary>
+        static bool ValidateNetworkType(PlcTypeEnum plcType, NetworkTypeEnum networkType)
+        {
+            var field = typeof(NetworkTypeEnum).GetField(networkType.ToString());
+            var attr = field?.GetCustomAttribute<NetworkTypeInfoAttribute>();
+            return attr != null && attr.NetworkTypeBasePlc.Contains(plcType);
         }
     }
 }

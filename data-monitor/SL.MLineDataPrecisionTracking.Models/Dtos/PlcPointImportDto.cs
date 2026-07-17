@@ -1,5 +1,6 @@
 ﻿using McpXLib.Enums;
 using SL.MLineDataPrecisionTracking.Models.Domain;
+using SL.MLineDataPrecisionTracking.Models.Enum.Plc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,5 +22,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         public int Length { get; set; }
         public string WriteFormula { get; set; } = "";
         public string ReadFormula { get; set; } = "";
+        public PlcTypeEnum PlcType { get; set; }
+        public NetworkTypeEnum NetworkType { get; set; }
     }
 }

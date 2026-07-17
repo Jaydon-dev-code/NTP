@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using NPOI.POIFS.Crypt;
 using SL.MLineDataPrecisionTracking.Infrastructure;
 using SL.MLineDataPrecisionTracking.Models;
 using SqlSugar;
@@ -7,6 +8,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Reflection;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace SL.MLineDataPrecisionTracking.Core.Middleware
 {
@@ -79,6 +81,12 @@ namespace SL.MLineDataPrecisionTracking.Core.Middleware
                         }
                     }
                     db.CodeFirst.SetStringDefaultLength(200).InitTables(types.ToArray());
+                    //将创建的修改为false
+                    Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                    config.AppSettings.Settings["IsCreateTable"].Value = "false";
+                    config.Save(ConfigurationSaveMode.Modified);
+
+                    ConfigurationManager.RefreshSection("appSettings");
                 }
 
                 return db;

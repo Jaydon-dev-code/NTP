@@ -1,15 +1,15 @@
-﻿using Microsoft.AspNet.SignalR;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.AspNet.SignalR;
 using SL.MLineDataPrecisionTracking.Core.Hubs;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Entities.Factory4Workshop4_10Line;
 using SL.MLineDataPrecisionTracking.Models.Entitss.Factory4Workshop4_10Line;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Workshop4_10
 {
@@ -73,7 +73,6 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                 null,
                 (Tb_Factory4Workshop4_10Line_Clearance)interact.Data
             );
-      //
             //await _lineSummaryRepository.UpDataAsync(lineSummary, x => x.SN,);
         }
     }

@@ -87,7 +87,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                         return ApiResult.Fail($"产品型号 \"{productModel}\" 已存在，是否覆盖？");
 
                     await _energyRangeDetailRepository.DeleteAsync(x => x.EnergyRangeId == existing.Id);
-                    existing.IsEnabled = true;
+         
                     existing.CreateTime = DateTime.Now;
                     await _energyRangeRepository.UpdateAsync(existing);
 
@@ -100,7 +100,6 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                     var entity = new Tb_EnergyRange
                     {
                         ProductModel = productModel,
-                        IsEnabled = true,
                         CreateTime = DateTime.Now
                     };
                     int id = await _energyRangeRepository.InsertAsync(entity);
@@ -123,27 +122,24 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             return await _energyRangeRepository.GetAllWithDetailsAsync();
         }
 
-        public async Task ToggleEnabledAsync(int id, bool isEnabled)
-        {
-            var entity = await _energyRangeRepository.GetFirstAsync(x => x.Id == id);
-            if (entity != null)
-            {
-                entity.IsEnabled = isEnabled;
-                await _energyRangeRepository.UpdateAsync(entity);
-            }
-        }
+  
 
         public async Task DeleteNavAsync(Expression<Func<Tb_EnergyRange, bool>> whereExpression)
         {
             await _energyRangeRepository.DeleteNavAsync(whereExpression);
         }
 
-        public async Task SetCurrentModelAsync(int id)
+    
+
+        public async Task SetCurrentStationModelAsync(int id, string station)
         {
             var all = await _energyRangeRepository.GetListAsync();
             foreach (var item in all)
             {
-                item.IsEnabled = item.Id == id;
+                if (item.Id == id)
+                    item.Station = station;
+                else if (item.Station == station)
+                    item.Station = null;
                 await _energyRangeRepository.UpdateAsync(item);
             }
         }

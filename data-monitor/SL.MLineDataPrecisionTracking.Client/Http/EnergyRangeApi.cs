@@ -43,14 +43,13 @@ namespace SL.MLineDataPrecisionTracking.Client.Http
             return await PostAsync("DeleteNav", id);
         }
 
-        public async Task<ApiResult> ToggleEnabledAsync(int id, bool isEnabled)
-        {
-            return await PostAsync($"ToggleEnabled?id={id}&isEnabled={isEnabled}", null);
-        }
+       
 
-        public async Task<ApiResult> SetCurrentModelAsync(int id)
+     
+
+        public async Task<ApiResult> SetCurrentStationModelAsync(int id, string station)
         {
-            return await PostAsync($"SetCurrentModel?id={id}", null);
+            return await PostAsync($"SetCurrentStationModel?id={id}&station={station}", null);
         }
 
         public async Task<ApiResult> StartSimulationAsync()

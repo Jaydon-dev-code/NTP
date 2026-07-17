@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SL.MLineDataPrecisionTracking.Models.Enum.Plc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +9,6 @@ namespace SL.MLineDataPrecisionTracking.Models
 {
     public class ModelsAssemblyMarker
     {
+  
     }
 }
