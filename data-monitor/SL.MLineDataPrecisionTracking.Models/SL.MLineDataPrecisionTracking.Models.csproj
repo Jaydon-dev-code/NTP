@@ -41,6 +41,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Dtos\Branch8Line63ManualHeatData.cs" />
+    <Compile Include="UsAttribute\NetworkTypeInfoAttribute.cs" />
     <Compile Include="Domain\ApiResult.cs" />
     <Compile Include="Domain\ChartMonitorItem.cs" />
     <Compile Include="Domain\EnergyRangePoint.cs" />
@@ -58,6 +60,13 @@
     <Compile Include="Dtos\DevPlcPointWriteDto.cs" />
     <Compile Include="Dtos\Factory6Workshop6_1AssemblyLineDto.cs" />
     <Compile Include="Dtos\HeatTreatmentDataDto.cs" />
+    <Compile Include="Dtos\Plc\DevPlcPointBaseDto.cs" />
+    <Compile Include="Dtos\Plc\MC\DevPlcPointMcDto.cs" />
+    <Compile Include="Dtos\Plc\MC\DevPlcPointMcReadDto.cs" />
+    <Compile Include="Dtos\Plc\MC\DevPlcPointMcWriteDto.cs" />
+    <Compile Include="Dtos\Plc\S7\DevPlcPointS7Dto.cs" />
+    <Compile Include="Dtos\Plc\S7\DevPlcPointS7ReadDto.cs" />
+    <Compile Include="Dtos\Plc\S7\DevPlcPointS7WriteDto.cs" />
     <Compile Include="Dtos\LineSummaryDto.cs" />
     <Compile Include="Dtos\PlcPointImportDto.cs" />
     <Compile Include="Dtos\Request\HeatTreatmentDataQueryRequestDto.cs" />
@@ -95,6 +104,8 @@
     <Compile Include="Enum\Assembly_B_LineNgCodeEnum.cs" />
     <Compile Include="Enum\Assembly_B_LinePassCodeEnum.cs" />
     <Compile Include="Enum\Br8Sec63HeatEnergyWorkEnum.cs" />
+    <Compile Include="Enum\Plc\NetworkTypeEnum.cs" />
+    <Compile Include="Enum\Plc\PlcTypeEnum.cs" />
     <Compile Include="Enum\ResultEnum.cs" />
     <Compile Include="Enum\ServiceStatusEnum.cs" />
     <Compile Include="ModelsAssemblyMarker.cs" />
