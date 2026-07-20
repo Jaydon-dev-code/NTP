@@ -169,7 +169,9 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <None Include="Resources\测试点位数据.xlsx" />
-    <None Include="Resources\能量范围.xlsx" />
+    <None Include="Resources\能量范围.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

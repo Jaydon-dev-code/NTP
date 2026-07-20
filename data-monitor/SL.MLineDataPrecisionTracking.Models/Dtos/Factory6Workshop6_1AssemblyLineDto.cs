@@ -1,15 +1,18 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using SL.MLineDataPrecisionTracking.Models.Entities.Factory6Workshop6_1AssemblyLine;
-using SL.MLineDataPrecisionTracking.Models.Enum;
 using System;
 using System.ComponentModel;
 using System.Reflection;
+using CommunityToolkit.Mvvm.ComponentModel;
+using SL.MLineDataPrecisionTracking.Models.Entities.Factory6Workshop6_1AssemblyLine;
+using SL.MLineDataPrecisionTracking.Models.Enum;
+using SqlSugar;
 
 namespace SL.MLineDataPrecisionTracking.Models.Dtos
 {
     public class Factory6Workshop6_1AssemblyLineDto : ObservableObject
     {
-        public Factory6Workshop6_1AssemblyLineDto(Tb_Factory6Workshop6_1AssemblyLineABSummary entity)
+        public Factory6Workshop6_1AssemblyLineDto(
+            Tb_Factory6Workshop6_1AssemblyLineABSummary entity
+        )
         {
             AutoMapProperties(entity, this);
         }
@@ -177,6 +180,78 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
 
         [Description("端跳值高度")]
         public string EndRunoutHeight { get; set; }
+
+        /// <summary>
+        /// 1400 TQ
+        /// </summary>
+        [Description("1400 TQ")]
+        public string TQ_1400 { get; set; }
+
+        /// <summary>
+        /// 1400 TQ
+        /// </summary>
+        [Description("1400 M/HIGH")]
+        public string M_HIGH_1400 { get; set; }
+
+        /// <summary>
+        /// 1600 P/M1400=ABSSINGLE MAX
+        /// </summary>
+        [Description("1600 P/M1400=ABSSINGLE MAX")]
+        public string P_1600_M1400_ABSSINGLE_MAX { get; set; }
+
+        /// <summary>
+        /// 1600 P/M1400=ABSSINGLE min
+        /// </summary>
+        [Description("1600 P/M1400=ABSSINGLE min")]
+        public string P_1600_M1400_ABSSINGLE_min { get; set; }
+
+        /// <summary>
+        /// 1600 P/M1400=ABSTOTAL
+        /// </summary>
+        [Description("1600 P/M1400=ABSTOTAL")]
+        public string P_1600_M1400_ABSTOTAL { get; set; }
+
+        /// <summary>
+        /// 1600 P/M1400=ABSTOOTH
+        /// </summary>
+        [Description("1600 P/M1400=ABSTOOTH")]
+        public string P_1600_M1400_ABSTOOTH { get; set; }
+
+        /// <summary>
+        /// 震动检测结果
+        /// </summary>
+        [Description("震动检测结果")]
+        public string VibrationDetectionResults { get; set; }
+
+        /// <summary>
+        /// 跳动检测值
+        /// </summary>
+        [Description("跳动检测值")]
+        public string RunoutValue { get; set; }
+
+        /// <summary>
+        /// 扁平度
+        /// </summary>
+        [Description("扁平度")]
+        public string Flatness { get; set; }
+
+        /// <summary>
+        /// 高度上限
+        /// </summary>
+        [Description("高度上限")]
+        public string HeightUpperLimit { get; set; }
+
+        /// <summary>
+        /// 实测间隙
+        /// </summary>
+        [Description("实测间隙")]
+        public string ActualGap { get; set; }
+
+        /// <summary>
+        /// 1150 GONO CHECK
+        /// </summary>
+        [Description("1150 GONO CHECK")]
+        public string GONO_CHECK_1150 { get; set; }
 
         private bool _isHave = true;
 

@@ -39,7 +39,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities.Factory6Workshop6_1Assem
         /// 托盘号
         /// </summary>
         [SugarColumn(ColumnDescription = "托盘号A", DefaultValue = " ")]
-        public string TrayNoA { get; set; }
+        public string TrayNoA { get; set; } = "";
 
         /// <summary>
         /// 托盘号
@@ -274,5 +274,77 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities.Factory6Workshop6_1Assem
         /// </summary>
         [SugarColumn(ColumnDescription = "端跳值高度")]
         public string EndRunoutHeight { get; set; } = "";
+
+        /// <summary>
+        /// 1400 TQ
+        /// </summary>
+        [SugarColumn(ColumnDescription = "1400 TQ", DefaultValue = " ")]
+        public string TQ_1400 { get; set; } = "";
+
+        /// <summary>
+        /// 1400 TQ
+        /// </summary>
+        [SugarColumn(ColumnDescription = "1400 M/HIGH", DefaultValue = " ")]
+        public string M_HIGH_1400 { get; set; } = "";
+
+        /// <summary>
+        /// 1600 P/M1400=ABSSINGLE MAX
+        /// </summary>
+        [SugarColumn(ColumnDescription = "1600 P/M1400=ABSSINGLE MAX", DefaultValue = " ")]
+        public string P_1600_M1400_ABSSINGLE_MAX { get; set; } = "";
+
+        /// <summary>
+        /// 1600 P/M1400=ABSSINGLE min
+        /// </summary>
+        [SugarColumn(ColumnDescription = "1600 P/M1400=ABSSINGLE min", DefaultValue = " ")]
+        public string P_1600_M1400_ABSSINGLE_min { get; set; } = "";
+
+        /// <summary>
+        /// 1600 P/M1400=ABSTOTAL
+        /// </summary>
+        [SugarColumn(ColumnDescription = "1600 P/M1400=ABSTOTAL", DefaultValue = " ")]
+        public string P_1600_M1400_ABSTOTAL { get; set; } = "";
+
+        /// <summary>
+        /// 1600 P/M1400=ABSTOOTH
+        /// </summary>
+        [SugarColumn(ColumnDescription = "1600 P/M1400=ABSTOOTH", DefaultValue = " ")]
+        public string P_1600_M1400_ABSTOOTH { get; set; } = "";
+
+        /// <summary>
+        /// 震动检测结果
+        /// </summary>
+        [SugarColumn(ColumnDescription = "震动检测结果", DefaultValue = " ")]
+        public string VibrationDetectionResults { get; set; } = "";
+
+        /// <summary>
+        /// 跳动检测值
+        /// </summary>
+        [SugarColumn(ColumnDescription = "跳动检测值", DefaultValue = " ")]
+        public string RunoutValue { get; set; } = "";
+
+        /// <summary>
+        /// 扁平度
+        /// </summary>
+        [SugarColumn(ColumnDescription = "扁平度", DefaultValue = " ")]
+        public string Flatness { get; set; } = "";
+
+        /// <summary>
+        /// 高度上限
+        /// </summary>
+        [SugarColumn(ColumnDescription = "高度上限", DefaultValue = " ")]
+        public string HeightUpperLimit { get; set; } = "";
+
+        /// <summary>
+        /// 实测间隙
+        /// </summary>
+        [SugarColumn(ColumnDescription = "实测间隙", DefaultValue = " ")]
+        public string ActualGap { get; set; } = "";
+
+        /// <summary>
+        /// 1150 GONO CHECK
+        /// </summary>
+        [SugarColumn(ColumnDescription = "1150 GONO CHECK", DefaultValue = " ")]
+        public string GONO_CHECK_1150 { get; set; } = "";
     }
 }

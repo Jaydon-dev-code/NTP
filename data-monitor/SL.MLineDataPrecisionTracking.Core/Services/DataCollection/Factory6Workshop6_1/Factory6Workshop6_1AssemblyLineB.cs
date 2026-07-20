@@ -52,6 +52,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
         protected override async Task<object> InsterValue(Result<object> interact)
         {
             var lineData = (Tb_Factory6Workshop6_1AssemblyLineB)interact.Data;
+
+            lineData.VibrationDetectionResults= GetVibrationDetectionResults(lineData?.VibrationDetectionResults?.Trim());
+
             Tb_Factory6Workshop6_1AssemblyLineABSummary tb_LineSummary =
               new Tb_Factory6Workshop6_1AssemblyLineABSummary() { Result = ResultEnum.OK };
             Tb_Factory6Workshop6_1AssemblyLineA aLineInfo = null;
@@ -116,6 +119,26 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                 tb_LineSummary
             );
             return lineData;
+        }
+
+        private string GetVibrationDetectionResults(string vibrationDetectionResults)
+        {
+            switch (vibrationDetectionResults)
+            {
+                case null:
+                    return string.Empty;    
+                case "0":
+                    return "未采集";
+
+                case "1":
+                    return "OK";
+
+                case "2":
+                    return "NG";
+                default:
+                    return vibrationDetectionResults;
+                
+            }
         }
 
         protected override void UpLastNo(object data)
