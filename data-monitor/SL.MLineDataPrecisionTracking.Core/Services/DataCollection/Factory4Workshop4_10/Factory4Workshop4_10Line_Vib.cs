@@ -1,4 +1,5 @@
 ﻿using SL.MLineDataPrecisionTracking.Models.Domain;
+using SL.MLineDataPrecisionTracking.Models.Entities.Factory4Workshop4_10Line;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,14 +22,14 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
             return Result.Success();
         }
 
-        protected override Task<Result<object>> InteractAsync()
+        protected override async Task<Result<object>> InteractAsync()
         {
-            throw new NotImplementedException();
+            return Result<object>.Success(new Tb_Factory4Workshop4_10Line_Vib());
         }
 
-        protected override Task NotifyAsync(Result<object> interact)
+        protected override async Task NotifyAsync(Result<object> interact)
         {
-            throw new NotImplementedException();
+            return;
         }
     }
 }

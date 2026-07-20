@@ -50,9 +50,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
             return Result.Success();
         }
 
-        protected override Task<Result<object>> InteractAsync()
+        protected override async Task<Result<object>> InteractAsync()
         {
-            throw new NotImplementedException();
+            return Result<object>.Success(new Tb_Factory4Workshop4_10Line_ABS());
         }
 
         protected override async Task NotifyAsync(Result<object> interact)

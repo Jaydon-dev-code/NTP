@@ -12,9 +12,6 @@ using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Dtos;
 using SL.MLineDataPrecisionTracking.Models.Entities;
-using SL.MLineDataPrecisionTracking.Models.Enum.Plc;
-using SL.MLineDataPrecisionTracking.Models.UsAttribute;
-
 namespace SL.MLineDataPrecisionTracking.Core.Services
 {
     public class PlcAddressExcelImportService
@@ -60,15 +57,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                     int port = group.Key.Port;
 
                     var firstRow = group.First();
-                    var plcType = firstRow.PlcType;
-                    var networkType = firstRow.NetworkType;
-
-                    // 校验 NetworkType 特性是否与 PlcType 匹配
-                    if (!ValidateNetworkType(plcType, networkType))
-                    {
-                        throw new InvalidOperationException($"PLC类型 \"{plcType}\" 与网络类型 \"{networkType}\" 不匹配 (设备: {deviceName})");
-                    }
-
+                  
                     // 1. 找设备，没有就新增
                     var device = await _equipmentRepository.QueryableFirstAsync(x =>
                         x.DeviceName == deviceName
@@ -97,8 +86,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                             EquipmentId = deviceId,
                             IpAddress = ip,
                             Port = port,
-                            PlcType = plcType.ToString(),
-                            NetworkType = networkType.ToString(),
+                          
                         };
                         plcId = await _plcConnectionRepository.ExecuteReturnIdentityAsync(plc);
                     }
@@ -113,7 +101,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                         {
                             PlcConnectionId = plcId,
                             PointName = x.PointName,
-                            Description = x.Description==null?"":x.Description,
+                            Description = x.Description == null ? "" : x.Description,
                             Area = x.Area,
                             Address = x.Address,
                             DataType = x.DataType,
@@ -143,45 +131,36 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             IWorkbook workbook = new XSSFWorkbook(stream);
                 ISheet sheet = workbook.GetSheetAt(0);
 
-                // 从第2行开始（第1行是表头）
-                for (int i = 1; i <= sheet.LastRowNum; i++)
+            // 从第2行开始（第1行是表头）
+            for (int i = 1; i <= sheet.LastRowNum; i++)
+            {
+                IRow row = sheet.GetRow(i);
+                if (row == null)
+                    continue;
+
+                var dto = new PlcPointImportDto
                 {
-                    IRow row = sheet.GetRow(i);
-                    if (row == null)
-                        continue;
+                    DeviceName = row.GetCell(0)?.ToString()?.Trim(),
+                    IpAddress = row.GetCell(1)?.ToString()?.Trim(),
+                    Port = int.TryParse(row.GetCell(2)?.ToString(), out int p) ? p : 8000,
+                    PointName = row.GetCell(3)?.ToString()?.Trim(),
+                    Description = row.GetCell(4)?.ToString()?.Trim(),
+                    Area = row.GetCell(5)?.ToString()?.Trim(),
+                    Address = row.GetCell(6)?.ToString()?.Trim(),
+                    DataType = row.GetCell(7)?.ToString()?.Trim(),
+                    Length = int.TryParse(row.GetCell(8)?.ToString(), out int len) ? len : 1,
+                    ReadFormula = row.GetCell(9)?.ToString()?.Trim() ?? "",
+                    WriteFormula = row.GetCell(10)?.ToString()?.Trim() ?? "",
+                   
+                };
 
-                    var dto = new PlcPointImportDto
-                    {
-                        DeviceName = row.GetCell(0)?.ToString()?.Trim(),
-                        IpAddress = row.GetCell(1)?.ToString()?.Trim(),
-                        Port = int.TryParse(row.GetCell(2)?.ToString(), out int p) ? p : 8000,
-                        PointName = row.GetCell(3)?.ToString()?.Trim(),
-                        Description = row.GetCell(4)?.ToString()?.Trim(),
-                        Area = row.GetCell(5)?.ToString()?.Trim(),
-                        Address = row.GetCell(6)?.ToString()?.Trim(),
-                        DataType = row.GetCell(7)?.ToString()?.Trim(),
-                        Length = int.TryParse(row.GetCell(8)?.ToString(), out int len) ? len : 1,
-                        ReadFormula = row.GetCell(9)?.ToString()?.Trim()??"",
-                        WriteFormula = row.GetCell(10)?.ToString()?.Trim()??"",
-                        PlcType = Enum.TryParse<PlcTypeEnum>(row.GetCell(11)?.ToString()?.Trim(), out var plcType) ? plcType : PlcTypeEnum.三菱,
-                        NetworkType = Enum.TryParse<NetworkTypeEnum>(row.GetCell(12)?.ToString()?.Trim(), out var netType) ? netType : NetworkTypeEnum.MC,
-                    };
+                if (!string.IsNullOrEmpty(dto.PointName) && !string.IsNullOrEmpty(dto.Area))
+                    list.Add(dto);
+            }
 
-                    if (!string.IsNullOrEmpty(dto.PointName) && !string.IsNullOrEmpty(dto.Area))
-                        list.Add(dto);
-                }
-
-                return list;
+            return list;
         }
 
-        /// <summary>
-        /// 校验 NetworkType 的 NetworkTypeInfoAttribute 是否包含指定的 PlcType
-        /// </summary>
-        static bool ValidateNetworkType(PlcTypeEnum plcType, NetworkTypeEnum networkType)
-        {
-            var field = typeof(NetworkTypeEnum).GetField(networkType.ToString());
-            var attr = field?.GetCustomAttribute<NetworkTypeInfoAttribute>();
-            return attr != null && attr.NetworkTypeBasePlc.Contains(plcType);
-        }
+     
     }
 }

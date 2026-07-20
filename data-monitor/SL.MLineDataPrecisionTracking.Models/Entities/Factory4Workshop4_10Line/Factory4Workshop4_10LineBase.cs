@@ -12,12 +12,5 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities.Base
     public class Factory4Workshop4_10LineBase : DataCollectionBase
     {
         public string SN { get; set; }
-
-        [SugarColumn(
-            ColumnDescription = "检测结果",
-            ColumnDataType = "varchar(20)",
-            SqlParameterDbType = typeof(EnumToStringConvert)
-        )]
-        public ResultEnum Result { get; set; }
     }
 }
