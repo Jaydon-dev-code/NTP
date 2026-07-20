@@ -39,6 +39,12 @@ namespace SL.MLineDataPrecisionTracking.Models.Enum
         [Description("810 INNER RING 压入 N.G")]
         NG_810 = 10,
 
+        [Description("内法兰扫码 N.G")]
+        NG_内法兰_扫码 = 11,
+
+        [Description("外法兰扫码 N.G")]
+        NG_外法兰_扫码 = 12,
+
         [Description("作业者 N.G")]
         NG_Worker = 99,
     }

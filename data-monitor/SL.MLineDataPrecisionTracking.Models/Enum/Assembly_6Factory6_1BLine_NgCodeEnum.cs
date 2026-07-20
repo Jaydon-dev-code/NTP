@@ -57,6 +57,9 @@ namespace SL.MLineDataPrecisionTracking.Models.Enum
         [Description("1400 ABS测试 N.G")]
         NG_1400_AbsTest = 16,
 
+        [Description("成品码扫码 N.G")]
+        NG_成品码_扫码 = 17,
+
         [Description("作业者 N.G")]
         NG_Worker = 99,
     }
