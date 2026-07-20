@@ -1,13 +1,13 @@
-﻿using Autofac;
-using NPOI.POIFS.Crypt;
-using SL.MLineDataPrecisionTracking.Infrastructure;
-using SL.MLineDataPrecisionTracking.Models;
-using SqlSugar;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Reflection;
+using Autofac;
+using NPOI.POIFS.Crypt;
+using SL.MLineDataPrecisionTracking.Infrastructure;
+using SL.MLineDataPrecisionTracking.Models;
+using SqlSugar;
 using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace SL.MLineDataPrecisionTracking.Core.Middleware
@@ -57,10 +57,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Middleware
                     bool.TryParse(
                         ConfigurationManager.AppSettings["IsCreateTable"],
                         out bool CreateTable
-                    )&& CreateTable
+                    ) && CreateTable
                 )
                 {
-  
                     string targetNamespace = "SL.MLineDataPrecisionTracking.Models.Entities";
                     List<Type> types = new List<Type>();
                     foreach (var t in typeof(ModelsAssemblyMarker).Assembly.GetTypes())
@@ -75,6 +74,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Middleware
                             !t.IsInterface
                             && // 不是接口
                             t.Namespace.Contains(targetNamespace)
+                            && t.GetCustomAttribute<SugarTable>(false) != null
                         )
                         {
                             types.Add(t);
@@ -82,7 +82,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Middleware
                     }
                     db.CodeFirst.SetStringDefaultLength(200).InitTables(types.ToArray());
                     //将创建的修改为false
-                    Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                    Configuration config = ConfigurationManager.OpenExeConfiguration(
+                        ConfigurationUserLevel.None
+                    );
                     config.AppSettings.Settings["IsCreateTable"].Value = "false";
                     config.Save(ConfigurationSaveMode.Modified);
 
