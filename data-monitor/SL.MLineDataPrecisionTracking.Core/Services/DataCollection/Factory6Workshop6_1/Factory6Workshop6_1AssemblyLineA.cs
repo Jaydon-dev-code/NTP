@@ -23,6 +23,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
         {
             _factory6Workshop6_1AssemblyLineARepository = tb_Factory6Workshop6_1AssemblyLineA;
             _factory6Workshop6_1AssemblyLineABSummaryRepository = factory6Workshop6_1AssemblyLineABSummaryRepository;
+            _sleepTimeSpan = TimeSpan.FromMilliseconds(200);
         }
         protected virtual Type _passCodeEnumType => typeof(Assembly_6Factory6_1ALine_PassCodeEnum);
         protected virtual Type _ngCodeEnumType => typeof(Assembly_6Factory6_1ALine_NgCodeEnum);
@@ -35,6 +36,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
 
         protected override async Task<object> InsterValue(Result<object> interact)
         {
+        
               var lineData = (Tb_Factory6Workshop6_1AssemblyLineA)interact.Data;
 
             if (lineData.ShieldStationA != "0")

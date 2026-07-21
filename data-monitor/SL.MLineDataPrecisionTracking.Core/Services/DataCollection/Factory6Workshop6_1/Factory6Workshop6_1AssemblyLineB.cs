@@ -39,6 +39,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                 factory6Workshop6_1AssemblyLineABSummaryRepository;
             _factory6Workshop6_1AssemblyLineBRepository =
                 tb_Factory6Workshop6_1AssemblyLineBRepository;
+            _sleepTimeSpan = TimeSpan.FromMilliseconds(200);
         }
 
         protected override string _lineName => "六分厂6-1装配B线";
