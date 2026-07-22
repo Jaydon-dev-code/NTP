@@ -198,40 +198,10 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities.Factory6Workshop6_1Assem
         public string MagneticRingParallelSensor3 { get; set; } = "";
 
         /// <summary>
-        /// 振动下LOAD
+        /// 磁性圈平行差平均值
         /// </summary>
-        [SugarColumn(ColumnDescription = "振动下LOAD")]
-        public string VibrationLowerLOAD { get; set; } = "";
-
-        /// <summary>
-        /// 振动下LH
-        /// </summary>
-        [SugarColumn(ColumnDescription = "振动下LH")]
-        public string VibrationLowerLH { get; set; } = "";
-
-        /// <summary>
-        /// 振动下RH
-        /// </summary>
-        [SugarColumn(ColumnDescription = "振动下RH")]
-        public string VibrationLowerRH { get; set; } = "";
-
-        /// <summary>
-        /// 振动上LOAD
-        /// </summary>
-        [SugarColumn(ColumnDescription = "振动上LOAD")]
-        public string VibrationUpperLOAD { get; set; } = "";
-
-        /// <summary>
-        /// 振动上LH
-        /// </summary>
-        [SugarColumn(ColumnDescription = "振动上LH")]
-        public string VibrationUpperLH { get; set; } = "";
-
-        /// <summary>
-        /// 振动上RH
-        /// </summary>
-        [SugarColumn(ColumnDescription = "振动上RH")]
-        public string VibrationUpperRH { get; set; } = "";
+        [SugarColumn(ColumnDescription = "磁性圈平行差平均值", DefaultValue = " ")]
+        public string MagneticRingParallelAVG { get; set; } = "";
 
         /// <summary>
         /// ABS检测峰值
@@ -244,12 +214,6 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities.Factory6Workshop6_1Assem
         /// </summary>
         [SugarColumn(ColumnDescription = "ABS检测谷值")]
         public string AbsValleyValue { get; set; } = "";
-
-        /// <summary>
-        /// 径跳值
-        /// </summary>
-        [SugarColumn(ColumnDescription = "径跳值")]
-        public string RadialRunout { get; set; } = "";
 
         /// <summary>
         /// 磁性圈平行差

@@ -32,12 +32,6 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities.Factory6Workshop6_1Assem
         public string MarkingNo { get; set; }
 
         /// <summary>
-        /// ABS检测齿数
-        /// </summary>
-        [SugarColumn(ColumnDescription = "ABS检测齿数")]
-        public string AbsToothCount { get; set; }
-
-        /// <summary>
         /// 托盘号
         /// </summary>
         [SugarColumn(ColumnDescription = "托盘号B")]
@@ -128,64 +122,10 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities.Factory6Workshop6_1Assem
         public string MagneticRingParallelSensor3 { get; set; }
 
         /// <summary>
-        /// 振动下LOAD
+        /// 磁性圈平行差平均值
         /// </summary>
-        [SugarColumn(ColumnDescription = "振动下LOAD")]
-        public string VibrationLowerLOAD { get; set; }
-
-        /// <summary>
-        /// 振动下LH
-        /// </summary>
-        [SugarColumn(ColumnDescription = "振动下LH")]
-        public string VibrationLowerLH { get; set; }
-
-        /// <summary>
-        /// 振动下RH
-        /// </summary>
-        [SugarColumn(ColumnDescription = "振动下RH")]
-        public string VibrationLowerRH { get; set; }
-
-        /// <summary>
-        /// 振动上LOAD
-        /// </summary>
-        [SugarColumn(ColumnDescription = "振动上LOAD")]
-        public string VibrationUpperLOAD { get; set; }
-
-        /// <summary>
-        /// 振动上LH
-        /// </summary>
-        [SugarColumn(ColumnDescription = "振动上LH")]
-        public string VibrationUpperLH { get; set; }
-
-        /// <summary>
-        /// 振动上RH
-        /// </summary>
-        [SugarColumn(ColumnDescription = "振动上RH")]
-        public string VibrationUpperRH { get; set; }
-
-        /// <summary>
-        /// ABS检测峰值
-        /// </summary>
-        [SugarColumn(ColumnDescription = "ABS检测峰值")]
-        public string AbsPeakValue { get; set; }
-
-        /// <summary>
-        /// ABS检测谷值
-        /// </summary>
-        [SugarColumn(ColumnDescription = "ABS检测谷值")]
-        public string AbsValleyValue { get; set; }
-
-        /// <summary>
-        /// 径跳值
-        /// </summary>
-        [SugarColumn(ColumnDescription = "径跳值")]
-        public string RadialRunout { get; set; }
-
-        /// <summary>
-        /// 磁性圈平行差
-        /// </summary>
-        [SugarColumn(ColumnDescription = "磁性圈平行差")]
-        public string MagneticRingParallelDiff { get; set; }
+        [SugarColumn(ColumnDescription = "磁性圈平行差平均值", DefaultValue = " ")]
+        public string MagneticRingParallelAVG { get; set; }
 
         /// <summary>
         /// 端跳值轴
@@ -258,12 +198,6 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities.Factory6Workshop6_1Assem
         /// </summary>
         [SugarColumn(ColumnDescription = "扁平度", DefaultValue = " ")]
         public string Flatness { get; set; }
-
-        /// <summary>
-        /// 高度上限
-        /// </summary>
-        [SugarColumn(ColumnDescription = "高度上限", DefaultValue = " ")]
-        public string HeightUpperLimit { get; set; }
 
         /// <summary>
         /// 实测间隙

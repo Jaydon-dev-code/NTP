@@ -121,6 +121,12 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         [Description("负游隙检测值")]
         public string NegativeClearanceValue { get; set; }
 
+        /// <summary>
+        /// 实测间隙
+        /// </summary>
+        [Description("实测间隙")]
+        public string ActualGap { get; set; }
+
         [Description("铆接前成型高度")]
         public string PreRivetingHeight { get; set; }
 
@@ -139,38 +145,11 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         [Description("磁性圈平行差检测传感器3")]
         public string MagneticRingParallelSensor3 { get; set; }
 
-        [Description("磁性圈平行差")]
-        public string MagneticRingParallelDiff { get; set; }
-
-        [Description("振动下LOAD")]
-        public string VibrationLowerLOAD { get; set; }
-
-        [Description("振动下LH")]
-        public string VibrationLowerLH { get; set; }
-
-        [Description("振动下RH")]
-        public string VibrationLowerRH { get; set; }
-
-        [Description("振动上LOAD")]
-        public string VibrationUpperLOAD { get; set; }
-
-        [Description("振动上LH")]
-        public string VibrationUpperLH { get; set; }
-
-        [Description("振动上RH")]
-        public string VibrationUpperRH { get; set; }
-
-        [Description("ABS检测峰值")]
-        public string AbsPeakValue { get; set; }
-
-        [Description("ABS检测谷值")]
-        public string AbsValleyValue { get; set; }
-
-        [Description("ABS检测齿数")]
-        public string AbsToothCount { get; set; }
-
-        [Description("径跳值")]
-        public string RadialRunout { get; set; }
+        /// <summary>
+        /// 磁性圈平行差平均值
+        /// </summary>
+        [SugarColumn(ColumnDescription = "磁性圈平行差平均值", DefaultValue = " ")]
+        public string MagneticRingParallelAVG { get; set; } = "";
 
         [Description("端跳值轴")]
         public string EndRunoutAxis { get; set; }
@@ -234,18 +213,6 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         /// </summary>
         [Description("扁平度")]
         public string Flatness { get; set; }
-
-        /// <summary>
-        /// 高度上限
-        /// </summary>
-        [Description("高度上限")]
-        public string HeightUpperLimit { get; set; }
-
-        /// <summary>
-        /// 实测间隙
-        /// </summary>
-        [Description("实测间隙")]
-        public string ActualGap { get; set; }
 
         /// <summary>
         /// 1150 GONO CHECK
