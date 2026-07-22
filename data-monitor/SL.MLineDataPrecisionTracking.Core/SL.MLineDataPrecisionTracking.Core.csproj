@@ -54,6 +54,7 @@
     <Compile Include="Middleware\SqlSugerMiddleware.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\DataCollection\DataCollectionServiceAbstract.cs" />
+    <Compile Include="Services\DataCollection\Factory4Workshop4_10\Factory4Workshop4_10LineBase.cs" />
     <Compile Include="Services\DataCollection\Factory4Workshop4_10\Factory4Workshop4_10Line_ABS.cs" />
     <Compile Include="Services\DataCollection\Factory4Workshop4_10\Factory4Workshop4_10Line_Clearance.cs" />
     <Compile Include="Services\DataCollection\Factory4Workshop4_10\Factory4Workshop4_10Line_RivetAndCrack.cs" />

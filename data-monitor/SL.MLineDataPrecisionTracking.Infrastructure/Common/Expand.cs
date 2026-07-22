@@ -362,6 +362,29 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
             }
         }
 
+        public static byte[] RemoveStartBytes(this byte[] source, int removeCount)
+        {
+            if (source == null)
+                return Array.Empty<byte>();
+
+            // 移除数量≥数组长度，直接返回空
+            if (removeCount >= source.Length)
+                return Array.Empty<byte>();
+
+            int newLen = source.Length - removeCount;
+            byte[] result = new byte[newLen];
+            Array.Copy(source, removeCount, result, 0, newLen);
+            return result;
+        }
+        public static string BytesToAscii(this byte[] data, int length)
+        {
+            if (data == null || length <= 0)
+                return string.Empty;
+
+            // ASCII编码
+            Encoding asciiEnc = Encoding.ASCII;
+            return asciiEnc.GetString(data, 0, length);
+        }
         /// <soure>
         /// 从字节数组解析出【数组类型】
         /// </soure>

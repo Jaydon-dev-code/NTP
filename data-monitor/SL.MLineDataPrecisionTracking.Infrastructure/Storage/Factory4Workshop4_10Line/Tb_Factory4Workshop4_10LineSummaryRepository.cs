@@ -37,6 +37,13 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
         {
             return await _db.Queryable<Tb_Factory4Workshop4_10LineSummary>().FirstAsync(expression);
         }
+        /// <summary>
+        /// 不用主键更新并更新指定列
+        /// </summary>
+        /// <param name="lineSummary"></param>
+        /// <param name="columns"></param>
+        /// <param name="upColumnsName"></param>
+        /// <returns></returns>
         public async Task<int> UpDataAsync(Tb_Factory4Workshop4_10LineSummary lineSummary, Expression<Func<Tb_Factory4Workshop4_10LineSummary, object>> columns, params string[] upColumnsName)
         {
             return  await _db.Updateable(lineSummary).WhereColumns(columns).UpdateColumns(upColumnsName).ExecuteCommandAsync();

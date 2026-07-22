@@ -56,6 +56,10 @@
     <Compile Include="Dtos\DevPlcPointDto.cs" />
     <Compile Include="Dtos\DevPlcPointReadDto.cs" />
     <Compile Include="Dtos\DevPlcPointWriteDto.cs" />
+    <Compile Include="Dtos\Factory4Workshop4_10Line\Factory4Workshop4_10Line_ABSDto.cs" />
+    <Compile Include="Dtos\Factory4Workshop4_10Line\Factory4Workshop4_10Line_ClearanceDto.cs" />
+    <Compile Include="Dtos\Factory4Workshop4_10Line\Factory4Workshop4_10Line_RivetAndCrackDto.cs" />
+    <Compile Include="Dtos\Factory4Workshop4_10Line\Factory4Workshop4_10Line_VibDto.cs" />
     <Compile Include="Dtos\Factory6Workshop6_1AssemblyLineDto.cs" />
     <Compile Include="Dtos\HeatTreatmentDataDto.cs" />
     <Compile Include="Dtos\LineSummaryDto.cs" />
