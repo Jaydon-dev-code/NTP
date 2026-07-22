@@ -5,22 +5,12 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Owin;
 using SL.MLineDataPrecisionTracking.Client.Http;
 using SL.MLineDataPrecisionTracking.Core.Hubs;
+using SL.MLineDataPrecisionTracking.Core.Middleware;
 using SL.MLineDataPrecisionTracking.Models.Domain;
 using System;
 using System.Configuration;
 using System.Threading;
 using System.Threading.Tasks;
-using System;
-using System.Configuration;
-using System.Threading.Tasks;
-using Autofac;
-using Microsoft.AspNet.SignalR;
-using Microsoft.Owin.Hosting;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Owin;
-using SL.MLineDataPrecisionTracking.Client.Http;
-using SL.MLineDataPrecisionTracking.Core.Middleware;
-using SL.MLineDataPrecisionTracking.Models.Domain;
 
 namespace UnitTestProject
 {

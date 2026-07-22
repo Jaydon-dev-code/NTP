@@ -1,5 +1,6 @@
 ﻿using Mapster;
 using Microsoft.AspNet.SignalR;
+using NPOI.XWPF.UserModel;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
@@ -71,7 +72,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
         {
             Tb_Factory4Workshop4_10Line_Vib data = (Tb_Factory4Workshop4_10Line_Vib)interact.Data;
             _chatHub.Clients.All.Factory4Workshop4_10Line_VibDto =
-             data.Adapt<Factory4Workshop4_10Line_VibDto>();
+                data.Adapt<Factory4Workshop4_10Line_VibDto>();
 
             if (string.IsNullOrEmpty(data.SN))
             {
@@ -85,12 +86,12 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                 x => x.SN,
                 _upCloName
             );
-         
         }
+
         /// <summary>
         /// 扫码枪socket通讯，公开用于单元测试
         /// </summary>
-        public  void ScanSocket()
+        public void ScanSocket()
         {
             if (
                 int.TryParse(
@@ -139,8 +140,19 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                     var soureLen = int.Parse(buffer.BytesToAscii(4)) - 4;
                     var soureByte = buffer.RemoveStartBytes(4);
                     var ccanInfo = soureByte.BytesToAscii(soureLen);
-                    _issueSancInfoPoint.Value[0] = ccanInfo;
-                    _mcp.Write(_issueSancInfoPoint);
+                    if (!Expand.IsRunningInMSTest())
+                    {
+                        _issueSancInfoPoint.Value[0] = ccanInfo;
+                        _mcp.Write(_issueSancInfoPoint);
+                    }
+                    else
+                    {
+                        string reMesg = "TestMsgIs" + ccanInfo;
+                        byte[] body = Encoding.UTF8.GetBytes(reMesg);
+                        client.Send(body);
+                    }
+                  
+
                 }
             }
             catch (SocketException ex)

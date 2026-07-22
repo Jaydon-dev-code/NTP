@@ -25,7 +25,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CONDITIONA</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -45,10 +45,12 @@
     <Reference Include="System.Web.Extensions" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataCollection\Factory6Workshop4_10Test.cs" />
     <Compile Include="DataCollection\Factory6Workshop6_1Test.cs" />
     <Compile Include="DataCollection\Factory6Workshop6_3Test.cs" />
     <Compile Include="HubTest.cs" />
     <Compile Include="LogTest.cs" />
+    <Compile Include="OtherPakeg\MapsterTest.cs" />
     <Compile Include="PLC\McpCommunicationTest.cs" />
     <Compile Include="PLC\OmronCommunicationTest.cs" />
     <Compile Include="PLC\S7CommunicationTest.cs" />

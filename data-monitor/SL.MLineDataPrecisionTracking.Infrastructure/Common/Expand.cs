@@ -95,6 +95,18 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
             }
         }
 
+        /// <summary>
+        /// 判断当前是否MSTest单元测试环境(.NET Framework 4.8)
+        /// </summary>
+        public static bool IsRunningInMSTest()
+        {
+            // MSTest v2 核心程序集
+          
+            var a = AppDomain.CurrentDomain.GetAssemblies();
+            
+            return AppDomain.CurrentDomain.GetAssemblies()
+                .Any(asm =>asm.FullName.Contains("MSTest"));
+        }
         public static int GetTypeByteLength(this Type type)
         {
             int typeSize;

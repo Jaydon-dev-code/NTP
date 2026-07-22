@@ -7,13 +7,17 @@ using System.Reflection;
 
 namespace UnitTestProject.PLC
 {
-    /// <summary>
-    /// S7 通信单元测试（通过反射测试私有方法）
-    /// </summary>
     [TestClass]
     public class S7CommunicationTest
     {
         private static readonly Type _s7Type = typeof(S7Communication);
+
+        [TestMethod]
+        public void cc()
+        {
+            S7Communication s7Communication=new S7Communication();
+           var a= s7Communication.Read(new SL.MLineDataPrecisionTracking.Models.Dtos.DevPlcPointDto("","","127.0.0.1",102, "DB1", TypeCode.String,"DBD11",3) );
+        }
 
         #region ParseAddress 地址解析测试
 
@@ -49,9 +53,17 @@ namespace UnitTestProject.PLC
             Assert.AreEqual(7, result.bitOffset);
         }
 
+        [TestMethod]
+        public void ParseAddress_OnlyBitOffset_DefaultsByteOffsetToZero()
+        {
+            var result = InvokeParseAddress(".5");
+            Assert.AreEqual(0, result.byteOffset);
+            Assert.AreEqual(5, result.bitOffset);
+        }
+
         #endregion
 
-        #region ConvertBytes 字节数组转值测试
+        #region ConvertBytes 布尔和单字节读取测试
 
         [TestMethod]
         public void ConvertBytes_BooleanTrue_ReturnsTrue()
@@ -67,7 +79,7 @@ namespace UnitTestProject.PLC
         {
             byte[] buffer = { 0x00 };
             var result = InvokeConvertBytes(buffer, TypeCode.Boolean, 1);
-            Assert.AreEqual(true, result[0] is bool);
+            Assert.AreEqual(1, result.Count);
             Assert.AreEqual(false, result[0]);
         }
 
@@ -76,7 +88,24 @@ namespace UnitTestProject.PLC
         {
             byte[] buffer = { 0xAB };
             var result = InvokeConvertBytes(buffer, TypeCode.Byte, 1);
+            Assert.AreEqual(1, result.Count);
             Assert.AreEqual((byte)0xAB, result[0]);
+        }
+
+        [TestMethod]
+        public void ConvertBytes_ByteMinValue_ReturnsZero()
+        {
+            byte[] buffer = { 0x00 };
+            var result = InvokeConvertBytes(buffer, TypeCode.Byte, 1);
+            Assert.AreEqual((byte)0, result[0]);
+        }
+
+        [TestMethod]
+        public void ConvertBytes_ByteMaxValue_Returns255()
+        {
+            byte[] buffer = { 0xFF };
+            var result = InvokeConvertBytes(buffer, TypeCode.Byte, 1);
+            Assert.AreEqual((byte)255, result[0]);
         }
 
         [TestMethod]
@@ -90,10 +119,24 @@ namespace UnitTestProject.PLC
             Assert.AreEqual((byte)3, result[2]);
         }
 
+        #endregion
+
+        #region ConvertBytes 浮点和双精度读取测试
+
         [TestMethod]
         public void ConvertBytes_Double_ReturnsCorrectValue()
         {
             double expected = 3.14159265358979;
+            byte[] buffer = BitConverter.GetBytes(expected);
+            var result = InvokeConvertBytes(buffer, TypeCode.Double, 1);
+            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual(expected, (double)result[0], 1e-10);
+        }
+
+        [TestMethod]
+        public void ConvertBytes_DoubleNegative_ReturnsCorrectValue()
+        {
+            double expected = -23.5555;
             byte[] buffer = BitConverter.GetBytes(expected);
             var result = InvokeConvertBytes(buffer, TypeCode.Double, 1);
             Assert.AreEqual(1, result.Count);
@@ -116,10 +159,58 @@ namespace UnitTestProject.PLC
         }
 
         [TestMethod]
-        public void ConvertBytes_WithOffset_ReadsFromCorrectPosition()
+        public void ConvertBytes_Single_ReturnsCorrectValue()
         {
-            byte[] buffer = { 0xFF, 0x00, 0x42 };
+            float expected = 23.5555f;
+            byte[] buffer = BitConverter.GetBytes(expected);
+            var result = InvokeConvertBytes(buffer, TypeCode.Single, 1);
+            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual(expected, (float)result[0], 1e-6f);
+        }
+
+        [TestMethod]
+        public void ConvertBytes_SingleMultiple_ReturnsAllValues()
+        {
+            float[] expected = { 1.5f, -2.5f, 3.0f };
+            byte[] buffer = new byte[12];
+            Buffer.BlockCopy(BitConverter.GetBytes(expected[0]), 0, buffer, 0, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(expected[1]), 0, buffer, 4, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(expected[2]), 0, buffer, 8, 4);
+            var result = InvokeConvertBytes(buffer, TypeCode.Single, 3);
+            Assert.AreEqual(3, result.Count);
+            Assert.AreEqual(expected[0], (float)result[0], 1e-6f);
+            Assert.AreEqual(expected[1], (float)result[1], 1e-6f);
+            Assert.AreEqual(expected[2], (float)result[2], 1e-6f);
+        }
+
+        #endregion
+
+        #region ConvertBytes 带偏移量读取测试
+
+        [TestMethod]
+        public void ConvertBytes_WithOffset_SkipsLeadingBytes()
+        {
+            byte[] buffer = { 0xFF, 0xFF, 0x42 };
             var result = InvokeConvertBytes(buffer, 2, TypeCode.Byte, 1);
+            Assert.AreEqual((byte)0x42, result[0]);
+        }
+
+        [TestMethod]
+        public void ConvertBytes_WithOffset_MultipleValues_ReadsFromCorrectPosition()
+        {
+            byte[] buffer = { 0xFF, 0x01, 0x02, 0x03 };
+            var result = InvokeConvertBytes(buffer, 1, TypeCode.Byte, 3);
+            Assert.AreEqual(3, result.Count);
+            Assert.AreEqual((byte)1, result[0]);
+            Assert.AreEqual((byte)2, result[1]);
+            Assert.AreEqual((byte)3, result[2]);
+        }
+
+        [TestMethod]
+        public void ConvertBytes_WithOffset_ZeroOffset_ReturnsFirstByte()
+        {
+            byte[] buffer = { 0x42, 0xFF };
+            var result = InvokeConvertBytes(buffer, 0, TypeCode.Byte, 1);
             Assert.AreEqual((byte)0x42, result[0]);
         }
 
@@ -136,9 +227,51 @@ namespace UnitTestProject.PLC
         }
 
         [TestMethod]
+        public void ToS7Bytes_ByteMinValue_ReturnsZero()
+        {
+            var result = InvokeToS7Bytes((byte)0, TypeCode.Byte);
+            Assert.AreEqual(1, result.Length);
+            Assert.AreEqual(0, result[0]);
+        }
+
+        [TestMethod]
+        public void ToS7Bytes_ByteMaxValue_Returns255()
+        {
+            var result = InvokeToS7Bytes((byte)255, TypeCode.Byte);
+            Assert.AreEqual(1, result.Length);
+            Assert.AreEqual(255, result[0]);
+        }
+
+        [TestMethod]
         public void ToS7Bytes_Int16_ReturnsLittleEndianBytes()
         {
             short value = -232;
+            var result = InvokeToS7Bytes(value, TypeCode.Int16);
+            CollectionAssert.AreEqual(BitConverter.GetBytes(value), result);
+        }
+
+        [TestMethod]
+        public void ToS7Bytes_Int16Zero_ReturnsTwoZeroBytes()
+        {
+            short value = 0;
+            var result = InvokeToS7Bytes(value, TypeCode.Int16);
+            Assert.AreEqual(2, result.Length);
+            Assert.AreEqual(0, result[0]);
+            Assert.AreEqual(0, result[1]);
+        }
+
+        [TestMethod]
+        public void ToS7Bytes_Int16MaxValue_ReturnsCorrectBytes()
+        {
+            short value = short.MaxValue;
+            var result = InvokeToS7Bytes(value, TypeCode.Int16);
+            CollectionAssert.AreEqual(BitConverter.GetBytes(value), result);
+        }
+
+        [TestMethod]
+        public void ToS7Bytes_Int16MinValue_ReturnsCorrectBytes()
+        {
+            short value = short.MinValue;
             var result = InvokeToS7Bytes(value, TypeCode.Int16);
             CollectionAssert.AreEqual(BitConverter.GetBytes(value), result);
         }
@@ -185,7 +318,7 @@ namespace UnitTestProject.PLC
 
         #endregion
 
-        #region 反射辅助方法
+        #region 辅助方法
 
         private static (int byteOffset, int bitOffset) InvokeParseAddress(string address)
         {
