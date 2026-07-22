@@ -26,7 +26,7 @@ namespace UnitTestProject.DataCollection
 
         public Factory6Workshop6_1Test()
         {
-            var builder = new ContainerBuilder();
+           var builder = new ContainerBuilder();
             builder.AddInfrastructureMiddleware();
             builder.AddCoreMiddleware();
             builder.AddSqlSugerMiddleware();
@@ -78,6 +78,8 @@ namespace UnitTestProject.DataCollection
 
             var startPoint = lineInfo.FirstOrDefault(x => x.PointName == "采集开始");
             var trayNoPoint = lineInfo.FirstOrDefault(x => x.PointName == "托盘号A");
+            startPoint.Value = new List<object>() { true };
+            mcp.Write(startPoint);
 
             lineInfo.Remove(startPoint);
             lineInfo.Remove(trayNoPoint);
@@ -103,8 +105,7 @@ namespace UnitTestProject.DataCollection
                     val++;
                 }
 
-                startPoint.Value = new List<object>() { true };
-                mcp.Write(startPoint);
+             
                 await Task.Delay(2*1000);
             }
             //else
@@ -150,15 +151,15 @@ namespace UnitTestProject.DataCollection
             //lineInfo.Remove(endPoint);
             lineInfo.Remove(startPoint);
             lineInfo.Remove(trayNoPoint);
+            startPoint.Value = new List<object>() { true };
+            mcp.Write(startPoint);
 
-      
             //EndServer(endPoint, startPoint, mcp);
 
-            int val = 1000;
+            int val = 200;
             for (int i = 0; i < 100; i++)
             {
-                startPoint.Value = new List<object>() { true };
-                var a = mcp.Write(startPoint);
+  
                 //if ((mcp.Read(startPoint)).Data.Value[0].ObjToBool() is false)
                 //{
                 trayNoPoint.Value = new List<object>() { val };
@@ -291,6 +292,7 @@ namespace UnitTestProject.DataCollection
             lineInfo.Remove(pallNotPoint);
             lineInfo.Remove(ngCodeoPoint);
             lineInfo.Remove(modelNoPoint);
+            lineInfo.Remove(startPoint);
 
             var mcp = Container.Resolve<McpCommunication>();
 
