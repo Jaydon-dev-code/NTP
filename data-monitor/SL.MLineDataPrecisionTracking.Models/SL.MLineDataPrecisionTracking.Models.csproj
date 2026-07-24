@@ -2,6 +2,9 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{292117F3-5422-4C4F-86C6-12DE0CF50BDE}</ProjectGuid>
@@ -46,6 +49,9 @@
     <Compile Include="Domain\EnergyRangePoint.cs" />
     <Compile Include="Domain\Factory4Workshop4_10LineBase.cs" />
     <Compile Include="Domain\Factory4Workshop4_10Line\Factory4Workshop4_10LineBase.cs" />
+    <Compile Include="Domain\Mc1E\Mc1EBase.cs" />
+    <Compile Include="Domain\Mc1E\Mc1ERead.cs" />
+    <Compile Include="Domain\Mc1E\Mc1EWirte.cs" />
     <Compile Include="Domain\MenuItem.cs" />
     <Compile Include="Domain\TimeAxisConfig.cs" />
     <Compile Include="Domain\PaginationPage.cs" />
@@ -99,6 +105,7 @@
     <Compile Include="Enum\Assembly_B_LineNgCodeEnum.cs" />
     <Compile Include="Enum\Assembly_B_LinePassCodeEnum.cs" />
     <Compile Include="Enum\Br8Sec63HeatEnergyWorkEnum.cs" />
+    <Compile Include="Enum\Mc1E\Mc1EFunctionCodeEnum.cs" />
     <Compile Include="Enum\ResultEnum.cs" />
     <Compile Include="Enum\ServiceStatusEnum.cs" />
     <Compile Include="ModelsAssemblyMarker.cs" />

@@ -1,7 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
+<PropertyGroup>
+  <LangVersion>latest</LangVersion>
+</PropertyGroup> 
+ <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{1C96F4DE-9C6B-463F-8432-F615868E7BB7}</ProjectGuid>
@@ -51,6 +54,7 @@
     <Compile Include="HubTest.cs" />
     <Compile Include="LogTest.cs" />
     <Compile Include="OtherPakeg\MapsterTest.cs" />
+    <Compile Include="PLC\Mc1ECommunicationTest.cs" />
     <Compile Include="PLC\McpCommunicationTest.cs" />
     <Compile Include="PLC\OmronCommunicationTest.cs" />
     <Compile Include="PLC\S7CommunicationTest.cs" />
