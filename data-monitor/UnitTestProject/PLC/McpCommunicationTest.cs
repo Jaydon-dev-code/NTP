@@ -308,6 +308,162 @@ namespace UnitTestProject.PLC
 
         #endregion
 
+        #region 同步写入基本测试
+
+        [TestMethod]
+        public void Write_ValidDto_ReturnsResult()
+        {
+            var mcp = new McpCommunication();
+            var dto = MakeWriteDto(address: 100, dataType: TypeCode.Int16, value: new List<object> { (short)123 });
+            var result = mcp.Write(dto);
+            Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
+        public void Write_ConnectionUnavailable_ReturnsFail()
+        {
+            var mcp = new McpCommunication();
+            var dto = MakeWriteDto(address: 100, dataType: TypeCode.Int16, value: new List<object> { (short)123 });
+            var result = mcp.Write(dto);
+            Assert.IsFalse(result.IsSuccess);
+        }
+
+        [TestMethod]
+        public void Write_ConnectionUnavailable_MessageNotEmpty()
+        {
+            var mcp = new McpCommunication();
+            var dto = MakeWriteDto(address: 100, dataType: TypeCode.Int16, value: new List<object> { (short)123 });
+            var result = mcp.Write(dto);
+            Assert.IsFalse(string.IsNullOrEmpty(result.Message));
+        }
+
+        #endregion
+
+        #region 同步写入数据类型测试
+
+        private static void AssertWriteForType(TypeCode typeCode, object value)
+        {
+            var mcp = new McpCommunication();
+            var dto = MakeWriteDto(address: 100, dataType: typeCode, value: new List<object> { value });
+            var result = mcp.Write(dto);
+            Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
+        public void Write_BooleanType_ReturnsResult() => AssertWriteForType(TypeCode.Boolean, true);
+
+        [TestMethod]
+        public void Write_Int16Type_ReturnsResult() => AssertWriteForType(TypeCode.Int16, (short)123);
+
+        [TestMethod]
+        public void Write_UInt16Type_ReturnsResult() => AssertWriteForType(TypeCode.UInt16, (ushort)123);
+
+        [TestMethod]
+        public void Write_Int32Type_ReturnsResult() => AssertWriteForType(TypeCode.Int32, 123456);
+
+        [TestMethod]
+        public void Write_UInt32Type_ReturnsResult() => AssertWriteForType(TypeCode.UInt32, (uint)123456);
+
+        [TestMethod]
+        public void Write_SingleType_ReturnsResult() => AssertWriteForType(TypeCode.Single, 123.45f);
+
+        [TestMethod]
+        public void Write_DoubleType_ReturnsResult() => AssertWriteForType(TypeCode.Double, 123.45);
+
+        [TestMethod]
+        public void Write_StringType_ReturnsResult() => AssertWriteForType(TypeCode.String, "test123");
+
+        #endregion
+
+        #region 同步写入异常测试
+
+        [TestMethod]
+        public void Write_NullValue_ReturnsResult()
+        {
+            var mcp = new McpCommunication();
+            var dto = MakeWriteDto(address: 100, dataType: TypeCode.Int16, value: null);
+            var result = mcp.Write(dto);
+            Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
+        public void Write_EmptyValueList_ReturnsResult()
+        {
+            var mcp = new McpCommunication();
+            var dto = MakeWriteDto(address: 100, dataType: TypeCode.Int16, value: new List<object>());
+            var result = mcp.Write(dto);
+            Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
+        public void Write_MultipleValues_ReturnsResult()
+        {
+            var mcp = new McpCommunication();
+            var dto = MakeWriteDto(address: 100, dataType: TypeCode.Int16, value: new List<object> { (short)1, (short)2, (short)3 });
+            var result = mcp.Write(dto);
+            Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
+        public void Write_StringMultipleChars_ReturnsResult()
+        {
+            var mcp = new McpCommunication();
+            var dto = MakeWriteDto(address: 100, dataType: TypeCode.String, value: new List<object> { "Hello", "World" });
+            dto.IpAddress = "192.168.3.250";
+            dto.Port = 9000;
+            dto.Address = "1900";
+            var result = mcp.Write(dto);
+            Assert.IsNotNull(result);
+        }
+
+        //[TestMethod]
+        //public void Write_BatchList_ThrowsNotImplemented()
+        //{
+        //    var mcp = new McpCommunication();
+        //    Assert.ThrowsException<NotImplementedException>(() => mcp.Write(new List<DevPlcPointDto>()));
+        //}
+
+        //[TestMethod]
+        //public void Write_InvalidPrefix_ThrowsNotSupported()
+        //{
+        //    var mcp = new McpCommunication();
+        //    var dto = MakeWriteDto(address: 100, prefix: "Invalid", dataType: TypeCode.Int16, value: new List<object> { (short)123 });
+        //    Assert.ThrowsException<NotSupportedException>(() => mcp.Write(dto));
+        //}
+
+        [TestMethod]
+        public void Write_UnsupportedType_ReturnsFail()
+        {
+            var mcp = new McpCommunication();
+            var dto = MakeWriteDto(address: 100, dataType: TypeCode.Decimal, value: new List<object> { 1.0m });
+            var result = mcp.Write(dto);
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.IsSuccess);
+        }
+
+        [TestMethod]
+        public void Write_LargeAddress_ReturnsResult()
+        {
+            var mcp = new McpCommunication();
+            var dto = MakeWriteDto(address: 9999, dataType: TypeCode.Int16, value: new List<object> { (short)123 });
+            var result = mcp.Write(dto);
+            Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
+        public void Write_MultipleRetries_ReturnsFail()
+        {
+            var mcp = new McpCommunication();
+            var dto = MakeWriteDto(address: 100, dataType: TypeCode.Int16, value: new List<object> { (short)123 });
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            var result = mcp.Write(dto);
+            sw.Stop();
+            Assert.IsFalse(result.IsSuccess);
+            Assert.IsTrue(sw.ElapsedMilliseconds >= 300, "应执行至少一次重试间隔");
+        }
+
+        #endregion
+
         #region 辅助方法
 
         private static DevPlcPointReadDto MakeReadDto(int address, TypeCode dataType = TypeCode.Int16, int shortOffset = 1, int length = 1)
@@ -321,6 +477,20 @@ namespace UnitTestProject.PLC
                 Address = address,
                 Length = length,
                 ShortOffset = shortOffset
+            };
+        }
+
+        private static DevPlcPointDto MakeWriteDto(int address = 100, string prefix = "D", TypeCode dataType = TypeCode.Int16, List<object> value = null)
+        {
+            return new DevPlcPointDto
+            {
+                IpAddress = "127.0.0.1",
+                Port = 6000,
+                Prefix = prefix,
+                DataType = dataType,
+                Address = address.ToString(),
+                Length = 1,
+                Value = value
             };
         }
 
