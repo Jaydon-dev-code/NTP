@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Mapster;
 using Microsoft.AspNet.SignalR;
+using IClientProxy = Microsoft.AspNet.SignalR.Hubs.IClientProxy;
 using NPOI.POIFS.Crypt.Dsig;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
@@ -90,7 +91,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
         protected override async Task<Result> HandshakeAsync()
         {
             var re = _mcp.Read(_rivetAndCrackResultPlcInfo);
-            _chatHub.Clients.All.IsOnlieRivetAndCrack = re.IsSuccess;
+            ((IClientProxy)_chatHub.Clients.All).Invoke("IsOnlieRivetAndCrack", re.IsSuccess);
             if (re.IsSuccess == false)
             {
                 return Result.Fail("PLC通讯失败");
@@ -154,12 +155,12 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                         x => new { x.RivetingResult, x.RivetingTime }
                     );
 
-                    _chatHub.Clients.All.RivetingData = new Factory4Workshop4_10Line_RivetAndCrack_RivetingDto
+                    ((IClientProxy)_chatHub.Clients.All).Invoke("RivetingData", new Factory4Workshop4_10Line_RivetAndCrack_RivetingDto
                     {
                         SN = dataValue.SN,
                         RivetingResult = dataValue.RivetingResult,
                         RivetingTime = dataValue.RivetingTime,
-                    };
+                    });
                 }
             }
             if (_spinRivetingRe != _spinRivetingReTmp && _spinRivetingReTmp != 0)
@@ -219,14 +220,14 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                         }
                     );
 
-                    _chatHub.Clients.All.SpinRivetingData = new Factory4Workshop4_10Line_RivetAndCrack_SpinRivetingDto
+                    ((IClientProxy)_chatHub.Clients.All).Invoke("SpinRivetingData", new Factory4Workshop4_10Line_RivetAndCrack_SpinRivetingDto
                     {
                         SN = dataValue.SN,
                         RivetingInspection1Height = dataValue.RivetingInspection1Height,
                         SpiralRivetingFormingHeight = dataValue.SpiralRivetingFormingHeight,
                         RivetingInspection2Height = dataValue.RivetingInspection2Height,
                         SpinRivetingTime = dataValue.SpinRivetingTime,
-                    };
+                    });
                 }
             }
             return Result<object>.Success(null);

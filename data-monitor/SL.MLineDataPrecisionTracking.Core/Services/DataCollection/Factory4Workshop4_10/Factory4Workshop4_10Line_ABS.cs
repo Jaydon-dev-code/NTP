@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Mapster;
 using Microsoft.AspNet.SignalR;
+using IClientProxy = Microsoft.AspNet.SignalR.Hubs.IClientProxy;
 using NPOI.POIFS.Crypt.Dsig;
 using SL.MLineDataPrecisionTracking.Core.Hubs;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
@@ -77,7 +78,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
         protected override async Task<Result> HandshakeAsync()
         {
             var re = _mcp.Read(_absResultPlcInfo);
-            _chatHub.Clients.All.IsOnlieABS = re.IsSuccess;
+            ((IClientProxy)_chatHub.Clients.All).Invoke("IsOnlieABS", re.IsSuccess);
             if (re.IsSuccess ==false)
             {
                 return Result.Fail("PLC通讯失败");
@@ -141,12 +142,12 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                         x => new { x.ABSPressDownResult, x.ABSPressDownTime }
                     );
 
-                    _chatHub.Clients.All.ABSPressDownData = new Factory4Workshop4_10Line_ABS_PressDownDto
+                    ((IClientProxy)_chatHub.Clients.All).Invoke("ABSPressDownData", new Factory4Workshop4_10Line_ABS_PressDownDto
                     {
                         SN = dataValue.SN,
                         ABSPressDownResult = dataValue.ABSPressDownResult,
                         ABSPressDownTime = dataValue.ABSPressDownTime,
-                    };
+                    });
                 }
             }
             if (_absCheckReTmp != _absCheckRe && _absCheckReTmp != 0)
@@ -184,12 +185,12 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                         x => new { x.ABSCheckResult, x.ABSCheckTime }
                     );
 
-                    _chatHub.Clients.All.ABSCheckData = new Factory4Workshop4_10Line_ABS_CheckDto
+                    ((IClientProxy)_chatHub.Clients.All).Invoke("ABSCheckData", new Factory4Workshop4_10Line_ABS_CheckDto
                     {
                         SN = dataValue.SN,
                         ABSCheckResult = dataValue.ABSCheckResult,
                         ABSCheckTime = dataValue.ABSCheckTime,
-                    };
+                    });
                 }
             }
 

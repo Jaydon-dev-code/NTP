@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Mapster;
 using Microsoft.AspNet.SignalR;
+using IClientProxy = Microsoft.AspNet.SignalR.Hubs.IClientProxy;
 using NPOI.XWPF.UserModel;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
@@ -74,7 +75,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
         protected override async Task<Result> HandshakeAsync()
         {
             var re = _mc1ECommunication.Read(_vibResultPlcInfo);
-            _chatHub.Clients.All.IsOnlieVib = re.IsSuccess;
+            ((IClientProxy)_chatHub.Clients.All).Invoke("IsOnlieVib", re.IsSuccess);
             if (re.IsSuccess == false)
             {
                 return Result.Fail("PLC通讯失败");
@@ -128,12 +129,12 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                     x => new { x.VibCrackResult, x.RecordTime }
                 );
 
-                _chatHub.Clients.All.VibData = new Factory4Workshop4_10Line_VibDto
+                ((IClientProxy)_chatHub.Clients.All).Invoke("VibData", new Factory4Workshop4_10Line_VibDto
                 {
                     SN = dataValue.SN,
                     VibCrackResult = dataValue.VibCrackResult,
                     RecordTime = dataValue.RecordTime,
-                };
+                });
             }
             return Result<object>.Success(null);
         }
@@ -192,7 +193,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                 while (true)
                 {
                     Socket client = _serverSocket.Accept();
-                    _chatHub.Clients.All.IsOnlieVibScan = true;
+                    ((IClientProxy)_chatHub.Clients.All).Invoke("IsOnlieVibScan", true);
 
                     // 新开线程持续接收条码
                     new Thread(() => ReceiveBarcodeLoop(client)).Start();
@@ -253,7 +254,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
             {
                 client.Close();
                 client.Dispose();
-                _chatHub.Clients.All.IsOnlieVibScan = false;
+                ((IClientProxy)_chatHub.Clients.All).Invoke("IsOnlieVibScan", false);
                 Serilog.Log.Warning("[扫描枪数据推送]{_serviceName}:客户端Socket已释放");
             }
         }

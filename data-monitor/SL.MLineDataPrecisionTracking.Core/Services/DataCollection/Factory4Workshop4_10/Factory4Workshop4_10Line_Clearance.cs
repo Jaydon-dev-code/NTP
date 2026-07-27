@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Mapster;
 using Microsoft.AspNet.SignalR;
+using IClientProxy = Microsoft.AspNet.SignalR.Hubs.IClientProxy;
 using NPOI.POIFS.Crypt.Dsig;
 using SL.MLineDataPrecisionTracking.Core.Hubs;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
@@ -117,7 +118,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
         protected override async Task<Result> HandshakeAsync()
         {
             var re = _mcp.Read(_clearancResultPlcInfo);
-            _chatHub.Clients.All.IsOnlieClearance = re.IsSuccess;
+            ((IClientProxy)_chatHub.Clients.All).Invoke("IsOnlieClearance", re.IsSuccess);
             if (re.IsSuccess == false)
             {
                 return Result.Fail("PLC通讯失败");
@@ -200,13 +201,13 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                     }
                     else
                     {
-                        await _clearanceRepository.InsertableAsync(dataValue);
-                        await _summaryRepository.InsertableAsync(
+                     var a=   await _clearanceRepository.InsertableAsync(dataValue);
+                        var b = await _summaryRepository.InsertableAsync(
                             dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>()
                         );
                     }
 
-                    _chatHub.Clients.All.ClearanceStation1Data = new Factory4Workshop4_10Line_Clearance_Station1Dto
+                    ((IClientProxy)_chatHub.Clients.All).Invoke("ClearanceStation1Data", new Factory4Workshop4_10Line_Clearance_Station1Dto
                     {
                         SN = dataValue.SN,
                         Clearance1Result = dataValue.Clearance1Result,
@@ -214,7 +215,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                         LowerLoad = dataValue.LowerLoad,
                         UpperLoad = dataValue.UpperLoad,
                         Clearance1Time = dataValue.Clearance1Time,
-                    };
+                    });
                 }
             }
             if (_clearance2Re != _clearance2ReTmp && _clearance2ReTmp != 0)
@@ -272,7 +273,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                         }
                     );
 
-                    _chatHub.Clients.All.ClearanceStation2Data = new Factory4Workshop4_10Line_Clearance_Station2Dto
+                    ((IClientProxy)_chatHub.Clients.All).Invoke("ClearanceStation2Data", new Factory4Workshop4_10Line_Clearance_Station2Dto
                     {
                         SN = dataValue.SN,
                         Clearance2Result = dataValue.Clearance2Result,
@@ -281,7 +282,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                         AfterPressIn = dataValue.AfterPressIn,
                         Gap = dataValue.Gap,
                         Clearance2Time = dataValue.Clearance2Time,
-                    };
+                    });
                 }
             }
             return Result<object>.Success(null);
