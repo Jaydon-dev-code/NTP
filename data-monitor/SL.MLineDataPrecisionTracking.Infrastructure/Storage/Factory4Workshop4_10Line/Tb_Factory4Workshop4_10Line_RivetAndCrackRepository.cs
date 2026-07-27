@@ -30,6 +30,19 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
             return await _db.Queryable<Tb_Factory4Workshop4_10Line_RivetAndCrack>().FirstAsync(expression);
         }
 
+        /// <summary>
+        /// 不用主键更新并更新指定列
+        /// </summary>
+        /// <param name="lineSummary"></param>
+        /// <param name="WhereColumns"></param>
+        /// <param name="upColumnsName"></param>
+        /// <returns></returns>
+        public async Task<int> UpDataAsync(Tb_Factory4Workshop4_10Line_RivetAndCrack lineSummary, Expression<Func<Tb_Factory4Workshop4_10Line_RivetAndCrack, object>> WhereColumns, Expression<Func<Tb_Factory4Workshop4_10Line_RivetAndCrack, object>> upColumnsName)
+        {
+            return await _db.Updateable(lineSummary).WhereColumns(WhereColumns).UpdateColumns(upColumnsName).ExecuteCommandAsync();
+            ;
+        }
+
         public async Task<int> UpdateableAsync(Tb_Factory4Workshop4_10Line_RivetAndCrack device)
         {
             return await _db.Updateable<Tb_Factory4Workshop4_10Line_RivetAndCrack>(device).ExecuteCommandAsync();

@@ -9,8 +9,8 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos.Factory4Workshop4_10Line
 {
     public class Factory4Workshop4_10Line_VibDto
     {
-        public DateTime RecordTime { get; set; }
-        public string SN { get; set; }
-        public ResultEnum VibCrackResult { get; set; }
+        public string? SN { get; set; }
+        public ResultEnum? VibCrackResult { get; set; }
+        public DateTime? RecordTime { get; set; }
     }
 }

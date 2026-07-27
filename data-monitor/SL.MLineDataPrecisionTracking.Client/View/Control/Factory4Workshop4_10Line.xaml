@@ -5,6 +5,7 @@
     xmlns:converters="http://schemas.superdev.ch/valueconverters/2016/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:SL.MLineDataPrecisionTracking.Client.View.Control"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="450"
@@ -21,6 +22,16 @@
                 x:Key="BoolToStringConverter"
                 FalseValue="离线"
                 TrueValue="在线" />
+            <Style BasedOn="{StaticResource TextBoxPlus.Small}" TargetType="hc:TextBox">
+                <Setter Property="hc:InfoElement.TitlePlacement" Value="Left" />
+                <Setter Property="hc:InfoElement.TitleWidth" Value="120" />
+                <Setter Property="hc:InfoElement.MinContentHeight" Value="35" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="IsReadOnly" Value="True" />
+                <Setter Property="FontSize" Value="18" />
+
+
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
@@ -35,7 +46,7 @@
                                         Width="50"
                                         Style="{DynamicResource TextBlockTitle}"
                                         Text="工位:" />
-                                    <TextBlock Style="{DynamicResource TextBlockTitle}" Text="游隙" />
+                                    <TextBlock Style="{DynamicResource TextBlockTitle}" Text="游隙1工位" />
                                 </WrapPanel>
                             </GroupBox.Header>
                             <Grid>
@@ -47,24 +58,19 @@
                                     <TextBlock Style="{DynamicResource TextBlockSubTitle}" Text="设备状态" />
                                     <Label Content="{Binding IsOnlieClearance, Converter={StaticResource BoolToStringConverter}}" Style="{Binding IsOnlieClearance, Converter={StaticResource BoolToStyleConverter}}" />
                                 </UniformGrid>
-                                <ListBox Grid.Row="1" BorderThickness="0,1,0,0">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid>
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="25" />
-                                                    </Grid.ColumnDefinitions>
-                                                </Grid>
-                                                <TextBlock Grid.Column="0" Text="{Binding Name}" />
-                                                <TextBlock Grid.Column="1" Text="{Binding Data}" />
-                                                <TextBlock Grid.Column="2" Text="{Binding Unit}" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
+                                <hc:UniformSpacingPanel
+                                    Grid.Row="1"
+                                    Margin="10,5,0,0"
+                                    HorizontalAlignment="Left"
+                                    Orientation="Vertical"
+                                    Spacing="10">
+                                    <hc:TextBox hc:InfoElement.Title="检测结果：" Text="{Binding ClearanceStation1Data.Clearance1Result}" />
+                                    <hc:TextBox hc:InfoElement.Title="SN：" Text="{Binding ClearanceStation1Data.SN}" />
+                                    <hc:TextBox hc:InfoElement.Title="采集时间：" Text="{Binding ClearanceStation1Data.Clearance1Time}" />
+                                    <hc:TextBox hc:InfoElement.Title="正间隙：" Text="{Binding ClearanceStation1Data.PositiveGap}" />
+                                    <hc:TextBox hc:InfoElement.Title="下负荷：" Text="{Binding ClearanceStation1Data.LowerLoad}" />
+                                    <hc:TextBox hc:InfoElement.Title="上负荷：" Text="{Binding ClearanceStation1Data.UpperLoad}" />
+                                </hc:UniformSpacingPanel>
                             </Grid>
                         </GroupBox>
                     </hc:Card>
@@ -76,7 +82,44 @@
                                         Width="50"
                                         Style="{DynamicResource TextBlockTitle}"
                                         Text="工位:" />
-                                    <TextBlock Style="{DynamicResource TextBlockTitle}" Text="铆接和裂纹检测" />
+                                    <TextBlock Style="{DynamicResource TextBlockTitle}" Text="游隙2工位" />
+                                </WrapPanel>
+                            </GroupBox.Header>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="25" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <UniformGrid Grid.Row="0" Columns="2">
+                                    <TextBlock Style="{DynamicResource TextBlockSubTitle}" Text="设备状态" />
+                                    <Label Content="{Binding IsOnlieClearance, Converter={StaticResource BoolToStringConverter}}" Style="{Binding IsOnlieClearance, Converter={StaticResource BoolToStyleConverter}}" />
+                                </UniformGrid>
+                                <hc:UniformSpacingPanel
+                                    Grid.Row="1"
+                                    Margin="10,5,0,0"
+                                    HorizontalAlignment="Left"
+                                    Orientation="Vertical"
+                                    Spacing="10">
+                                    <hc:TextBox hc:InfoElement.Title="检测结果：" Text="{Binding ClearanceStation2Data.Clearance2Result}" />
+                                    <hc:TextBox hc:InfoElement.Title="SN：" Text="{Binding ClearanceStation2Data.SN}" />
+                                    <hc:TextBox hc:InfoElement.Title="采集时间：" Text="{Binding ClearanceStation2Data.Clearance2Time}" />
+                                    <hc:TextBox hc:InfoElement.Title="偏移量：" Text="{Binding ClearanceStation2Data.Offset}" />
+                                    <hc:TextBox hc:InfoElement.Title="压入前：" Text="{Binding ClearanceStation2Data.BeforePressIn}" />
+                                    <hc:TextBox hc:InfoElement.Title="压入后：" Text="{Binding ClearanceStation2Data.AfterPressIn}" />
+                                    <hc:TextBox hc:InfoElement.Title="间隙：" Text="{Binding ClearanceStation2Data.Gap}" />
+                                </hc:UniformSpacingPanel>
+                            </Grid>
+                        </GroupBox>
+                    </hc:Card>
+                    <hc:Card Margin="5">
+                        <GroupBox Style="{StaticResource GroupBoxOriginal}">
+                            <GroupBox.Header>
+                                <WrapPanel HorizontalAlignment="Left">
+                                    <TextBlock
+                                        Width="50"
+                                        Style="{DynamicResource TextBlockTitle}"
+                                        Text="工位:" />
+                                    <TextBlock Style="{DynamicResource TextBlockTitle}" Text="铆接" />
                                 </WrapPanel>
                             </GroupBox.Header>
                             <Grid>
@@ -88,28 +131,54 @@
                                     <TextBlock Style="{DynamicResource TextBlockSubTitle}" Text="设备状态" />
                                     <Label Content="{Binding IsOnlieRivetAndCrack, Converter={StaticResource BoolToStringConverter}}" Style="{Binding IsOnlieRivetAndCrack, Converter={StaticResource BoolToStyleConverter}}" />
                                 </UniformGrid>
-                                <ListBox Grid.Row="1" BorderThickness="0,1,0,0">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid>
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="25" />
-                                                    </Grid.ColumnDefinitions>
-                                                </Grid>
-                                                <TextBlock Grid.Column="0" Text="{Binding Name}" />
-                                                <TextBlock Grid.Column="1" Text="{Binding Data}" />
-                                                <TextBlock Grid.Column="2" Text="{Binding Unit}" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
+                                <hc:UniformSpacingPanel
+                                    Grid.Row="1"
+                                    Margin="10,5,0,0"
+                                    HorizontalAlignment="Left"
+                                    Orientation="Vertical"
+                                    Spacing="10">
+                                    <hc:TextBox hc:InfoElement.Title="检测结果：" Text="{Binding RivetingData.RivetingResult}" />
+                                    <hc:TextBox hc:InfoElement.Title="SN：" Text="{Binding RivetingData.SN}" />
+                                    <hc:TextBox hc:InfoElement.Title="采集时间：" Text="{Binding RivetingData.RivetingTime}" />
+                                </hc:UniformSpacingPanel>
                             </Grid>
                         </GroupBox>
                     </hc:Card>
-
+                    <hc:Card Margin="5">
+                        <GroupBox Style="{StaticResource GroupBoxOriginal}">
+                            <GroupBox.Header>
+                                <WrapPanel HorizontalAlignment="Left">
+                                    <TextBlock
+                                        Width="50"
+                                        Style="{DynamicResource TextBlockTitle}"
+                                        Text="工位:" />
+                                    <TextBlock Style="{DynamicResource TextBlockTitle}" Text="旋铆检测" />
+                                </WrapPanel>
+                            </GroupBox.Header>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="25" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <UniformGrid Grid.Row="0" Columns="2">
+                                    <TextBlock Style="{DynamicResource TextBlockSubTitle}" Text="设备状态" />
+                                    <Label Content="{Binding IsOnlieRivetAndCrack, Converter={StaticResource BoolToStringConverter}}" Style="{Binding IsOnlieRivetAndCrack, Converter={StaticResource BoolToStyleConverter}}" />
+                                </UniformGrid>
+                                <hc:UniformSpacingPanel
+                                    Grid.Row="1"
+                                    Margin="10,5,0,0"
+                                    HorizontalAlignment="Left"
+                                    Orientation="Vertical"
+                                    Spacing="10">
+                                    <hc:TextBox hc:InfoElement.Title="SN：" Text="{Binding SpinRivetingData.SN}" />
+                                    <hc:TextBox hc:InfoElement.Title="高度检测#1：" Text="{Binding SpinRivetingData.RivetingInspection1Height}" />
+                                    <hc:TextBox hc:InfoElement.Title="高度检测#2：" Text="{Binding SpinRivetingData.RivetingInspection2Height}" />
+                                    <hc:TextBox hc:InfoElement.Title="旋铆成型高度：" Text="{Binding SpinRivetingData.SpiralRivetingFormingHeight}" />
+                                    <hc:TextBox hc:InfoElement.Title="采集时间：" Text="{Binding SpinRivetingData.SpinRivetingTime}" />
+                                </hc:UniformSpacingPanel>
+                            </Grid>
+                        </GroupBox>
+                    </hc:Card>
                     <hc:Card Margin="5">
                         <GroupBox Style="{StaticResource GroupBoxOriginal}">
                             <GroupBox.Header>
@@ -124,34 +193,30 @@
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="25" />
+                                    <RowDefinition Height="25" />
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
                                 <UniformGrid Grid.Row="0" Columns="2">
                                     <TextBlock Style="{DynamicResource TextBlockSubTitle}" Text="设备状态" />
                                     <Label Content="{Binding IsOnlieVib, Converter={StaticResource BoolToStringConverter}}" Style="{Binding IsOnlieVib, Converter={StaticResource BoolToStyleConverter}}" />
                                 </UniformGrid>
-                                <ListBox Grid.Row="1" BorderThickness="0,1,0,0">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid>
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="25" />
-                                                    </Grid.ColumnDefinitions>
-                                                </Grid>
-                                                <TextBlock Grid.Column="0" Text="{Binding Name}" />
-                                                <TextBlock Grid.Column="1" Text="{Binding Data}" />
-                                                <TextBlock Grid.Column="2" Text="{Binding Unit}" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
+                                <UniformGrid Grid.Row="1" Columns="2">
+                                    <TextBlock Style="{DynamicResource TextBlockSubTitle}" Text="扫码枪状态" />
+                                    <Label Content="{Binding IsOnlieVibScan, Converter={StaticResource BoolToStringConverter}}" Style="{Binding IsOnlieVibScan, Converter={StaticResource BoolToStyleConverter}}" />
+                                </UniformGrid>
+                                <hc:UniformSpacingPanel
+                                    Grid.Row="2"
+                                    Margin="10,5,0,0"
+                                    HorizontalAlignment="Left"
+                                    Orientation="Vertical"
+                                    Spacing="10">
+                                    <hc:TextBox hc:InfoElement.Title="检测结果：" Text="{Binding VibData.VibCrackResult}" />
+                                    <hc:TextBox hc:InfoElement.Title="SN：" Text="{Binding VibData.SN}" />
+                                    <hc:TextBox hc:InfoElement.Title="采集时间：" Text="{Binding VibData.RecordTime}" />
+                                </hc:UniformSpacingPanel>
                             </Grid>
                         </GroupBox>
                     </hc:Card>
-
                     <hc:Card Margin="5">
                         <GroupBox Style="{StaticResource GroupBoxOriginal}">
                             <GroupBox.Header>
@@ -160,7 +225,7 @@
                                         Width="50"
                                         Style="{DynamicResource TextBlockTitle}"
                                         Text="工位:" />
-                                    <TextBlock Style="{DynamicResource TextBlockTitle}" Text="ABS" />
+                                    <TextBlock Style="{DynamicResource TextBlockTitle}" Text="ABS压紧" />
                                 </WrapPanel>
                             </GroupBox.Header>
                             <Grid>
@@ -172,30 +237,252 @@
                                     <TextBlock Style="{DynamicResource TextBlockSubTitle}" Text="设备状态" />
                                     <Label Content="{Binding IsOnlieABS, Converter={StaticResource BoolToStringConverter}}" Style="{Binding IsOnlieABS, Converter={StaticResource BoolToStyleConverter}}" />
                                 </UniformGrid>
-                                <ListBox Grid.Row="1" BorderThickness="0,1,0,0">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid>
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="25" />
-                                                    </Grid.ColumnDefinitions>
-                                                </Grid>
-                                                <TextBlock Grid.Column="0" Text="{Binding Name}" />
-                                                <TextBlock Grid.Column="1" Text="{Binding Data}" />
-                                                <TextBlock Grid.Column="2" Text="{Binding Unit}" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
+                                <hc:UniformSpacingPanel
+                                    Grid.Row="1"
+                                    Margin="10,5,0,0"
+                                    HorizontalAlignment="Left"
+                                    Orientation="Vertical"
+                                    Spacing="10">
+                                    <hc:TextBox hc:InfoElement.Title="检测结果：" Text="{Binding ABSPressDownData.ABSPressDownResult}" />
+                                    <hc:TextBox hc:InfoElement.Title="SN：" Text="{Binding ABSPressDownData.SN}" />
+                                    <hc:TextBox hc:InfoElement.Title="采集时间：" Text="{Binding ABSPressDownData.ABSPressDownTime}" />
+                                </hc:UniformSpacingPanel>
+                            </Grid>
+                        </GroupBox>
+                    </hc:Card>
+                    <hc:Card Margin="5">
+                        <GroupBox Style="{StaticResource GroupBoxOriginal}">
+                            <GroupBox.Header>
+                                <WrapPanel HorizontalAlignment="Left">
+                                    <TextBlock
+                                        Width="50"
+                                        Style="{DynamicResource TextBlockTitle}"
+                                        Text="工位:" />
+                                    <TextBlock Style="{DynamicResource TextBlockTitle}" Text="ABS检测" />
+                                </WrapPanel>
+                            </GroupBox.Header>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="25" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <UniformGrid Grid.Row="0" Columns="2">
+                                    <TextBlock Style="{DynamicResource TextBlockSubTitle}" Text="设备状态" />
+                                    <Label Content="{Binding IsOnlieABS, Converter={StaticResource BoolToStringConverter}}" Style="{Binding IsOnlieABS, Converter={StaticResource BoolToStyleConverter}}" />
+                                </UniformGrid>
+                                <hc:UniformSpacingPanel
+                                    Grid.Row="1"
+                                    Margin="10,5,0,0"
+                                    HorizontalAlignment="Left"
+                                    Orientation="Vertical"
+                                    Spacing="10">
+                                    <hc:TextBox hc:InfoElement.Title="检测结果：" Text="{Binding ABSCheckData.ABSCheckResult}" />
+                                    <hc:TextBox hc:InfoElement.Title="SN：" Text="{Binding ABSCheckData.SN}" />
+                                    <hc:TextBox hc:InfoElement.Title="采集时间：" Text="{Binding ABSCheckData.ABSCheckTime}" />
+                                </hc:UniformSpacingPanel>
                             </Grid>
                         </GroupBox>
                     </hc:Card>
                 </UniformGrid>
             </TabItem>
-            <TabItem Header="数据查询" />
+            <TabItem Header="数据查询">
+                <Grid Margin="0,5">
+                    <Grid.Resources>
+                        <converters:BoolInverter x:Key="BoolInverter" />
+                        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+                        <converters:ValueConverterGroup x:Key="InverterBoolToVisibilityConverter">
+                            <converters:BoolInverter />
+                            <converters:BoolToVisibilityConverter />
+                        </converters:ValueConverterGroup>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Left" />
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                        </Style>
+                    </Grid.Resources>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="80" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="30" />
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="5" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="100" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="100" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="起始时间" />
+                        <Grid Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                              IsEnabled="{Binding IsScanCode, Converter={StaticResource BoolInverter}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <hc:DatePicker Grid.Column="0" SelectedDate="{Binding QueryStartDate, Mode=TwoWay}" />
+                            <hc:TimePicker Grid.Column="1" SelectedTime="{Binding QueryStartTime, Mode=TwoWay}" Style="{StaticResource TimePickerPlus}">
+                                <hc:TimePicker.Clock>
+                                    <hc:ListClock />
+                                </hc:TimePicker.Clock>
+                            </hc:TimePicker>
+                        </Grid>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="结束时间" />
+                        <Grid Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                              IsEnabled="{Binding IsScanCode, Converter={StaticResource BoolInverter}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <hc:DatePicker Grid.Column="0" SelectedDate="{Binding QueryEndDate, Mode=TwoWay}" />
+                            <hc:TimePicker Grid.Column="1" SelectedTime="{Binding QueryEndTime, Mode=TwoWay}" Style="{StaticResource TimePickerPlus}">
+                                <hc:TimePicker.Clock>
+                                    <hc:ListClock />
+                                </hc:TimePicker.Clock>
+                            </hc:TimePicker>
+                        </Grid>
+                        <TextBlock Grid.Row="0" Grid.Column="4" Text="序列码" />
+                        <TextBox Name="MarkingNo"
+                                 Grid.Row="0" Grid.Column="5" Width="200"
+                                 Style="{StaticResource DataGridEditingTextColumnStyle.Small}"
+                                 Text="{Binding QuerySN, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="Enter" Command="{Binding MarkingNoQueryCommand}" CommandParameter="{Binding ElementName=MarkingNo}" />
+                            </TextBox.InputBindings>
+                        </TextBox>
+                        <Button Grid.Row="2" Grid.Column="4" Command="{Binding QueryCommand}" Content="查询"
+                                IsEnabled="{Binding IsScanCode, Converter={StaticResource BoolInverter}}"
+                                Style="{StaticResource ButtonPrimary.Small}" />
+                        <Button Grid.Row="2" Grid.Column="5" Command="{Binding SaveQueryCommand}" Content="导出"
+                                Style="{StaticResource ButtonInfo.Small}" />
+                        <CheckBox Grid.Row="0" Grid.Column="6" Name="IsScanCode"
+                                  VerticalAlignment="Center"
+                                  Content="扫码查询"
+                                  IsChecked="{Binding IsScanCode, Mode=TwoWay}"
+                                  Command="{Binding OpenScanCodeModelCommand}"
+                                  CommandParameter="{Binding ElementName=MarkingNo}" />
+                    </Grid>
+                    <hc:TransitioningContentControl Grid.Row="1" Margin="0,5">
+                        <hc:DrawerContainer>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <DataGrid Grid.Column="0" Margin="0,0,15,0"
+                                          AutoGenerateColumns="False"
+                                          ItemsSource="{Binding QueryValue}"
+                                          ScrollViewer.CanContentScroll="True"
+                                          ScrollViewer.HorizontalScrollBarVisibility="Visible"
+                                          ScrollViewer.VerticalScrollBarVisibility="Visible">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn MinWidth="150" Binding="{Binding RecordTime, StringFormat='yyyy-MM-dd HH:mm:ss'}" Header="时间" IsReadOnly="True" />
+                                        <DataGridTextColumn MinWidth="120" Binding="{Binding SN}" Header="序列码" IsReadOnly="True" />
+                                        <DataGridTextColumn MinWidth="100" Binding="{Binding Clearance1Result}" Header="游隙1结果" IsReadOnly="True" />
+                                        <DataGridTextColumn MinWidth="100" Binding="{Binding Clearance2Result}" Header="游隙2结果" IsReadOnly="True" />
+                                        <DataGridTextColumn MinWidth="80" Binding="{Binding PositiveGap}" Header="正间隙" IsReadOnly="True" />
+                                        <DataGridTextColumn MinWidth="80" Binding="{Binding LowerLoad}" Header="下负荷" IsReadOnly="True" />
+                                        <DataGridTextColumn MinWidth="80" Binding="{Binding UpperLoad}" Header="上负荷" IsReadOnly="True" />
+                                        <DataGridTextColumn MinWidth="80" Binding="{Binding Offset}" Header="偏移量" IsReadOnly="True" />
+                                        <DataGridTextColumn MinWidth="80" Binding="{Binding BeforePressIn}" Header="压入前" IsReadOnly="True" />
+                                        <DataGridTextColumn MinWidth="80" Binding="{Binding AfterPressIn}" Header="压入后" IsReadOnly="True" />
+                                        <DataGridTextColumn MinWidth="80" Binding="{Binding Gap}" Header="间隙" IsReadOnly="True" />
+                                        <DataGridTextColumn MinWidth="100" Binding="{Binding RivetingResult}" Header="铆接结果" IsReadOnly="True" />
+                                        <DataGridTextColumn MinWidth="100" Binding="{Binding SpinRivetingResult}" Header="旋铆结果" IsReadOnly="True" />
+                                        <DataGridTextColumn MinWidth="100" Binding="{Binding RivetingInspection1Height}" Header="旋铆高度1" IsReadOnly="True" />
+                                        <DataGridTextColumn MinWidth="100" Binding="{Binding RivetingInspection2Height}" Header="旋铆高度2" IsReadOnly="True" />
+                                        <DataGridTextColumn MinWidth="100" Binding="{Binding SpiralRivetingFormingHeight}" Header="成型高度" IsReadOnly="True" />
+                                        <DataGridTextColumn MinWidth="100" Binding="{Binding VibCrackResult}" Header="震动结果" IsReadOnly="True" />
+                                        <DataGridTextColumn MinWidth="100" Binding="{Binding ABSPressDownResult}" Header="ABS压紧结果" IsReadOnly="True" />
+                                        <DataGridTextColumn MinWidth="100" Binding="{Binding ABSCheckResult}" Header="ABS检测结果" IsReadOnly="True" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <hc:Drawer Grid.Column="1" Width="160" Margin="1"
+                                           IsOpen="{Binding ElementName=IsScanCode, Path=IsChecked, Mode=OneWay}"
+                                           MaskCanClose="False" ShowMask="False"
+                                           Visibility="{Binding ElementName=IsScanCode, Path=IsChecked, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <Border HorizontalAlignment="Stretch"
+                                            Background="{DynamicResource RegionBrush}"
+                                            BorderBrush="{DynamicResource BorderBrush}">
+                                        <Grid HorizontalAlignment="Stretch">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="20" />
+                                                <RowDefinition Height="*" />
+                                                <RowDefinition Height="20" />
+                                            </Grid.RowDefinitions>
+                                            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                                <TextBlock VerticalAlignment="Center" Text="扫码记录（近100条）" />
+                                            </StackPanel>
+                                            <ListBox Grid.Row="1" HorizontalContentAlignment="Stretch"
+                                                     ItemsSource="{Binding HistoryScanMarkingNos}"
+                                                     Style="{StaticResource InputElementBaseStyle}">
+                                                <ListBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid Height="24" Margin="0" VerticalAlignment="Center">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <TextBlock Grid.Column="0" MinWidth="150" Margin="2,0"
+                                                                       HorizontalAlignment="Left" VerticalAlignment="Center"
+                                                                       Text="{Binding MarkingNo}">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsHave}" Value="False">
+                                                                                <Setter Property="Foreground" Value="Red" />
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding IsHave}" Value="True">
+                                                                                <Setter Property="Foreground" Value="Black" />
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                            <Button Grid.Column="1" Margin="5,0,0,0"
+                                                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                                    BorderThickness="0"
+                                                                    Command="{Binding DataContext.RemoveHistoryScanCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                    CommandParameter="{Binding}"
+                                                                    Content="X"
+                                                                    Style="{StaticResource ButtonDashedWarning.Small}" />
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                            </ListBox>
+                                            <Button Grid.Row="2" Command="{Binding ClearHistoryMarkingNoCommand}"
+                                                    Content="一键清理" Style="{StaticResource ButtonDashedWarning.Small}" />
+                                        </Grid>
+                                    </Border>
+                                </hc:Drawer>
+                            </Grid>
+                        </hc:DrawerContainer>
+                    </hc:TransitioningContentControl>
+                    <WrapPanel Grid.Row="2" HorizontalAlignment="Center"
+                               Visibility="{Binding ElementName=IsScanCode, Path=IsChecked, Converter={StaticResource InverterBoolToVisibilityConverter}}">
+                        <hc:Pagination Name="Pagination"
+                                       AutoHiding="False"
+                                       DataCountPerPage="{Binding PaginationPages.DataCountPerPage}"
+                                       MaxPageCount="{Binding PaginationPages.MaxPageCount}"
+                                       PageIndex="{Binding PaginationPages.PageIndex, Mode=TwoWay}">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="PageUpdated">
+                                    <i:InvokeCommandAction Command="{Binding PageUpdatedCommand}" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </hc:Pagination>
+                        <TextBlock Margin="5,0,0,0" Text="每页：" />
+                        <ComboBox Margin="5,0" ItemsSource="{Binding PageSoure}" SelectedItem="{Binding PaginationPages.DataCountPerPage, Mode=TwoWay}" />
+                        <TextBlock Margin="0,0,5,0" Text="条" />
+                        <TextBlock Text="{Binding PaginationPages.TotalCount, StringFormat=共：{0}条}" />
+                    </WrapPanel>
+                </Grid>
+            </TabItem>
         </TabControl>
     </Grid>
 </UserControl>

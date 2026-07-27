@@ -1,4 +1,12 @@
-﻿using System;
+﻿using McpXLib.Enums;
+using NPOI.OpenXmlFormats.Spreadsheet;
+using NPOI.SS.UserModel;
+using NPOI.XSSF.UserModel;
+using SL.MLineDataPrecisionTracking.Models.Domain;
+using SL.MLineDataPrecisionTracking.Models.Dtos;
+using SqlSugar;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -9,12 +17,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using McpXLib.Enums;
-using NPOI.SS.UserModel;
-using NPOI.XSSF.UserModel;
-using SL.MLineDataPrecisionTracking.Models.Domain;
-using SL.MLineDataPrecisionTracking.Models.Dtos;
-using SqlSugar;
 
 namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
 {
@@ -101,12 +103,14 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
         public static bool IsRunningInMSTest()
         {
             // MSTest v2 核心程序集
-          
+
             var a = AppDomain.CurrentDomain.GetAssemblies();
-            
-            return AppDomain.CurrentDomain.GetAssemblies()
-                .Any(asm =>asm.FullName.Contains("MSTest"));
+
+            return AppDomain
+                .CurrentDomain.GetAssemblies()
+                .Any(asm => asm.FullName.Contains("MSTest"));
         }
+
         public static int GetTypeByteLength(this Type type)
         {
             int typeSize;
@@ -388,6 +392,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
             Array.Copy(source, removeCount, result, 0, newLen);
             return result;
         }
+
         public static string BytesToAscii(this byte[] data, int length)
         {
             if (data == null || length <= 0)
@@ -397,6 +402,40 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
             Encoding asciiEnc = Encoding.ASCII;
             return asciiEnc.GetString(data, 0, length);
         }
+        /// <summary>
+        /// MC1E协议 十六进制byte数组转bool数组
+        /// 0x11 0x11 输出4个true
+        /// </summary>
+        public static bool[] Mc1eByteToBools(this byte[] buffer)
+        {
+          // byte[] 直接遍历转为 bool[]
+            if (buffer == null)
+                return Array.Empty<bool>();
+            bool[] boolResult = new bool[buffer.Length*2];
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                boolResult[i*2]= (buffer[i] & 0x05) != 0;
+                boolResult[i*2+1] = (buffer[i] & 0x01) != 0;
+            }
+            return boolResult;
+        
+        }
+
+        public static bool IsHexDevice(this Prefix prefix)
+        {
+            if (
+                prefix != Prefix.X
+                && prefix != Prefix.Y
+                && prefix != Prefix.B
+                && prefix != Prefix.W
+                && prefix != Prefix.SB
+                && prefix != Prefix.SW
+                && prefix != Prefix.DX
+            )
+                return prefix == Prefix.DY;
+            return true;
+        }
+
         /// <soure>
         /// 从字节数组解析出【数组类型】
         /// </soure>
@@ -431,12 +470,58 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
                 case TypeCode.Double:
                     return ParseArray(buffer, startIndex, length, GetTypeByteLength(type), type);
                 case TypeCode.String:
-                    return ParseArray(buffer, startIndex, length, GetTypeByteLength(type), type);
+                    return  new List<object>() { string.Join("", ParseArray(buffer, startIndex, length, GetTypeByteLength(type), type)) }  ;
+                   ;
                 default:
                     throw new NotSupportedException($"不支持解析类型数组: {type}");
             }
         }
+        /// <summary>
+        /// 将输入byte数组中每个字节，拆分为高低4位，每1字节输出2字节
+        /// 拆分规则：byte = [高4位][低4位]
+        /// 输出顺序：低4位字节，高4位字节
+        /// </summary>
+        /// <param name="inputBytes">原始字节数组</param>
+        /// <returns>拆分后的新byte数组</returns>
+        public static byte[] SplitByteHighLow4Bit(this byte[] inputBytes,bool isInvert)
+        {
+            // 空值判断
+            if (inputBytes == null || inputBytes.Length == 0)
+                return Array.Empty<byte>();
 
+            // 原数组1字节拆2字节，长度翻倍
+            byte[] output = new byte[inputBytes.Length * 2];
+            int outIndex = 0;
+
+            foreach (byte b in inputBytes)
+            {
+                if (isInvert)
+                {
+                    // 提取低4位：& 0x0F
+                    byte low4 = (byte)(b & 0x0F);
+                    // 提取高4位：右移4位
+                    byte high4 = (byte)((b >> 4) & 0x0F);
+
+                    // 先存高4位，再存低4位
+                    output[outIndex++] = high4;
+                    output[outIndex++] = low4;
+                }
+                else
+                {
+                    // 提取低4位：& 0x0F
+                    byte low4 = (byte)(b & 0x0F);
+                    // 提取高4位：右移4位
+                    byte high4 = (byte)((b >> 4) & 0x0F);
+
+                    // 先存低4位，再存高4位
+                    output[outIndex++] = low4;
+                    output[outIndex++] = high4;
+                }
+           
+            }
+
+            return output;
+        }
         public static bool[] ByteToBits(this byte value)
         {
             bool[] bits = new bool[8];
@@ -471,7 +556,52 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
             }
             return list;
         }
+        /// <summary>
+        /// byte数组转bool数组（按bit顺序，低位在前）
+        /// </summary>
+        public static bool[] BytesToBools(this byte[] buffer)
+        {
+            if (buffer == null)
+                throw new ArgumentNullException(nameof(buffer));
 
+            bool[] result = new bool[buffer.Length * 8];
+            int index = 0;
+
+            foreach (byte b in buffer)
+            {
+                // 遍历当前byte的8个bit（0~7位）
+                for (int bit = 0; bit < 8; bit++)
+                {
+                    // 取出第bit位
+                    result[index++] = (b & (1 << bit)) != 0;
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// bool数组转单个byte（最多8位）
+        /// </summary>
+        /// <param name="bools">布尔数组，长度不能超过8</param>
+        /// <returns>合并后的byte</returns>
+        public static byte BoolArrayToByte(bool[] bools)
+        {
+            if (bools == null)
+                throw new ArgumentNullException(nameof(bools));
+            if (bools.Length > 8)
+                throw new ArgumentException("数组长度不能超过8，超出无法存入单个byte");
+
+            byte result = 0;
+            for (int i = 0; i < bools.Length; i++)
+            {
+                if (bools[i])
+                {
+                    // 将第i位置1
+                    result |= (byte)(1 << i);
+                }
+            }
+            return result;
+        }
         public static object ConvertToValue(byte[] buffer, int startIndex, TypeCode type)
         {
             switch (type)
@@ -588,6 +718,8 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
             var prop = obj.GetType().GetProperty(fieldName);
             return prop?.CanRead == true ? prop.GetValue(obj) : null;
         }
+
+   
 
         public static void ItemToSoure(
             object soure,

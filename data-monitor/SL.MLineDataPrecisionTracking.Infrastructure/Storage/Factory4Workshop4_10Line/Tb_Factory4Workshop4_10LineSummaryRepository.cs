@@ -41,12 +41,12 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
         /// 不用主键更新并更新指定列
         /// </summary>
         /// <param name="lineSummary"></param>
-        /// <param name="columns"></param>
+        /// <param name="whereColumns"></param>
         /// <param name="upColumnsName"></param>
         /// <returns></returns>
-        public async Task<int> UpDataAsync(Tb_Factory4Workshop4_10LineSummary lineSummary, Expression<Func<Tb_Factory4Workshop4_10LineSummary, object>> columns, params string[] upColumnsName)
+        public async Task<int> UpDataAsync(Tb_Factory4Workshop4_10LineSummary lineSummary, Expression<Func<Tb_Factory4Workshop4_10LineSummary, object>> columns, Expression<Func<Tb_Factory4Workshop4_10LineSummary, object>> upColumns)
         {
-            return  await _db.Updateable(lineSummary).WhereColumns(columns).UpdateColumns(upColumnsName).ExecuteCommandAsync();
+            return  await _db.Updateable(lineSummary).WhereColumns(columns).UpdateColumns(upColumns).ExecuteCommandAsync();
             ;
         }
 

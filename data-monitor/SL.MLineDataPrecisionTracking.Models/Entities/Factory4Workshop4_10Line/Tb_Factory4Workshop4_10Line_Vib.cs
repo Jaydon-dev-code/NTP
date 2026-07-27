@@ -21,6 +21,9 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities.Factory4Workshop4_10Line
             ColumnDataType = "varchar(20)",
             SqlParameterDbType = typeof(EnumToStringConvert)
         )]
-        public ResultEnum VibCrackResult { get; set; }
+        public ResultEnum? VibCrackResult { get; set; }
+
+        [SugarColumn(ColumnDescription = "震动时间")]
+        public DateTime? VibCrackTime { get; set; }
     }
 }

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-<PropertyGroup>
-  <LangVersion>latest</LangVersion>
-</PropertyGroup> 
- <PropertyGroup>
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{63BAE626-1915-4B19-ACBD-BD8100C857CA}</ProjectGuid>
@@ -113,6 +113,7 @@
     <Compile Include="Http\BaseHttp.cs" />
     <Compile Include="Http\DeviceCollectionConfigApi.cs" />
     <Compile Include="Http\EnergyRangeApi.cs" />
+    <Compile Include="Http\Factory4Workshop4_10LineSummaryApi.cs" />
     <Compile Include="Http\Factory6Workshop6_1AssemblyLineApi.cs" />
     <Compile Include="Http\HubClien.cs" />
     <Compile Include="Http\MeticulousPursuitApi.cs" />

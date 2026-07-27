@@ -17,10 +17,32 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities.Factory4Workshop4_10Line
     public class Tb_Factory4Workshop4_10Line_RivetAndCrack : Factory4Workshop4_10LineBase
     {
         [SugarColumn(
-            ColumnDescription = "检测结果",
+            ColumnDescription = "铆接检测结果",
             ColumnDataType = "varchar(20)",
             SqlParameterDbType = typeof(EnumToStringConvert)
         )]
-        public ResultEnum RivetAndCrackResult { get; set; }
+        public ResultEnum? RivetingResult { get; set; }
+
+        [SugarColumn(ColumnDescription = "铆接时间")]
+        public DateTime? RivetingTime { get; set; }
+
+        [SugarColumn(
+            ColumnDescription = "旋铆检测结果",
+            ColumnDataType = "varchar(20)",
+            SqlParameterDbType = typeof(EnumToStringConvert)
+        )]
+        public ResultEnum? SpinRivetingResult { get; set; }
+
+        [SugarColumn(ColumnDescription = "旋铆检测时间")]
+        public DateTime? SpinRivetingTime { get; set; }
+
+        [SugarColumn(ColumnDescription = "旋铆检测1高度")]
+        public string? RivetingInspection1Height { get; set; }
+
+        [SugarColumn(ColumnDescription = "旋铆检测2高度")]
+        public string? RivetingInspection2Height { get; set; }
+
+        [SugarColumn(ColumnDescription = "旋铆成型高度")]
+        public string? SpiralRivetingFormingHeight { get; set; }
     }
 }

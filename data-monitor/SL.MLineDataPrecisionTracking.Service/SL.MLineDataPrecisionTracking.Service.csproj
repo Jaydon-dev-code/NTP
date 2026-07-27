@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-<PropertyGroup>
-  <LangVersion>latest</LangVersion>
-</PropertyGroup>  
-<PropertyGroup>
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{9D40BCA8-8414-4A1F-989F-6DB38FC3A1E0}</ProjectGuid>
@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="Controllers\DeviceCollectionConfigController.cs" />
     <Compile Include="Controllers\EnergyRangeController.cs" />
+    <Compile Include="Controllers\Factory4Workshop4_10LineController.cs" />
     <Compile Include="Controllers\Factory6Workshop6_1AssemblyLineController.cs" />
     <Compile Include="Controllers\MeticulousPursuitController.cs" />
     <Compile Include="Controllers\Rcl_MeticulousPursuitController.cs" />

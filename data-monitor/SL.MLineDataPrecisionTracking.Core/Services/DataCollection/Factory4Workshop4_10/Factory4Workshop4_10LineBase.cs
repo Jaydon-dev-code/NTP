@@ -16,9 +16,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
 {
     public abstract class Factory4Workshop4_10LineBase : DataCollectionServiceAbstract
     {
-        protected abstract Type _dataModelType { get; set; }
+
         protected List<DevPlcPointDto> _linePlcInfo;
-        protected string[] _upCloName;
         protected Tb_EquipmentRepository _equipmentRepository;
         protected McpCommunication _mcp;
         protected Tb_Factory4Workshop4_10LineSummaryRepository _summaryRepository;
@@ -42,12 +41,10 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
             {
                 return readPlcPoint;
             }
-            PropertyInfo[] props = _dataModelType.GetProperties();
-            _upCloName = props.Select(p => p.Name).ToArray();
-            return IntiSetting();
+            return await IntiSetting();
         }
 
-        protected abstract Result IntiSetting();
+        protected abstract Task<Result> IntiSetting();
 
         private async Task<Result> ReadPlcPoint()
         {
@@ -89,15 +86,6 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
             return Result.Success();
         }
 
-        protected override async Task<Result<object>> InteractAsync()
-        {
-            var readValue = _mcp.Read(_linePlcInfo);
-            if (readValue.IsSuccess is false)
-            {
-                return Result<object>.Fail(readValue.Message);
-            }
-
-            return Expand.SugarColumnReflectAssign(readValue, _dataModelType);
-        }
+    
     }
 }

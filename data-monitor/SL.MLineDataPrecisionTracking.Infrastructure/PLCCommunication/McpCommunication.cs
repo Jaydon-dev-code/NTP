@@ -13,14 +13,12 @@ using SqlSugar;
 
 namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
 {
-    public class McpCommunication: IPlcCommunication
+    public class McpCommunication : IPlcCommunication
     {
         private readonly object _lockObj = new object();
         private readonly Dictionary<string, McpX> _mcpDic = new Dictionary<string, McpX>();
 
-        public McpCommunication()
-        {
-        }
+        public McpCommunication() { }
 
         #region 同步读取方法
         /// <summary>
@@ -28,7 +26,10 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
         /// </summary>
         public Result<DevPlcPointDto> Read(DevPlcPointDto readPlcInfo)
         {
-            Result<DevPlcPointReadDto> re = new Result<DevPlcPointReadDto>() { Data = new DevPlcPointReadDto() };
+            Result<DevPlcPointReadDto> re = new Result<DevPlcPointReadDto>()
+            {
+                Data = new DevPlcPointReadDto(),
+            };
             if (int.TryParse(readPlcInfo.Address, out int result) is false)
             {
                 byte[] data = null;
@@ -201,7 +202,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                             foreach (var item in groupAddre)
                             {
                                 item.Value = readValue.Data.ConvertToValues(
-                                    ((item.Address - startAddre) * 2),
+                                    ((item.Address - startAddre) * (item.Prefix.ToPrefix().IsHexDevice()?1:2)),
                                     item.DataType,
                                     item.Length
                                 );
@@ -346,8 +347,19 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                 try
                 {
                     // 同步调用McpX读取方法
-                    var data = GetMcp(ipAddress, port)
-                        .BatchReadByte(prefix, currentAddress.ToString(), readLen);
+                    byte[] data;
+                    if (prefix.IsHexDevice())
+                    {
+                        data = BoolArrayToByteArrayHighBit(
+                            GetMcp(ipAddress, port)
+                                .BatchReadBool(prefix, currentAddress.ToString(), readLen)
+                        );
+                    }
+                    else
+                    {
+                        data = GetMcp(ipAddress, port)
+                            .BatchReadByte(prefix, currentAddress.ToString(), readLen);
+                    }
                     return data;
                 }
                 catch (Exception ex)
@@ -988,6 +1000,28 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                 }
                 catch { }
             }
+        }
+
+        /// <summary>
+        /// bool数组转byte数组，每个bool单独占1字节，bool存放在字节最高位Bit7
+        /// true=0x80，false=0x00
+        /// </summary>
+        /// <param name="boolArray">输入布尔数组</param>
+        /// <returns>转换后的byte数组</returns>
+        byte[] BoolArrayToByteArrayHighBit(bool[] boolArray)
+        {
+            // 空数组处理
+            if (boolArray == null || boolArray.Length == 0)
+                return Array.Empty<byte>();
+
+            byte[] result = new byte[boolArray.Length];
+
+            for (int i = 0; i < boolArray.Length; i++)
+            {
+                result[i] = boolArray[i] ? (byte)0x01 : (byte)0x00;
+            }
+
+            return result;
         }
 
         public Result Write(List<DevPlcPointDto> pointMcWriteDto)

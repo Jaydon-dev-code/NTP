@@ -1,4 +1,13 @@
-﻿using Mapster;
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Mapster;
 using Microsoft.AspNet.SignalR;
 using NPOI.XWPF.UserModel;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
@@ -8,84 +17,130 @@ using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Dtos;
 using SL.MLineDataPrecisionTracking.Models.Dtos.Factory4Workshop4_10Line;
 using SL.MLineDataPrecisionTracking.Models.Entities.Factory4Workshop4_10Line;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using SL.MLineDataPrecisionTracking.Models.Enum;
+using SqlSugar.Extensions;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Workshop4_10
 {
     public class Factory4Workshop4_10Line_Vib : Factory4Workshop4_10LineBase
     {
         Socket _serverSocket;
+
+        /// <summary>
+        /// 下发序列码给plc的点位
+        /// </summary>
         protected DevPlcPointDto _issueSancInfoPoint;
         protected override string _serviceName => "四分厂4-10-震动";
 
-        protected override Type _dataModelType { get; set; } =
-            typeof(Tb_Factory4Workshop4_10Line_Vib);
-        Tb_Factory4Workshop4_10Line_VibRepository _factory4Workshop;
+        Tb_Factory4Workshop4_10Line_VibRepository _vibRepository;
+        Mc1ECommunication _mc1ECommunication;
+
+        DevPlcPointDto _vibOK;
+        DevPlcPointDto _vibNG;
+        DevPlcPointDto _vibSN;
+        List<DevPlcPointDto> _vibResultPlcInfo;
+
+        byte _vibRe;
+        byte _vibReTmp;
 
         public Factory4Workshop4_10Line_Vib(
             Tb_EquipmentRepository tb_EquipmentRepository,
             McpCommunication mcpCommunication,
             Tb_Factory4Workshop4_10LineSummaryRepository summaryRepository,
             Tb_Factory4Workshop4_10Line_VibRepository factory4Workshop,
-            IHubContext chatHub
+            IHubContext chatHub,
+            Mc1ECommunication mc1ECommunication
         )
             : base(tb_EquipmentRepository, mcpCommunication, summaryRepository, chatHub)
         {
-            _factory4Workshop = factory4Workshop;
+            _mc1ECommunication = mc1ECommunication;
+            _vibRepository = factory4Workshop;
+        }
+
+        protected override async Task<Result> IntiSetting()
+        {
+            _issueSancInfoPoint = _linePlcInfo.First(x => x.PointName == "下发震动SN");
+            _issueSancInfoPoint.Value = new List<object>() { "" };
+            _vibOK = _linePlcInfo.First(x => x.PointName == "震动OK");
+            _vibNG = _linePlcInfo.First(x => x.PointName == "震动NG");
+            _vibSN = _linePlcInfo.First(x => x.PointName == "震动SN");
+            _vibResultPlcInfo = new List<DevPlcPointDto>() { _vibOK,_vibNG
+            };
+            Task.Run(() => ScanSocket());
+        
+            return Result.Success();
         }
 
         protected override async Task<Result> HandshakeAsync()
         {
-            _chatHub.Clients.All.IsOnlieVib = true;
-            return Result.Success();
-        }
-
-        protected override Result IntiSetting()
-        {
-            _issueSancInfoPoint = _linePlcInfo.First(x => x.PointName == "下发序列码");
-            _issueSancInfoPoint.Value = new List<object>() { "" };
-            _linePlcInfo.Remove(_issueSancInfoPoint);
-            ScanSocket();
-            return Result.Success();
+            var re = _mc1ECommunication.Read(_vibResultPlcInfo);
+            _chatHub.Clients.All.IsOnlieVib = re.IsSuccess;
+            if (re.IsSuccess == false)
+            {
+                return Result.Fail("PLC通讯失败");
+            }
+            _vibReTmp = Expand.BoolArrayToByte(
+                new bool[] { _vibOK.Value[0].ObjToBool(), _vibNG.Value[0].ObjToBool() }
+            );
+            if (_vibReTmp == 0 || _vibReTmp == _vibRe)
+            {
+                return Result.Fail("PLC未触发采集信号");
+            }
+            else
+            {
+                return Result.Success();
+            }
         }
 
         protected override async Task<Result<object>> InteractAsync()
         {
-            var readValue = _mcp.Read(_linePlcInfo);
-            if (readValue.IsSuccess is false)
-            {
-                return Result<object>.Fail(readValue.Message);
-            }
+            Tb_Factory4Workshop4_10Line_Vib dataValue;
 
-            return Expand.SugarColumnReflectAssign(readValue, _dataModelType);
+            var revalue = _mcp.Read(_vibSN);
+
+            if (revalue.IsSuccess)
+            {
+                var clearanceInfo = await _vibRepository.QueryableFirstAsync(x =>
+                    x.SN == _vibSN.Value[0].ToString()
+                );
+                dataValue = new Tb_Factory4Workshop4_10Line_Vib()
+                {
+                    VibCrackResult = _vibReTmp == 1 ? ResultEnum.OK : ResultEnum.NG,
+                    SN = _vibSN.Value[0].ToString(),
+                    RecordTime = DateTime.Now,
+                };
+
+                if (clearanceInfo != null)
+                {
+                    await _vibRepository.UpDataAsync(
+                        dataValue,
+                        x => new { x.SN },
+                        x => new { x.VibCrackResult, x.RecordTime }
+                    );
+                }
+                else
+                {
+                    await _vibRepository.InsertableAsync(dataValue);
+                }
+                await _summaryRepository.UpDataAsync(
+                    dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
+                    x => new { x.SN },
+                    x => new { x.VibCrackResult, x.RivetingTime }
+                );
+
+                _chatHub.Clients.All.VibData = new Factory4Workshop4_10Line_VibDto
+                {
+                    SN = dataValue.SN,
+                    VibCrackResult = dataValue.VibCrackResult,
+                    RecordTime = dataValue.RecordTime,
+                };
+            }
+            return Result<object>.Success(null);
         }
 
         protected override async Task NotifyAsync(Result<object> interact)
         {
-            Tb_Factory4Workshop4_10Line_Vib data = (Tb_Factory4Workshop4_10Line_Vib)interact.Data;
-            _chatHub.Clients.All.Factory4Workshop4_10Line_VibDto =
-                data.Adapt<Factory4Workshop4_10Line_VibDto>();
-
-            if (string.IsNullOrEmpty(data.SN))
-            {
-                return;
-            }
-
-            await _factory4Workshop.InsertableAsync(data);
-
-            await _summaryRepository.UpDataAsync(
-                data.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
-                x => x.SN,
-                _upCloName
-            );
+            _vibRe = _vibReTmp;
         }
 
         /// <summary>
@@ -100,6 +155,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                 ) == false
             )
             {
+                Serilog.Log.Warning("[扫描枪数据推送]{_serverName}端口解析失败。", _serviceName);
                 return;
             }
             _serverSocket = new Socket(
@@ -114,6 +170,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
             while (true)
             {
                 Socket client = _serverSocket.Accept();
+                _chatHub.Clients.All.IsOnlieVibScan = true;
 
                 // 新开线程持续接收条码
                 new Thread(() => ReceiveBarcodeLoop(client)).Start();
@@ -143,7 +200,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                     if (!Expand.IsRunningInMSTest())
                     {
                         _issueSancInfoPoint.Value[0] = ccanInfo;
-                        _mcp.Write(_issueSancInfoPoint);
+                        _mc1ECommunication.Write(_issueSancInfoPoint);
                     }
                     else
                     {
@@ -151,8 +208,6 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                         byte[] body = Encoding.UTF8.GetBytes(reMesg);
                         client.Send(body);
                     }
-                  
-
                 }
             }
             catch (SocketException ex)
@@ -167,7 +222,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
             {
                 client.Close();
                 client.Dispose();
-                Serilog.Log.Warning("[扫描枪数据推送]{_serverName}:客户端Socket已释放");
+                _chatHub.Clients.All.IsOnlieVibScan = false;
+                Serilog.Log.Warning("[扫描枪数据推送]{_serviceName}:客户端Socket已释放");
             }
         }
     }
