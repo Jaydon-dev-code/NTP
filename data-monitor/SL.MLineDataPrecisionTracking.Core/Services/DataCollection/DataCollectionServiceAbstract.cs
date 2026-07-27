@@ -49,7 +49,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
         }
 
         /// <summary>停止服务</summary>
-        public void Stop()
+        public virtual void Stop()
         {
             if (Status == ServiceStatusEnum.Stopped)
                 return;

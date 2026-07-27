@@ -137,10 +137,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                     _clearance2NG.Value[0].ObjToBool(),
                 }
             );
-            if (
-                _clearance2Re == 0 && _clearance1Re == 0
-                || (_clearance2Re == _clearance2ReTmp && _clearance1Re == _clearance1ReTmp)
-            )
+            if ((_clearance1ReTmp == 0 && _clearance2ReTmp == 0)
+                || (_clearance1Re == _clearance1ReTmp && _clearance2Re == _clearance2ReTmp))
             {
                 return Result.Fail("PLC未触发采集信号");
             }
@@ -153,7 +151,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
         protected override async Task<Result<object>> InteractAsync()
         {
             Tb_Factory4Workshop4_10Line_Clearance dataValue;
-            if (_clearance1ReTmp != _clearance1Re)
+            if (_clearance1ReTmp != _clearance1Re && _clearance1ReTmp != 0)
             {
                 var revalue = _mcp.Read(_clearance1PlcInfo);
 
@@ -219,11 +217,15 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                     };
                 }
             }
-            if (_clearance2Re != _clearance2ReTmp)
+            if (_clearance2Re != _clearance2ReTmp && _clearance2ReTmp != 0)
             {
                 var reSN = _mcp.Read(_clearance2PlcInfo);
                 if (reSN.IsSuccess)
                 {
+                    var clearanceInfo = await _clearanceRepository.QueryableFirstAsync(
+                        x => x.SN == _clearance2SN.Value[0].ToString(),
+                        x => x.Clearance2Time
+                    );
                     dataValue = new Tb_Factory4Workshop4_10Line_Clearance()
                     {
                         Clearance2Result = _clearance2ReTmp == 1 ? ResultEnum.OK : ResultEnum.NG,
@@ -234,19 +236,27 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                         Gap = _gapPlcInfo.Value[0].ToString(),
                         Clearance2Time = DateTime.Now,
                     };
-                    var upDataRe = await _clearanceRepository.UpDataAsync(
-                        dataValue,
-                        x => new { x.SN },
-                        x => new
-                        {
-                            x.Clearance2Result,
-                            x.Offset,
-                            x.BeforePressIn,
-                            x.AfterPressIn,
-                            x.Gap,
-                            x.Clearance2Time,
-                        }
-                    );
+
+                    if (clearanceInfo != null)
+                    {
+                        await _clearanceRepository.UpDataAsync(
+                            dataValue,
+                            x => new { x.SN },
+                            x => new
+                            {
+                                x.Clearance2Result,
+                                x.Offset,
+                                x.BeforePressIn,
+                                x.AfterPressIn,
+                                x.Gap,
+                                x.Clearance2Time,
+                            }
+                        );
+                    }
+                    else
+                    {
+                        await _clearanceRepository.InsertableAsync(dataValue);
+                    }
 
                     await _summaryRepository.UpDataAsync(
                         dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),

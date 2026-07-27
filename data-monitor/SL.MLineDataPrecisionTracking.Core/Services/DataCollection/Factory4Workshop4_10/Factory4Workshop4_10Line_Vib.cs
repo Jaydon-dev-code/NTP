@@ -115,7 +115,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                     await _vibRepository.UpDataAsync(
                         dataValue,
                         x => new { x.SN },
-                        x => new { x.VibCrackResult, x.RecordTime }
+                        x => new { x.VibCrackResult, x.VibCrackTime }
                     );
                 }
                 else
@@ -125,7 +125,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                 await _summaryRepository.UpDataAsync(
                     dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
                     x => new { x.SN },
-                    x => new { x.VibCrackResult, x.RivetingTime }
+                    x => new { x.VibCrackResult, x.RecordTime }
                 );
 
                 _chatHub.Clients.All.VibData = new Factory4Workshop4_10Line_VibDto
@@ -141,6 +141,26 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
         protected override async Task NotifyAsync(Result<object> interact)
         {
             _vibRe = _vibReTmp;
+        }
+
+        public override void Stop()
+        {
+            if (_serverSocket != null)
+            {
+                try
+                {
+                    _serverSocket.Close();
+                }
+                catch (Exception ex)
+                {
+                    Serilog.Log.Warning("[扫描枪数据推送]{_serviceName}关闭Socket异常:{ex.Message}", _serviceName, ex.Message);
+                }
+                finally
+                {
+                    _serverSocket = null;
+                }
+            }
+            base.Stop();
         }
 
         /// <summary>
@@ -167,13 +187,24 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
             _serverSocket.Bind(ep);
             _serverSocket.Listen(5);
             // 循环等待读码器接入
-            while (true)
+            try
             {
-                Socket client = _serverSocket.Accept();
-                _chatHub.Clients.All.IsOnlieVibScan = true;
+                while (true)
+                {
+                    Socket client = _serverSocket.Accept();
+                    _chatHub.Clients.All.IsOnlieVibScan = true;
 
-                // 新开线程持续接收条码
-                new Thread(() => ReceiveBarcodeLoop(client)).Start();
+                    // 新开线程持续接收条码
+                    new Thread(() => ReceiveBarcodeLoop(client)).Start();
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                Serilog.Log.Information("[扫描枪数据推送]{_serviceName}:Socket已关闭，停止监听。", _serviceName);
+            }
+            catch (SocketException ex)
+            {
+                Serilog.Log.Warning("[扫描枪数据推送]{_serviceName}监听异常:{ex.Message}", _serviceName, ex.Message);
             }
         }
 

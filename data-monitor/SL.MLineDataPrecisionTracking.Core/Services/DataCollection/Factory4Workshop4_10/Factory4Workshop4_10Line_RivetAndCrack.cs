@@ -106,10 +106,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                     _spinRivetingNG.Value[0].ObjToBool(),
                 }
             );
-            if (
-                _spinRivetingReTmp == 0 && _rivetingReTmp == 0
-                || (_spinRivetingRe == _spinRivetingReTmp && _rivetingRe == _rivetingReTmp)
-            )
+            if ((_rivetingReTmp == 0 && _spinRivetingReTmp == 0)
+                || (_rivetingRe == _rivetingReTmp && _spinRivetingRe == _spinRivetingReTmp))
             {
                 return Result.Fail("PLC未触发采集信号");
             }
@@ -122,7 +120,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
         protected override async Task<Result<object>> InteractAsync()
         {
             Tb_Factory4Workshop4_10Line_RivetAndCrack dataValue;
-            if (_rivetingReTmp != _rivetingRe)
+            if (_rivetingReTmp != _rivetingRe && _rivetingReTmp != 0)
             {
                 var revalue = _mcp.Read(_rivetingSN);
 
@@ -164,11 +162,14 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                     };
                 }
             }
-            if (_spinRivetingRe != _spinRivetingReTmp)
+            if (_spinRivetingRe != _spinRivetingReTmp && _spinRivetingReTmp != 0)
             {
                 var revalue = _mcp.Read(_spinRivetingPlcInfo);
                 if (revalue.IsSuccess)
                 {
+                    var spinInfo = await _rivetAndCrackRepository.QueryableFirstAsync(x =>
+                        x.SN == _spinRivetingSNPlcInfo.Value[0].ToString()
+                    );
                     dataValue = new Tb_Factory4Workshop4_10Line_RivetAndCrack()
                     {
                         SpinRivetingResult= _spinRivetingReTmp == 1 ? ResultEnum.OK : ResultEnum.NG,
@@ -184,23 +185,33 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                         SN = _spinRivetingSNPlcInfo.Value[0].ToString(),
                         SpinRivetingTime = DateTime.Now,
                     };
-                    var upDataRe = await _rivetAndCrackRepository.UpDataAsync(
-                        dataValue,
-                        x => new { x.SN },
-                        x => new
-                        {
-                            x.RivetingInspection1Height,
-                            x.SpiralRivetingFormingHeight,
-                            x.RivetingInspection2Height,
-                            x.SpinRivetingTime,
-                        }
-                    );
+
+                    if (spinInfo != null)
+                    {
+                        await _rivetAndCrackRepository.UpDataAsync(
+                            dataValue,
+                            x => new { x.SN },
+                            x => new
+                            {
+                                x.RivetingInspection1Height,
+                                x.SpiralRivetingFormingHeight,
+                                x.RivetingInspection2Height,
+                                x.SpinRivetingTime,
+                                x.SpinRivetingResult,
+                            }
+                        );
+                    }
+                    else
+                    {
+                        await _rivetAndCrackRepository.InsertableAsync(dataValue);
+                    }
 
                     await _summaryRepository.UpDataAsync(
                         dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
                         x => x.SN,
                         x => new
                         {
+                            x.SpinRivetingResult,
                             x.RivetingInspection1Height,
                             x.SpiralRivetingFormingHeight,
                             x.RivetingInspection2Height,

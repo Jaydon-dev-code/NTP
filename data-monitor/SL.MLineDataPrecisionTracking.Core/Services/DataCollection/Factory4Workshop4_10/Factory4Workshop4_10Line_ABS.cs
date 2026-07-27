@@ -93,10 +93,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
             _absCheckReTmp = Expand.BoolArrayToByte(
                 new bool[] { _aBSCheckOK.Value[0].ObjToBool(), _aBSCheckNG.Value[0].ObjToBool() }
             );
-            if (
-                _aBSPressDownReTmp == 0 && _absCheckReTmp == 0
-                || (_aBSPressDownRe == _aBSPressDownReTmp && _absCheckRe == _absCheckReTmp)
-            )
+            if ((_aBSPressDownReTmp == 0 && _absCheckReTmp == 0)
+                || (_aBSPressDownRe == _aBSPressDownReTmp && _absCheckRe == _absCheckReTmp))
             {
                 return Result.Fail("PLC未触发采集信号");
             }
@@ -109,7 +107,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
         protected override async Task<Result<object>> InteractAsync()
         {
             Tb_Factory4Workshop4_10Line_ABS dataValue;
-            if (_aBSPressDownRe != _aBSPressDownReTmp)
+            if (_aBSPressDownRe != _aBSPressDownReTmp && _aBSPressDownReTmp != 0)
             {
                 var reSN = _mcp.Read(_aBSPressDownSN);
                 if (reSN.IsSuccess)
@@ -151,22 +149,34 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                     };
                 }
             }
-            if (_absCheckReTmp != _absCheckRe)
+            if (_absCheckReTmp != _absCheckRe && _absCheckReTmp != 0)
             {
                 var reSN = _mcp.Read(_aBSCheckSN);
                 if (reSN.IsSuccess)
                 {
+                    var absInfo = await _aBSRepository.QueryableFirstAsync(
+                        x => x.SN == reSN.Data.Value[0].ToString(),
+                        x => x.ABSCheckTime
+                    );
                     dataValue = new Tb_Factory4Workshop4_10Line_ABS()
                     {
                         SN = reSN.Data.Value[0].ToString(),
                         ABSCheckResult = _absCheckReTmp == 1 ? ResultEnum.OK : ResultEnum.NG,
                         ABSCheckTime = DateTime.Now,
                     };
-                    var upDataRe = await _aBSRepository.UpDataAsync(
-                        dataValue,
-                        x => new { x.SN },
-                        x => new { x.ABSCheckResult, x.ABSCheckTime }
-                    );
+
+                    if (absInfo != null)
+                    {
+                        await _aBSRepository.UpDataAsync(
+                            dataValue,
+                            x => new { x.SN },
+                            x => new { x.ABSCheckResult, x.ABSCheckTime }
+                        );
+                    }
+                    else
+                    {
+                        await _aBSRepository.InsertableAsync(dataValue);
+                    }
 
                     await _summaryRepository.UpDataAsync(
                         dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
