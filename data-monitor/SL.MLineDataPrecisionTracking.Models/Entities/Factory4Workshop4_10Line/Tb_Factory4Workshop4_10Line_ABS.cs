@@ -11,33 +11,29 @@ using SqlSugar.DbConvert;
 
 namespace SL.MLineDataPrecisionTracking.Models.Entitss.Factory4Workshop4_10Line
 {
-    /// <summary>
-    /// abs
-    /// </summary>
     [SugarTable("Factory4Workshop4_10Line_ABS")]
     public class Tb_Factory4Workshop4_10Line_ABS : Factory4Workshop4_10LineBase
     {
-        /// <summary>
-        /// 压紧结果
-        /// </summary>
         [SugarColumn(
             ColumnDescription = "ABS压紧结果",
             ColumnDataType = "varchar(20)",
-            SqlParameterDbType = typeof(EnumToStringConvert)
+            SqlParameterDbType = typeof(EnumToStringConvert),
+            IsNullable = true
         )]
         public ResultEnum? ABSPressDownResult { get; set; }
 
-        [SugarColumn(ColumnDescription = "ABS压紧时间")]
+        [SugarColumn(ColumnDescription = "ABS压紧时间", IsNullable = true)]
         public DateTime? ABSPressDownTime { get; set; }
 
         [SugarColumn(
             ColumnDescription = "ABS检测结果",
             ColumnDataType = "varchar(20)",
-            SqlParameterDbType = typeof(EnumToStringConvert)
+            SqlParameterDbType = typeof(EnumToStringConvert),
+            IsNullable = true
         )]
         public ResultEnum? ABSCheckResult { get; set; }
 
-        [SugarColumn(ColumnDescription = "ABS检测时间")]
+        [SugarColumn(ColumnDescription = "ABS检测时间", IsNullable = true)]
         public DateTime? ABSCheckTime { get; set; }
     }
 }

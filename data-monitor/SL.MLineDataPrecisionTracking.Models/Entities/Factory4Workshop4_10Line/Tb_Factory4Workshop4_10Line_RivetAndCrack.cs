@@ -10,39 +10,38 @@ using SqlSugar.DbConvert;
 
 namespace SL.MLineDataPrecisionTracking.Models.Entities.Factory4Workshop4_10Line
 {
-    /// <summary>
-    /// 铆接和裂纹
-    /// </summary>
     [SugarTable("Factory4Workshop4_10Line_RivetAndCrack")]
     public class Tb_Factory4Workshop4_10Line_RivetAndCrack : Factory4Workshop4_10LineBase
     {
         [SugarColumn(
             ColumnDescription = "铆接检测结果",
             ColumnDataType = "varchar(20)",
-            SqlParameterDbType = typeof(EnumToStringConvert)
+            SqlParameterDbType = typeof(EnumToStringConvert),
+            IsNullable = true
         )]
         public ResultEnum? RivetingResult { get; set; }
 
-        [SugarColumn(ColumnDescription = "铆接时间")]
+        [SugarColumn(ColumnDescription = "铆接时间", IsNullable = true)]
         public DateTime? RivetingTime { get; set; }
 
         [SugarColumn(
             ColumnDescription = "旋铆检测结果",
             ColumnDataType = "varchar(20)",
-            SqlParameterDbType = typeof(EnumToStringConvert)
+            SqlParameterDbType = typeof(EnumToStringConvert),
+            IsNullable = true
         )]
         public ResultEnum? SpinRivetingResult { get; set; }
 
-        [SugarColumn(ColumnDescription = "旋铆检测时间")]
+        [SugarColumn(ColumnDescription = "旋铆检测时间", IsNullable = true)]
         public DateTime? SpinRivetingTime { get; set; }
 
-        [SugarColumn(ColumnDescription = "旋铆检测1高度")]
+        [SugarColumn(ColumnDescription = "旋铆检测1高度", IsNullable = true)]
         public string? RivetingInspection1Height { get; set; }
 
-        [SugarColumn(ColumnDescription = "旋铆检测2高度")]
+        [SugarColumn(ColumnDescription = "旋铆检测2高度", IsNullable = true)]
         public string? RivetingInspection2Height { get; set; }
 
-        [SugarColumn(ColumnDescription = "旋铆成型高度")]
+        [SugarColumn(ColumnDescription = "旋铆成型高度", IsNullable = true)]
         public string? SpiralRivetingFormingHeight { get; set; }
     }
 }
