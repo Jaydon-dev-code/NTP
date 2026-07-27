@@ -17,8 +17,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
             Port = devPlcPointMcDto.Port;
             Prefix = devPlcPointMcDto.Prefix;
             DataType = devPlcPointMcDto.DataType;
-            int.TryParse(devPlcPointMcDto.Address ,out int address)  ;
-            Address=address;
+            Address = devPlcPointMcDto.Address;
             Length = devPlcPointMcDto.Length;
             ShortOffset = shortOffset;
         }
@@ -27,7 +26,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         public int Port { get;set; }
         public string Prefix { get;set; }
         public TypeCode DataType { get;set; }
-        public int Address { get;set; }
+        public string Address { get;set; }
         public int Length { get;set; }
 
         /// <summary>

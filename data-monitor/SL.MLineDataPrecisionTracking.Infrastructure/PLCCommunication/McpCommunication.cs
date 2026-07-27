@@ -36,7 +36,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                 try
                 {
                     data = ReadWithRetrySync(
-                        readPlcInfo.IpAddress,
+                        readPlcInfo.IpAddress ,
                         readPlcInfo.Port,
                         readPlcInfo.Prefix.ToPrefix(),
                         readPlcInfo.Address,
@@ -112,11 +112,16 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
         {
             try
             {
+                var prefix = readPlcInfo.Prefix.ToPrefix();
+                int address = prefix.IsHexDevice()
+                    ? (int)Convert.ToUInt32(readPlcInfo.Address, 16)
+                    : int.Parse(readPlcInfo.Address);
+
                 var readValue = PaginatedReadingSync(
                     readPlcInfo.IpAddress,
                     readPlcInfo.Port,
-                    readPlcInfo.Prefix.ToPrefix(),
-                    readPlcInfo.Address,
+                    prefix,
+                    address,
                     readPlcInfo.Length
                 );
 
@@ -163,24 +168,35 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
 
                 foreach (var group in groups)
                 {
+                    var prefix = group.Key.Prefix.ToPrefix();
+                    bool isHex = prefix.IsHexDevice();
+
                     foreach (var groupAddre in GroupByAddress(group))
                     {
-                        var startAddre = groupAddre.Min(x => x.Address);
-                        var endAddressInfo = groupAddre.OrderByDescending(x => x.Address).First();
+                        var list = groupAddre.Select(item => new
+                        {
+                            Item = item,
+                            Addr = isHex
+                                ? (int)Convert.ToUInt32(item.Address, 16)
+                                : int.Parse(item.Address)
+                        }).ToList();
+
+                        var startAddre = list.Min(x => x.Addr);
+                        var endAddressInfo = list.OrderByDescending(x => x.Addr).First();
 
                         var length =
-                            endAddressInfo.Address
+                            endAddressInfo.Addr
                             + (
-                                endAddressInfo.DataType == TypeCode.String
-                                    ? (int)Math.Ceiling((double)endAddressInfo.Length / 2)
-                                    : endAddressInfo.Length * endAddressInfo.ShortOffset
+                                endAddressInfo.Item.DataType == TypeCode.String
+                                    ? (int)Math.Ceiling((double)endAddressInfo.Item.Length / 2)
+                                    : endAddressInfo.Item.Length * endAddressInfo.Item.ShortOffset
                             )
                             - startAddre;
 
                         var readValue = PaginatedReadingSync(
                             group.Key.IpAddress,
                             group.Key.Port,
-                            group.Key.Prefix.ToPrefix(),
+                            prefix,
                             startAddre,
                             length
                         );
@@ -188,23 +204,23 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                         if (!readValue.IsSuccess)
                         {
                             byte[] bytes = new byte[length * 2];
-                            foreach (var item in groupAddre)
+                            foreach (var x in list)
                             {
-                                item.Value = bytes.ConvertToValues(
-                                    (item.Address - startAddre) * item.ShortOffset,
-                                    item.DataType,
-                                    item.Length
+                                x.Item.Value = bytes.ConvertToValues(
+                                    (x.Addr - startAddre) * x.Item.ShortOffset,
+                                    x.Item.DataType,
+                                    x.Item.Length
                                 );
                             }
                         }
                         else
                         {
-                            foreach (var item in groupAddre)
+                            foreach (var x in list)
                             {
-                                item.Value = readValue.Data.ConvertToValues(
-                                    ((item.Address - startAddre) * (item.Prefix.ToPrefix().IsHexDevice()?1:2)),
-                                    item.DataType,
-                                    item.Length
+                                x.Item.Value = readValue.Data.ConvertToValues(
+                                    ((x.Addr - startAddre) * (x.Item.DataType == TypeCode.Boolean ? 1 : 2)),
+                                    x.Item.DataType,
+                                    x.Item.Length
                                 );
                             }
                         }
@@ -230,34 +246,39 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
         /// </summary>
         List<List<DevPlcPointReadDto>> GroupByAddress(IEnumerable<DevPlcPointReadDto> pointList)
         {
-            // 1. 必须按地址从小到大排序
-            var sorted = pointList.OrderBy(p => p.Address).ToList();
+            var sorted = pointList
+                .Select(p => new { Item = p, Addr = ParseAddress(p.Address, p.Prefix) })
+                .OrderBy(p => p.Addr)
+                .ToList();
+
             var result = new List<List<DevPlcPointReadDto>>();
 
             if (!sorted.Any())
                 return result;
 
-            // 2. 初始化第一组
-            var currentGroup = new List<DevPlcPointReadDto> { sorted[0] };
+            var currentGroup = new List<DevPlcPointReadDto> { sorted[0].Item };
             result.Add(currentGroup);
 
-            // 3. 遍历分组
             for (int i = 1; i < sorted.Count; i++)
             {
-                var prev = sorted[i - 1];
-                var curr = sorted[i];
-
-                // 地址差 > 128 → 断开，新建组
-                if (curr.Address - prev.Address > 128)
+                if (sorted[i].Addr - sorted[i - 1].Addr > 128)
                 {
                     currentGroup = new List<DevPlcPointReadDto>();
                     result.Add(currentGroup);
                 }
 
-                currentGroup.Add(curr);
+                currentGroup.Add(sorted[i].Item);
             }
 
             return result;
+        }
+
+        private static int ParseAddress(string address, string prefix)
+        {
+            var p = prefix.ToPrefix();
+            return p.IsHexDevice()
+                ? (int)Convert.ToUInt32(address, 16)
+                : int.Parse(address);
         }
 
         /// <summary>
@@ -290,7 +311,6 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                         readLen
                     );
 
-                    // 空数据重试一次
                     if (data.Length == 0)
                     {
                         Thread.Sleep(100);
@@ -346,7 +366,6 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             {
                 try
                 {
-                    // 同步调用McpX读取方法
                     byte[] data;
                     if (prefix.IsHexDevice())
                     {
@@ -373,7 +392,6 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                         throw new Exception($"同步读取失败，已重试{maxRetry}次：{ex.Message}", ex);
                     }
 
-                    // 同步等待
                     Thread.Sleep(retryInterval);
                 }
             }
@@ -394,12 +412,17 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
 
         private Result Write(DevPlcPointWriteDto pointMcWriteDto)
         {
+            var prefix = pointMcWriteDto.Prefix.ToPrefix();
+            int address = prefix.IsHexDevice()
+                ? (int)Convert.ToUInt32(pointMcWriteDto.Address, 16)
+                : int.Parse(pointMcWriteDto.Address);
+
             return PaginatedWriteing(
                 pointMcWriteDto.IpAddress,
                 pointMcWriteDto.Port,
-                pointMcWriteDto.Prefix.ToPrefix(),
+                prefix,
                 pointMcWriteDto.DataType,
-                pointMcWriteDto.Address,
+                address,
                 pointMcWriteDto.Value
             );
         }
@@ -439,7 +462,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             TypeCode typeCode,
             int address,
             List<object> value,
-            int maxRetry = 3, // 最多重试次数
+            int maxRetry = 3,
             int retryInterval = 300
         )
         {
@@ -450,12 +473,6 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                     var mcp = GetMcp(ipAddress, port);
                     switch (typeCode)
                     {
-                        //case TypeCode.Empty:
-                        //    break;
-                        //case TypeCode.Object:
-                        //    break;
-                        //case TypeCode.DBNull:
-                        //    break;
                         case TypeCode.Boolean:
                             mcp.BatchWriteBool(
                                 prefix,
@@ -463,12 +480,6 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                                 value.Select(x => bool.Parse(x?.ToString())).ToArray()
                             );
                             break;
-                        //case TypeCode.Char:
-                        //    break;
-                        //case TypeCode.SByte:
-                        //    break;
-                        //case TypeCode.Byte:
-                        //    break;
                         case TypeCode.Int16:
                             mcp.BatchWriteInt16(
                                 prefix,
@@ -497,10 +508,6 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                                 value.Select(x => UInt32.Parse(x?.ToString())).ToArray()
                             );
                             break;
-                        //case TypeCode.Int64:
-                        //    break;
-                        //case TypeCode.UInt64:
-                        //    break;
                         case TypeCode.Single:
                             mcp.BatchWriteSingle(
                                 prefix,
@@ -515,10 +522,6 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                                 value.Select(x => double.Parse(x?.ToString())).ToArray()
                             );
                             break;
-                        //case TypeCode.Decimal:
-                        //    break;
-                        //case TypeCode.DateTime:
-                        //    break;
                         case TypeCode.String:
                             mcp.WriteString(prefix, address.ToString(), string.Concat(value));
                             break;
@@ -529,11 +532,9 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                 }
                 catch (Exception ex)
                 {
-                    // 最后一次还失败 → 不重试了
                     if (i == maxRetry - 1)
                         throw new Exception($"写入失败，已重试{maxRetry}次：{ex.Message}", ex);
 
-                    // 出现异常 → 标记连接失效（下次自动新建）
                     MarkMcpInvalid(ipAddress, port);
 
                     Thread.Sleep(100);
@@ -545,12 +546,17 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
         #endregion
         private async Task<Result> WriteAsync(DevPlcPointWriteDto pointMcWriteDto)
         {
+            var prefix = pointMcWriteDto.Prefix.ToPrefix();
+            int address = prefix.IsHexDevice()
+                ? (int)Convert.ToUInt32(pointMcWriteDto.Address, 16)
+                : int.Parse(pointMcWriteDto.Address);
+
             return await PaginatedWriteingAsync(
                 pointMcWriteDto.IpAddress,
                 pointMcWriteDto.Port,
-                pointMcWriteDto.Prefix.ToPrefix(),
+                prefix,
                 pointMcWriteDto.DataType,
-                pointMcWriteDto.Address,
+                address,
                 pointMcWriteDto.Value
             );
         }
@@ -590,7 +596,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             TypeCode typeCode,
             int address,
             List<object> value,
-            int maxRetry = 3, // 最多重试次数
+            int maxRetry = 3,
             int retryInterval = 300
         )
         {
@@ -601,12 +607,6 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                     var mcp = GetMcp(ipAddress, port);
                     switch (typeCode)
                     {
-                        //case TypeCode.Empty:
-                        //    break;
-                        //case TypeCode.Object:
-                        //    break;
-                        //case TypeCode.DBNull:
-                        //    break;
                         case TypeCode.Boolean:
                             await mcp.BatchWriteBoolAsync(
                                 prefix,
@@ -614,12 +614,6 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                                 value.Select(x => bool.Parse(x?.ToString())).ToArray()
                             );
                             break;
-                        //case TypeCode.Char:
-                        //    break;
-                        //case TypeCode.SByte:
-                        //    break;
-                        //case TypeCode.Byte:
-                        //    break;
                         case TypeCode.Int16:
                             await mcp.BatchWriteInt16Async(
                                 prefix,
@@ -648,10 +642,6 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                                 value.Select(x => UInt32.Parse(x?.ToString())).ToArray()
                             );
                             break;
-                        //case TypeCode.Int64:
-                        //    break;
-                        //case TypeCode.UInt64:
-                        //    break;
                         case TypeCode.Single:
                             await mcp.BatchWriteSingleAsync(
                                 prefix,
@@ -666,10 +656,6 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                                 value.Select(x => double.Parse(x?.ToString())).ToArray()
                             );
                             break;
-                        //case TypeCode.Decimal:
-                        //    break;
-                        //case TypeCode.DateTime:
-                        //    break;
                         case TypeCode.String:
                             await mcp.WriteStringAsync(
                                 prefix,
@@ -684,47 +670,32 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                 }
                 catch (Exception ex)
                 {
-                    // 最后一次还失败 → 不重试了
                     if (i == maxRetry - 1)
                         throw new Exception($"写入失败，已重试{maxRetry}次：{ex.Message}", ex);
 
-                    // 出现异常 → 标记连接失效（下次自动新建）
                     MarkMcpInvalid(ipAddress, port);
 
-                    // 等待后重试
                     await Task.Delay(retryInterval);
                 }
             }
             throw new Exception("重试失败");
         }
 
-        //public async Task<Result<DevPlcPointDto>> ReadAsync(DevPlcPointDto readPlcInfo)
-        //{
-        //    var re = await ReadAsync(
-        //        new DevPlcPointReadDto(readPlcInfo, readPlcInfo.DataType.GetTypeOfShortOffset())
-        //    );
-        //    if (re.IsSuccess is false)
-        //    {
-        //        return Result<DevPlcPointDto>.Fail(re.Message);
-        //    }
-        //    else
-        //    {
-        //        readPlcInfo.Value = re.Data.Value;
-
-        //        return Result<DevPlcPointDto>.Success(readPlcInfo);
-        //    }
-        //}
-
         async Task<Result<DevPlcPointReadDto>> ReadAsync(DevPlcPointReadDto readPlcInfo)
         {
             Result<byte[]> readValue;
             try
             {
+                var prefix = readPlcInfo.Prefix.ToPrefix();
+                int address = prefix.IsHexDevice()
+                    ? (int)Convert.ToUInt32(readPlcInfo.Address, 16)
+                    : int.Parse(readPlcInfo.Address);
+
                 readValue = await PaginatedReading(
                     readPlcInfo.IpAddress,
                     readPlcInfo.Port,
-                    readPlcInfo.Prefix.ToPrefix(),
-                    readPlcInfo.Address,
+                    prefix,
+                    address,
                     readPlcInfo.Length
                 );
                 if (readValue.IsSuccess is false)
@@ -754,29 +725,6 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             }
         }
 
-        //public async Task<Result<List<DevPlcPointDto>>> ReadAsync(
-        //    List<DevPlcPointDto> readPlcInfo
-        //)
-        //{
-        //    var re = await ReadAsync(
-        //        readPlcInfo
-        //            .Select(x => new DevPlcPointReadDto(x, x.DataType.GetTypeOfShortOffset()))
-        //            .ToList()
-        //    );
-        //    if (re.IsSuccess is false)
-        //    {
-        //        return Result<List<DevPlcPointDto>>.Fail(re.Message);
-        //    }
-        //    else
-        //    {
-        //        for (int i = 0; i < readPlcInfo.Count; i++)
-        //        {
-        //            readPlcInfo[i].Value = re.Data[i].Value;
-        //        }
-        //        return Result<List<DevPlcPointDto>>.Success(readPlcInfo);
-        //    }
-        //}
-
         async Task<Result<List<DevPlcPointReadDto>>> ReadAsync(
             List<DevPlcPointReadDto> lineReadPlcInfo
         )
@@ -791,48 +739,57 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                 });
                 foreach (var group in groups)
                 {
+                    var prefix = group.Key.Prefix.ToPrefix();
+                    bool isHex = prefix.IsHexDevice();
+
                     foreach (var groupAddre in GroupByAddress(group))
                     {
-                        var startAddre = groupAddre.Min(x => x.Address);
-                        var endAddressInfo = groupAddre.OrderByDescending(x => x.Address).First();
-                        //mcpx 是按照short 也就是可读取最小寄存器 来解析的所以要加上shourt偏移
+                        var list = groupAddre.Select(item => new
+                        {
+                            Item = item,
+                            Addr = isHex
+                                ? (int)Convert.ToUInt32(item.Address, 16)
+                                : int.Parse(item.Address)
+                        }).ToList();
+
+                        var startAddre = list.Min(x => x.Addr);
+                        var endAddressInfo = list.OrderByDescending(x => x.Addr).First();
                         var lenght =
-                            endAddressInfo.Address
-                            // string 的长度等于 byte 所以的 /2
+                            endAddressInfo.Addr
                             + (
-                                endAddressInfo.DataType == TypeCode.String
-                                    ? (int)Math.Ceiling((double)endAddressInfo.Length / 2)
-                                    : (endAddressInfo.Length * endAddressInfo.ShortOffset)
+                                endAddressInfo.Item.DataType == TypeCode.String
+                                    ? (int)Math.Ceiling((double)endAddressInfo.Item.Length / 2)
+                                    : (endAddressInfo.Item.Length * endAddressInfo.Item.ShortOffset)
                             )
                             - startAddre;
 
                         var readValue = await PaginatedReading(
                             group.Key.IpAddress,
                             group.Key.Port,
-                            group.Key.Prefix.ToPrefix(),
+                            prefix,
                             startAddre,
                             lenght
                         );
                         if (readValue.IsSuccess is false)
                         {
                             byte[] bytes = new byte[lenght * 2];
-                            foreach (DevPlcPointReadDto item in groupAddre)
+                            foreach (var x in list)
                             {
-                                item.Value = bytes.ConvertToValues(
-                                    (item.Address - startAddre) * item.ShortOffset,
-                                    item.DataType,
-                                    item.Length
+                                x.Item.Value = bytes.ConvertToValues(
+                                    (x.Addr - startAddre) * x.Item.ShortOffset,
+                                    x.Item.DataType,
+                                    x.Item.Length
                                 );
                             }
                         }
                         else
                         {
-                            foreach (DevPlcPointReadDto item in groupAddre)
+                            foreach (var x in list)
                             {
-                                item.Value = readValue.Data.ConvertToValues(
-                                    ((item.Address - startAddre) * 2),
-                                    item.DataType,
-                                    item.Length
+                                x.Item.Value = readValue.Data.ConvertToValues(
+                                    ((x.Addr - startAddre) * 2),
+                                    x.Item.DataType,
+                                    x.Item.Length
                                 );
                             }
                         }
@@ -856,17 +813,12 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
         )
         {
             Result<byte[]> result = new Result<byte[]>() { IsSuccess = true };
-            // 开始地址
             int currentAddress = startAddre;
-            // 剩余长度
             int remaining = lenght;
-            // 存储所有读取结果
             List<byte> allData = new List<byte>();
 
-            // 自动循环分页读取
             while (remaining > 0)
             {
-                // 本次读取长度：最多 65535
                 ushort readLen = (ushort)Math.Min(remaining, 960);
 
                 try
@@ -891,7 +843,6 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                         );
                     }
                     Log.Debug("读取结束。");
-                    // 把读到的数据加入总结果
                     allData.AddRange(data);
                 }
                 catch (Exception ex)
@@ -909,19 +860,13 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                     result.IsSuccess = false;
                 }
 
-                // 偏移地址
                 currentAddress += readLen;
-                // 减少剩余长度
                 remaining -= readLen;
             }
             result.Data = allData.ToArray();
-            // 最终所有数据在这里
             return result;
         }
 
-        /// <summary>
-        /// 线程安全 + 自动释放 + 带超时 + 不会死锁的 PLC 读取方法
-        /// </summary>
         async Task<byte[]> ReadWithRetry(
             string ipAddress,
             int port,
@@ -936,7 +881,6 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             {
                 try
                 {
-                    // 3. 读取（带超时）
                     var data = await GetMcp(ipAddress, port)
                         .BatchReadByteAsync(prefix, currentAddress.ToString(), readLen);
 
@@ -948,7 +892,6 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
 
                     MarkMcpInvalid(ipAddress, port);
 
-                    // 最后一次重试失败，抛出异常
                     if (i == maxRetry - 1)
                     {
                         throw new Exception($"读取失败，已重试{maxRetry}次：{ex.Message}", ex);
@@ -976,22 +919,17 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             }
         }
 
-        /// <summary>
-        /// 无死锁销毁连接（锁外 Dispose）
-        /// </summary>
         private void MarkMcpInvalid(string ipAddress, int port)
         {
             string key = $"{ipAddress}:{port}";
             McpX oldMcp = null;
 
-            // 锁里只做字典移除（极快）
             lock (_lockObj)
             {
                 if (_mcpDic.TryGetValue(key, out oldMcp))
                     _mcpDic.Remove(key);
             }
 
-            // 锁外面再释放！！！绝对不死锁
             if (oldMcp != null)
             {
                 try
@@ -1002,15 +940,8 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             }
         }
 
-        /// <summary>
-        /// bool数组转byte数组，每个bool单独占1字节，bool存放在字节最高位Bit7
-        /// true=0x80，false=0x00
-        /// </summary>
-        /// <param name="boolArray">输入布尔数组</param>
-        /// <returns>转换后的byte数组</returns>
         byte[] BoolArrayToByteArrayHighBit(bool[] boolArray)
         {
-            // 空数组处理
             if (boolArray == null || boolArray.Length == 0)
                 return Array.Empty<byte>();
 

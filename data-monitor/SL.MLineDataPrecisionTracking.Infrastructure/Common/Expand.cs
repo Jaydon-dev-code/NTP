@@ -710,54 +710,10 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
             return result;
         }
 
-        static object GetValue(object obj, string fieldName)
-        {
-            if (obj == null)
-                return null;
-
-            var prop = obj.GetType().GetProperty(fieldName);
-            return prop?.CanRead == true ? prop.GetValue(obj) : null;
-        }
+ 
 
    
 
-        public static void ItemToSoure(
-            object soure,
-            List<string> ignoreFields = null,
-            params object[] sourceItem
-        )
-        {
-            if (ignoreFields == null)
-            {
-                ignoreFields = new List<string>();
-            }
-
-            var summaryProperties = soure
-                .GetType()
-                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(p => p.CanWrite && p.IsDefined(typeof(SugarColumn), true))
-                .ToList();
-
-            foreach (var prop in summaryProperties)
-            {
-                var fieldName = prop.Name;
-
-                if (
-                    ignoreFields.Any(ig => ig.Equals(fieldName, StringComparison.OrdinalIgnoreCase))
-                )
-                    continue;
-                foreach (var item in sourceItem)
-                {
-                    object value = GetValue(item, fieldName);
-                    if (value == null)
-                        continue;
-                    else
-                    {
-                        prop.SetValue(soure, value);
-                        break;
-                    }
-                }
-            }
-        }
+      
     }
 }

@@ -16,17 +16,16 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
             Port = devPlcPointMcDto.Port;
             Prefix = devPlcPointMcDto.Prefix;
             DataType = devPlcPointMcDto.DataType;
-              int.TryParse(devPlcPointMcDto.Address, out int address) ;
-            Address = address;
+            Address = devPlcPointMcDto.Address;
             Value = devPlcPointMcDto.Value;
-           
+            
         }
 
         public string IpAddress { get; set; }
         public int Port { get; set; }
         public string Prefix { get; set; }
         public TypeCode DataType { get; set; }
-        public int Address { get; set; }  
+        public string Address { get; set; }  
         public List<object> Value { get; set; }
     }
 }

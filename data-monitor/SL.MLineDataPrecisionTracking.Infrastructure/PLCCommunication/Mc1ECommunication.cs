@@ -49,9 +49,11 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
         {
             try
             {
-                int addr = int.Parse(readPlcInfo.Address);
-                int wordLen = readPlcInfo.Length * readPlcInfo.DataType.GetTypeOfShortOffset();
                 Prefix prefix = readPlcInfo.Prefix.ToPrefix();
+                int addr = prefix.IsHexDevice()
+                    ? (int)Convert.ToUInt32(readPlcInfo.Address, 16)
+                    : int.Parse(readPlcInfo.Address);
+                int wordLen = readPlcInfo.Length * readPlcInfo.DataType.GetTypeOfShortOffset();
 
                 byte[] req = new Mc1ERead().ToByte(prefix, addr, wordLen);
                 byte[] resp = SendWithRetry(readPlcInfo.IpAddress, readPlcInfo.Port, req);
@@ -87,9 +89,16 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                     .Select(x => new
                     {
                         Dto = x,
-                        Addr = int.Parse(x.Address),
-                        WordLen =x.DataType == TypeCode.String?(int)Math.Ceiling((double)x.Length / 2) :x.Length * x.DataType.GetTypeOfShortOffset(),
                         Prefix = x.Prefix.ToPrefix(),
+                    })
+                    .Select(x => new
+                    {
+                        x.Dto,
+                        x.Prefix,
+                        Addr = x.Prefix.IsHexDevice()
+                            ? (int)Convert.ToUInt32(x.Dto.Address, 16)
+                            : int.Parse(x.Dto.Address),
+                        WordLen =x.Dto.DataType == TypeCode.String?(int)Math.Ceiling((double)x.Dto.Length / 2) :x.Dto.Length * x.Dto.DataType.GetTypeOfShortOffset(),
                     })
                     .ToList();
 
