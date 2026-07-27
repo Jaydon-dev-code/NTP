@@ -55,7 +55,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                     : int.Parse(readPlcInfo.Address);
                 int wordLen = readPlcInfo.Length * readPlcInfo.DataType.GetTypeOfShortOffset();
 
-                byte[] req = new Mc1ERead().ToByte(prefix, addr, wordLen);
+                byte[] req = new Mc1ERead().ToByte(prefix, addr, wordLen,readPlcInfo.DataType);
                 byte[] resp = SendWithRetry(readPlcInfo.IpAddress, readPlcInfo.Port, req);
                 byte[] rawData = Mc1ERead.GetResponseData(resp);
 
@@ -104,46 +104,56 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
 
                 foreach (var group in items.GroupBy(x => new { x.Dto.IpAddress, x.Dto.Port }))
                 {
-                    var sorted = group.OrderBy(x => x.Addr).ToList();
-                    int startAddr = sorted.Min(x => x.Addr);
-                    var last = sorted.Last();
-                    int endAddr = last.Addr + last.WordLen;
-                    int totalWords = endAddr - startAddr;
+                    Prefix prefix = group.First().Prefix;
 
-                    Prefix prefix = sorted[0].Prefix;
-
-                    byte[] req = new Mc1ERead().ToByte(prefix, startAddr, totalWords);
-                    byte[] resp = SendWithRetry(group.Key.IpAddress, group.Key.Port, req);
-
-                    if (resp == null || resp.Length < 1)
-                        throw new Exception("读响应为空");
-
-                    if (resp[0] != (byte)(req[0] | 0x80))
-                        throw new Exception($"PLC 返回错误: 完成码 0x{resp[0]:X2}");
-                    //返回的 帧 是   80 00 11  功能码 【80 00】80为发送的功能码 或 0x80 + 数据
-                    byte[] rawData = resp.Length > 1 ? resp.Skip(2).ToArray() : new byte[0];
-                    //将数组和读取长度一致
-                    if (req[0]== (byte)Mc1EFunctionCodeEnum.BatchBitRead)
+                    foreach (var typeGroup in group.GroupBy(x => x.Dto.DataType == TypeCode.Boolean))
                     {
-                        rawData= rawData.SplitByteHighLow4Bit(true);
-                    }
-                    foreach (var item in sorted)
-                    {
-                        int elemByteLen = item.Dto.DataType.GetTypeByteLength();
-                        int offset = (item.Addr - startAddr) * item.Dto.DataType.GetTypeOfShortOffset();
-                        byte[] elemBytes = new byte[elemByteLen * item.Dto.Length];
-                        Array.Copy(
-                            rawData,
-                            offset,
-                            elemBytes,
-                            0,
-                            Math.Min(elemBytes.Length, rawData.Length - offset)
+                        bool isBool = typeGroup.Key;
+                        var sorted = typeGroup.OrderBy(x => x.Addr).ToList();
+                        int startAddr = sorted.Min(x => x.Addr);
+                        var last = sorted.Last();
+                        int endAddr = last.Addr + last.WordLen;
+                        int total = endAddr - startAddr;
+
+                        byte[] req = new Mc1ERead().ToByte(
+                            prefix,
+                            startAddr,
+                            total,
+                            isBool ? TypeCode.Boolean : TypeCode.Object
                         );
-                        item.Dto.Value = elemBytes.ConvertToValues(
-                            0,
-                            item.Dto.DataType,
-                            item.Dto.Length
-                        );
+                        byte[] resp = SendWithRetry(group.Key.IpAddress, group.Key.Port, req);
+
+                        if (resp == null || resp.Length < 1)
+                            throw new Exception("读响应为空");
+
+                        if (resp[0] != (byte)(req[0] | 0x80))
+                            throw new Exception($"PLC 返回错误: 完成码 0x{resp[0]:X2}");
+
+                        byte[] rawData = resp.Length > 1 ? resp.Skip(2).ToArray() : new byte[0];
+
+                        if (isBool)
+                        {
+                            rawData = rawData.SplitByteHighLow4Bit(true);
+                        }
+
+                        foreach (var item in sorted)
+                        {
+                            int elemByteLen = item.Dto.DataType.GetTypeByteLength();
+                            int offset = (item.Addr - startAddr) * item.Dto.DataType.GetTypeOfShortOffset();
+                            byte[] elemBytes = new byte[elemByteLen * item.Dto.Length];
+                            Array.Copy(
+                                rawData,
+                                offset,
+                                elemBytes,
+                                0,
+                                Math.Min(elemBytes.Length, rawData.Length - offset)
+                            );
+                            item.Dto.Value = elemBytes.ConvertToValues(
+                                0,
+                                item.Dto.DataType,
+                                item.Dto.Length
+                            );
+                        }
                     }
                 }
 

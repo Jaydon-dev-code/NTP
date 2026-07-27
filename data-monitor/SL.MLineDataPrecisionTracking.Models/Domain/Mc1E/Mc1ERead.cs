@@ -29,9 +29,9 @@ namespace SL.MLineDataPrecisionTracking.Models.Domain.Mc1E
         /// <param name="wordCount">读取字数</param>
         /// <param name="outTime">监视定时器（ms）</param>
         /// <returns>完整的 1E 读请求帧</returns>
-        public byte[] ToByte(Prefix prefix, int address, int wordCount, int outTime = 10)
+        public byte[] ToByte(Prefix prefix, int address, int wordCount, TypeCode dataType, int outTime = 10)
         {
-            this.FunctionCode = IsHexDevice(prefix) 
+            this.FunctionCode = dataType==TypeCode.Boolean
                     ? Mc1EFunctionCodeEnum.BatchBitRead:Mc1EFunctionCodeEnum.BatchWordRead;
 
             this.PlcNo = 0xFF;
