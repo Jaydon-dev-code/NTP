@@ -50,9 +50,10 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             try
             {
                 Prefix prefix = readPlcInfo.Prefix.ToPrefix();
-                int addr = prefix.IsHexDevice()
-                    ? (int)Convert.ToUInt32(readPlcInfo.Address, 16)
-                    : int.Parse(readPlcInfo.Address);
+                //int addr = prefix.IsHexDevice()
+                //    ? (int)Convert.ToUInt32(readPlcInfo.Address, 16)
+                //    : int.Parse(readPlcInfo.Address);
+                int addr= int.Parse(readPlcInfo.Address);
                 int wordLen = readPlcInfo.Length * readPlcInfo.DataType.GetTypeOfShortOffset();
 
                 byte[] req = new Mc1ERead().ToByte(prefix, addr, wordLen,readPlcInfo.DataType);
@@ -64,6 +65,10 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                     throw new Exception($"PLC 返回错误: 完成码 0x{resp[0]:X2}");
 
                 byte[] rawData = resp.Length > 1 ? resp.Skip(2).ToArray() : new byte[0];
+                if (readPlcInfo.DataType == TypeCode.Boolean)
+                {
+                    rawData = rawData.SplitByteHighLow4Bit(true);
+                }
 
                 readPlcInfo.Value = rawData.ConvertToValues(
                     0,
