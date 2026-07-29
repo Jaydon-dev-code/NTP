@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Mapster;
 using Microsoft.AspNet.SignalR;
-using IClientProxy = Microsoft.AspNet.SignalR.Hubs.IClientProxy;
 using NPOI.POIFS.Crypt.Dsig;
 using SL.MLineDataPrecisionTracking.Core.Hubs;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
@@ -18,9 +17,9 @@ using SL.MLineDataPrecisionTracking.Models.Domain.Mc1E;
 using SL.MLineDataPrecisionTracking.Models.Dtos;
 using SL.MLineDataPrecisionTracking.Models.Dtos.Factory4Workshop4_10Line;
 using SL.MLineDataPrecisionTracking.Models.Entities.Factory4Workshop4_10Line;
-using SL.MLineDataPrecisionTracking.Models.Entitss.Factory4Workshop4_10Line;
 using SL.MLineDataPrecisionTracking.Models.Enum;
 using SqlSugar.Extensions;
+using IClientProxy = Microsoft.AspNet.SignalR.Hubs.IClientProxy;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Workshop4_10
 {
@@ -28,8 +27,6 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
     {
         Tb_Factory4Workshop4_10Line_ABSRepository _aBSRepository;
         protected override string _serviceName => "四分厂4-10-ABS";
-
-
 
         DevPlcPointDto _aBSCheckOK;
         DevPlcPointDto _aBSCheckNG;
@@ -79,7 +76,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
         {
             var re = _mcp.Read(_absResultPlcInfo);
             ((IClientProxy)_chatHub.Clients.All).Invoke("IsOnlieABS", re.IsSuccess);
-            if (re.IsSuccess ==false)
+            if (re.IsSuccess == false)
             {
                 return Result.Fail("PLC通讯失败");
             }
@@ -94,14 +91,13 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
             _absCheckReTmp = Expand.BoolArrayToByte(
                 new bool[] { _aBSCheckOK.Value[0].ObjToBool(), _aBSCheckNG.Value[0].ObjToBool() }
             );
-            if ((_aBSPressDownReTmp == 0 && _absCheckReTmp == 0)
-                || (_aBSPressDownRe == _aBSPressDownReTmp && _absCheckRe == _absCheckReTmp))
+            if (_aBSPressDownRe != _aBSPressDownReTmp || _absCheckRe != _absCheckReTmp)
             {
-                return Result.Fail("PLC未触发采集信号");
+                return Result.Success();
             }
             else
             {
-                return Result.Success();
+                return Result.Fail("PLC未触发采集信号");
             }
         }
 
@@ -111,86 +107,102 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
             if (_aBSPressDownRe != _aBSPressDownReTmp && _aBSPressDownReTmp != 0)
             {
                 var reSN = _mcp.Read(_aBSPressDownSN);
+
                 if (reSN.IsSuccess)
                 {
-                    var absInfo = await _aBSRepository.QueryableFirstAsync(
-                        x => x.SN == reSN.Data.Value[0].ToString(),
-                        x => x.ABSPressDownTime
-                    );
-                    dataValue = new Tb_Factory4Workshop4_10Line_ABS()
+                    var sn = reSN.Data.Value[0].ToString();
+                    if (string.IsNullOrEmpty(sn) == false)
                     {
-                        SN = reSN.Data.Value[0].ToString(),
-                        ABSPressDownResult =
-                            _aBSPressDownReTmp == 1 ? ResultEnum.OK : ResultEnum.NG,
-                        ABSPressDownTime = DateTime.Now,
-                    };
-                    if (absInfo != null)
-                    {
-                        await _aBSRepository.UpDataAsync(
-                            dataValue,
+                        var absInfo = await _aBSRepository.QueryableFirstAsync(
+                            x => x.SN == sn,
+                            x => x.ABSPressDownTime
+                        );
+                        dataValue = new Tb_Factory4Workshop4_10Line_ABS()
+                        {
+                            SN = sn,
+                            ABSPressDownResult =
+                                _aBSPressDownReTmp == 1 ? ResultEnum.OK : ResultEnum.NG,
+                            ABSPressDownTime = DateTime.Now,
+                        };
+                        if (absInfo != null)
+                        {
+                            await _aBSRepository.UpDataAsync(
+                                dataValue,
+                                x => new { x.SN },
+                                x => new { x.ABSPressDownResult, x.ABSPressDownTime }
+                            );
+                        }
+                        else
+                        {
+                            await _aBSRepository.InsertableAsync(dataValue);
+                        }
+                        await _summaryRepository.UpDataAsync(
+                            dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
                             x => new { x.SN },
                             x => new { x.ABSPressDownResult, x.ABSPressDownTime }
                         );
-                    }
-                    else
-                    {
-                        await _aBSRepository.InsertableAsync(dataValue);
-                    }
-                    await _summaryRepository.UpDataAsync(
-                        dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
-                        x => new { x.SN },
-                        x => new { x.ABSPressDownResult, x.ABSPressDownTime }
-                    );
 
-                    ((IClientProxy)_chatHub.Clients.All).Invoke("ABSPressDownData", new Factory4Workshop4_10Line_ABS_PressDownDto
-                    {
-                        SN = dataValue.SN,
-                        ABSPressDownResult = dataValue.ABSPressDownResult,
-                        ABSPressDownTime = dataValue.ABSPressDownTime,
-                    });
+                        ((IClientProxy)_chatHub.Clients.All).Invoke(
+                            "ABSPressDownData",
+                            new Factory4Workshop4_10Line_ABS_PressDownDto
+                            {
+                                SN = dataValue.SN,
+                                ABSPressDownResult = dataValue.ABSPressDownResult,
+                                ABSPressDownTime = dataValue.ABSPressDownTime,
+                            }
+                        );
+                    }
                 }
             }
             if (_absCheckReTmp != _absCheckRe && _absCheckReTmp != 0)
             {
                 var reSN = _mcp.Read(_aBSCheckSN);
+                
                 if (reSN.IsSuccess)
                 {
-                    var absInfo = await _aBSRepository.QueryableFirstAsync(
-                        x => x.SN == reSN.Data.Value[0].ToString(),
-                        x => x.ABSCheckTime
-                    );
-                    dataValue = new Tb_Factory4Workshop4_10Line_ABS()
+                    var sn = reSN.Data.Value[0].ToString();
+                    if (string.IsNullOrEmpty(sn) == false)
                     {
-                        SN = reSN.Data.Value[0].ToString(),
-                        ABSCheckResult = _absCheckReTmp == 1 ? ResultEnum.OK : ResultEnum.NG,
-                        ABSCheckTime = DateTime.Now,
-                    };
+                        var absInfo = await _aBSRepository.QueryableFirstAsync(
+                            x => x.SN == sn,
+                            x => x.ABSCheckTime
+                        );
+                        dataValue = new Tb_Factory4Workshop4_10Line_ABS()
+                        {
+                            SN = sn,
+                            ABSCheckResult = _absCheckReTmp == 1 ? ResultEnum.OK : ResultEnum.NG,
+                            ABSCheckTime = DateTime.Now,
+                        };
 
-                    if (absInfo != null)
-                    {
-                        await _aBSRepository.UpDataAsync(
-                            dataValue,
-                            x => new { x.SN },
+                        if (absInfo != null)
+                        {
+                            await _aBSRepository.UpDataAsync(
+                                dataValue,
+                                x => new { x.SN },
+                                x => new { x.ABSCheckResult, x.ABSCheckTime }
+                            );
+                        }
+                        else
+                        {
+                            await _aBSRepository.InsertableAsync(dataValue);
+                        }
+
+                        await _summaryRepository.UpDataAsync(
+                            dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
+                            x => x.SN,
                             x => new { x.ABSCheckResult, x.ABSCheckTime }
                         );
-                    }
-                    else
-                    {
-                        await _aBSRepository.InsertableAsync(dataValue);
-                    }
 
-                    await _summaryRepository.UpDataAsync(
-                        dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
-                        x => x.SN,
-                        x => new { x.ABSCheckResult, x.ABSCheckTime }
-                    );
-
-                    ((IClientProxy)_chatHub.Clients.All).Invoke("ABSCheckData", new Factory4Workshop4_10Line_ABS_CheckDto
-                    {
-                        SN = dataValue.SN,
-                        ABSCheckResult = dataValue.ABSCheckResult,
-                        ABSCheckTime = dataValue.ABSCheckTime,
-                    });
+                        ((IClientProxy)_chatHub.Clients.All).Invoke(
+                            "ABSCheckData",
+                            new Factory4Workshop4_10Line_ABS_CheckDto
+                            {
+                                SN = dataValue.SN,
+                                ABSCheckResult = dataValue.ABSCheckResult,
+                                ABSCheckTime = dataValue.ABSCheckTime,
+                            }
+                        );
+                    }
                 }
             }
 

@@ -9,7 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Mapster;
 using Microsoft.AspNet.SignalR;
-using IClientProxy = Microsoft.AspNet.SignalR.Hubs.IClientProxy;
 using NPOI.XWPF.UserModel;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
@@ -20,6 +19,7 @@ using SL.MLineDataPrecisionTracking.Models.Dtos.Factory4Workshop4_10Line;
 using SL.MLineDataPrecisionTracking.Models.Entities.Factory4Workshop4_10Line;
 using SL.MLineDataPrecisionTracking.Models.Enum;
 using SqlSugar.Extensions;
+using IClientProxy = Microsoft.AspNet.SignalR.Hubs.IClientProxy;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Workshop4_10
 {
@@ -65,10 +65,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
             _vibOK = _linePlcInfo.First(x => x.PointName == "震动OK");
             _vibNG = _linePlcInfo.First(x => x.PointName == "震动NG");
             _vibSN = _linePlcInfo.First(x => x.PointName == "震动SN");
-            _vibResultPlcInfo = new List<DevPlcPointDto>() { _vibOK,_vibNG
-            };
+            _vibResultPlcInfo = new List<DevPlcPointDto>() { _vibOK, _vibNG };
             Task.Run(() => ScanSocket());
-        
+
             return Result.Success();
         }
 
@@ -83,58 +82,70 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
             _vibReTmp = Expand.BoolArrayToByte(
                 new bool[] { _vibOK.Value[0].ObjToBool(), _vibNG.Value[0].ObjToBool() }
             );
-            if (_vibReTmp == 0 || _vibReTmp == _vibRe)
+            if (_vibReTmp != _vibRe)
             {
-                return Result.Fail("PLC未触发采集信号");
+                return Result.Success();
             }
             else
             {
-                return Result.Success();
+                return Result.Fail("PLC未触发采集信号");
             }
         }
 
         protected override async Task<Result<object>> InteractAsync()
         {
             Tb_Factory4Workshop4_10Line_Vib dataValue;
+            if (_vibReTmp == 0)
+            {
+                return Result<object>.Success(null);
+            }
 
-            var revalue = _mcp.Read(_vibSN);
+            var revalue = _mc1ECommunication.Read(_vibSN);
 
+          
             if (revalue.IsSuccess)
             {
-                var clearanceInfo = await _vibRepository.QueryableFirstAsync(x =>
-                    x.SN == _vibSN.Value[0].ToString()
+                var sn = _vibSN.Value[0].ToString();
+                if (string.IsNullOrEmpty(sn) == false)
+                {
+                    var clearanceInfo = await _vibRepository.QueryableFirstAsync(x =>
+                    x.SN ==sn
                 );
-                dataValue = new Tb_Factory4Workshop4_10Line_Vib()
-                {
-                    VibCrackResult = _vibReTmp == 1 ? ResultEnum.OK : ResultEnum.NG,
-                    SN = _vibSN.Value[0].ToString(),
-                    RecordTime = DateTime.Now,
-                };
+                    dataValue = new Tb_Factory4Workshop4_10Line_Vib()
+                    {
+                        VibCrackResult = _vibReTmp == 1 ? ResultEnum.OK : ResultEnum.NG,
+                        SN = sn,
+                        VibCrackTime = DateTime.Now,
+                    };
 
-                if (clearanceInfo != null)
-                {
-                    await _vibRepository.UpDataAsync(
-                        dataValue,
+                    if (clearanceInfo != null)
+                    {
+                        await _vibRepository.UpDataAsync(
+                            dataValue,
+                            x => new { x.SN },
+                            x => new { x.VibCrackResult, x.VibCrackTime }
+                        );
+                    }
+                    else
+                    {
+                        await _vibRepository.InsertableAsync(dataValue);
+                    }
+                    await _summaryRepository.UpDataAsync(
+                        dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
                         x => new { x.SN },
-                        x => new { x.VibCrackResult, x.VibCrackTime }
+                        x => new { x.VibCrackResult, x.RecordTime }
+                    );
+
+                    ((IClientProxy)_chatHub.Clients.All).Invoke(
+                        "VibData",
+                        new Factory4Workshop4_10Line_VibDto
+                        {
+                            SN = dataValue.SN,
+                            VibCrackResult = dataValue.VibCrackResult,
+                            RecordTime = dataValue.RecordTime,
+                        }
                     );
                 }
-                else
-                {
-                    await _vibRepository.InsertableAsync(dataValue);
-                }
-                await _summaryRepository.UpDataAsync(
-                    dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
-                    x => new { x.SN },
-                    x => new { x.VibCrackResult, x.RecordTime }
-                );
-
-                ((IClientProxy)_chatHub.Clients.All).Invoke("VibData", new Factory4Workshop4_10Line_VibDto
-                {
-                    SN = dataValue.SN,
-                    VibCrackResult = dataValue.VibCrackResult,
-                    RecordTime = dataValue.RecordTime,
-                });
             }
             return Result<object>.Success(null);
         }
@@ -154,7 +165,11 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                 }
                 catch (Exception ex)
                 {
-                    Serilog.Log.Warning("[扫描枪数据推送]{_serviceName}关闭Socket异常:{ex.Message}", _serviceName, ex.Message);
+                    Serilog.Log.Warning(
+                        "[扫描枪数据推送]{_serviceName}关闭Socket异常:{ex.Message}",
+                        _serviceName,
+                        ex.Message
+                    );
                 }
                 finally
                 {
@@ -201,11 +216,18 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
             }
             catch (ObjectDisposedException)
             {
-                Serilog.Log.Information("[扫描枪数据推送]{_serviceName}:Socket已关闭，停止监听。", _serviceName);
+                Serilog.Log.Information(
+                    "[扫描枪数据推送]{_serviceName}:Socket已关闭，停止监听。",
+                    _serviceName
+                );
             }
             catch (SocketException ex)
             {
-                Serilog.Log.Warning("[扫描枪数据推送]{_serviceName}监听异常:{ex.Message}", _serviceName, ex.Message);
+                Serilog.Log.Warning(
+                    "[扫描枪数据推送]{_serviceName}监听异常:{ex.Message}",
+                    _serviceName,
+                    ex.Message
+                );
             }
         }
 
@@ -229,17 +251,17 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                     var soureLen = int.Parse(buffer.BytesToAscii(4)) - 4;
                     var soureByte = buffer.RemoveStartBytes(4);
                     var ccanInfo = soureByte.BytesToAscii(soureLen);
-                    if (!Expand.IsRunningInMSTest())
-                    {
+                    //if (!Expand.IsRunningInMSTest())
+                    //{
                         _issueSancInfoPoint.Value[0] = ccanInfo;
                         _mc1ECommunication.Write(_issueSancInfoPoint);
-                    }
-                    else
-                    {
-                        string reMesg = "TestMsgIs" + ccanInfo;
-                        byte[] body = Encoding.UTF8.GetBytes(reMesg);
-                        client.Send(body);
-                    }
+                    //}
+                    //else
+                    //{
+                    //    string reMesg = "TestMsgIs" + ccanInfo;
+                    //    byte[] body = Encoding.UTF8.GetBytes(reMesg);
+                    //    client.Send(body);
+                    //}
                 }
             }
             catch (SocketException ex)
