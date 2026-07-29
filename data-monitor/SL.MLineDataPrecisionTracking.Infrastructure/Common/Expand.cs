@@ -216,17 +216,17 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
                     {
                         if (readInfo.Length == 1)
                         {
-                            if (readInfo.ReadFormula == null || readInfo.ReadFormula.Length == 0)
-                            {
+                            //if (readInfo.ReadFormula == null || readInfo.ReadFormula.Length == 0)
+                            //{
                                 prop.SetValue(t, readInfo.Value[0].ToString());
-                            }
-                            else
-                            {
-                                var val = readInfo.ReadFormula.StringCompute(
-                                    readInfo.Value[0].ToString()
-                                );
-                                prop.SetValue(t, val.ToString());
-                            }
+                            //}
+                            //else
+                            //{
+                            //    var val = readInfo.ReadFormula.StringCompute(
+                            //        readInfo.Value[0].ToString()
+                            //    );
+                            //    prop.SetValue(t, val.ToString());
+                            //}
                         }
                         else
                         {
@@ -710,10 +710,5 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
             return result;
         }
 
- 
-
-   
-
-      
     }
 }
