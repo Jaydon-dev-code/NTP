@@ -38,7 +38,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Domain.Mc1E
 
             this.OutTime = BitConverter.GetBytes((ushort)outTime);
 
-            this.StartAddre = ToByteAddress(prefix, address.ToString());
+            this.StartAddre = ToByteAddress(prefix, IsHexDevice(prefix) ? address.ToString("X") : address.ToString());
 
             this.McPrefix = GetCode(prefix);
 

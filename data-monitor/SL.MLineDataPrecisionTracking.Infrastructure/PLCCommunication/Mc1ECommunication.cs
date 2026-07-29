@@ -45,15 +45,37 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
 
         #region 读取
 
+        private static string StripNonHexChars(string address)
+        {
+            if (string.IsNullOrEmpty(address)) return "0";
+            int start = 0;
+            while (start < address.Length && !IsHexChar(address[start]))
+                start++;
+            return start < address.Length ? address.Substring(start) : "0";
+        }
+
+        private static string StripNonDigitChars(string address)
+        {
+            if (string.IsNullOrEmpty(address)) return "0";
+            int start = 0;
+            while (start < address.Length && !char.IsDigit(address[start]))
+                start++;
+            return start < address.Length ? address.Substring(start) : "0";
+        }
+
+        private static bool IsHexChar(char c)
+        {
+            return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f');
+        }
+
         public Result<DevPlcPointDto> Read(DevPlcPointDto readPlcInfo)
         {
             try
             {
                 Prefix prefix = readPlcInfo.Prefix.ToPrefix();
-                //int addr = prefix.IsHexDevice()
-                //    ? (int)Convert.ToUInt32(readPlcInfo.Address, 16)
-                //    : int.Parse(readPlcInfo.Address);
-                int addr= int.Parse(readPlcInfo.Address);
+                int addr = prefix.IsHexDevice()
+                    ? (int)Convert.ToUInt32(StripNonHexChars(readPlcInfo.Address), 16)
+                    : int.Parse(StripNonDigitChars(readPlcInfo.Address));
                 int wordLen = readPlcInfo.Length * readPlcInfo.DataType.GetTypeOfShortOffset();
 
                 byte[] req = new Mc1ERead().ToByte(prefix, addr, wordLen,readPlcInfo.DataType);
@@ -106,8 +128,12 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                     {
                         x.Dto,
                         x.Prefix,
-                        Addr =int.Parse(x.Dto.Address),
-                        WordLen =x.Dto.DataType == TypeCode.String?(int)Math.Ceiling((double)x.Dto.Length / 2) :x.Dto.Length * x.Dto.DataType.GetTypeOfShortOffset(),
+                        Addr = x.Prefix.IsHexDevice()
+                            ? (int)Convert.ToUInt32(StripNonHexChars(x.Dto.Address), 16)
+                            : int.Parse(StripNonDigitChars(x.Dto.Address)),
+                        WordLen = x.Dto.DataType == TypeCode.String
+                            ? (int)Math.Ceiling((double)x.Dto.Length / 2)
+                            : x.Dto.Length * x.Dto.DataType.GetTypeOfShortOffset(),
                     })
                     .ToList();
 
@@ -185,9 +211,13 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             {
                 Prefix prefix = devPlcPointMcDto.Prefix.ToPrefix();
 
+                string addr = prefix.IsHexDevice()
+                    ? StripNonHexChars(devPlcPointMcDto.Address)
+                    : StripNonDigitChars(devPlcPointMcDto.Address);
+
                 byte[] frame = new Mc1EWirte().ToByte(
                     prefix,
-                    devPlcPointMcDto.Address,
+                    addr,
                     devPlcPointMcDto.DataType,
                     devPlcPointMcDto.Value
                 );
