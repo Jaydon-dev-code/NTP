@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-<PropertyGroup>
-  <LangVersion>latest</LangVersion>
-</PropertyGroup> 
- <PropertyGroup>
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{1C96F4DE-9C6B-463F-8432-F615868E7BB7}</ProjectGuid>
@@ -48,12 +48,15 @@
     <Reference Include="System.Web.Extensions" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataCollection\Factory6Workshop4_10Test.cs" />
+    <Compile Include="DataCollection\Factory4Workshop4_10Line\Factory4Workshop4_10LineABSTest.cs" />
+    <Compile Include="DataCollection\Factory4Workshop4_10Line\Factory4Workshop4_10LineClearanceTest.cs" />
+    <Compile Include="DataCollection\Factory4Workshop4_10Line\Factory4Workshop4_10LineRivetAndCrackTest.cs" />
+    <Compile Include="DataCollection\Factory4Workshop4_10Line\Factory4Workshop4_10LineVibTest.cs" />
     <Compile Include="DataCollection\Factory6Workshop6_1Test.cs" />
     <Compile Include="DataCollection\Factory6Workshop6_3Test.cs" />
-    <Compile Include="HubTest.cs" />
-    <Compile Include="LogTest.cs" />
-    <Compile Include="OtherPakeg\MapsterTest.cs" />
+    <Compile Include="OtherPackage\HubTest.cs" />
+    <Compile Include="OtherPackage\LogTest.cs" />
+    <Compile Include="OtherPackage\MapsterTest.cs" />
     <Compile Include="PLC\Mc1ECommunicationTest.cs" />
     <Compile Include="PLC\McpCommunicationTest.cs" />
     <Compile Include="PLC\OmronCommunicationTest.cs" />

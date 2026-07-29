@@ -12,7 +12,7 @@ using System.Configuration;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace UnitTestProject
+namespace UnitTestProject.OtherPackage
 {
     [TestClass]
     public class HubTest

@@ -68,6 +68,42 @@ namespace UnitTestProject.PLC
         }
 
         [TestMethod]
+        public void Read_X16Address_Bacth()
+        {
+            _server.Write("XA", true);
+            _server.Write("XC", true);
+            _server.Write("X10", true);
+
+            var re = _plcCommunication.Read(
+                new List<DevPlcPointDto>()
+                {
+                    GetDevPlcPointDto("A", TypeCode.Boolean, "X"),
+                    GetDevPlcPointDto("C", TypeCode.Boolean, "X"),
+                    GetDevPlcPointDto("10", TypeCode.Boolean, "X"),
+                }
+            );
+
+            Assert.AreEqual(true, bool.Parse(re.Data[0].Value[0].ToString()));
+            Assert.AreEqual(true, bool.Parse(re.Data[1].Value[0].ToString()));
+            Assert.AreEqual(true, bool.Parse(re.Data[2].Value[0].ToString()));
+        }
+
+        [TestMethod]
+        public void Read_X16Address()
+        {
+            _server.Write("XA", true);
+
+            var re = _plcCommunication.Read(GetDevPlcPointDto("A", TypeCode.Boolean, "X"));
+
+            Assert.AreEqual(true, bool.Parse(re.Data.Value[0].ToString()));
+            _server.Write("XC", true);
+            var reLen = _plcCommunication.Read(GetDevPlcPointDto("A", TypeCode.Boolean, "X", 3));
+            Assert.AreEqual(true, bool.Parse(reLen.Data.Value[0].ToString()));
+            Assert.AreEqual(false, (reLen.Data.Value[1].ObjToBool()));
+            Assert.AreEqual(true, bool.Parse(reLen.Data.Value[2].ToString()));
+        }
+
+        [TestMethod]
         public void Write_String()
         {
             var str = "HelloWord";
@@ -79,6 +115,8 @@ namespace UnitTestProject.PLC
 
             Assert.AreEqual(str, readVal.Content.Replace('\0', ' ').Trim());
         }
+
+     
 
         DevPlcPointDto GetDevPlcPointDto(
             string address,

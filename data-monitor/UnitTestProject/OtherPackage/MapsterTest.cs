@@ -9,7 +9,7 @@ using SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Worksho
 using SL.MLineDataPrecisionTracking.Models.Dtos.Factory4Workshop4_10Line;
 using SL.MLineDataPrecisionTracking.Models.Entities.Factory4Workshop4_10Line;
 
-namespace UnitTestProject.OtherPakeg
+namespace UnitTestProject.OtherPackage
 {
     [TestClass]
     public class MapsterTest

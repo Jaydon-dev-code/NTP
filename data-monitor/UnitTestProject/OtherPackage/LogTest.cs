@@ -4,7 +4,7 @@ using Serilog;
 using SL.MLineDataPrecisionTracking.Core.Middleware;
 using System;
 
-namespace UnitTestProject
+namespace UnitTestProject.OtherPackage
 {
     [TestClass]
     public class LogTest
@@ -16,7 +16,7 @@ namespace UnitTestProject
             builder.AddLogMiddleware();
             string userName = "xiaoWang";
             Log.Debug("this debug log");
-            Log.Debug("this debug param log {userName}",userName);
+            Log.Debug("this debug param log {userName}", userName);
 
             Log.Information("this info  log ");
             Log.Information("this info param log {userName}", userName);
@@ -34,7 +34,7 @@ namespace UnitTestProject
 
                 Log.Error("this Error param log {ex}", ex);
             }
-        
+
         }
     }
 }
