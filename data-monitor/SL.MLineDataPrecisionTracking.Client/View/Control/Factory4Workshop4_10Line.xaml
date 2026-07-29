@@ -387,18 +387,17 @@
                             Grid.Column="4"
                             Command="{Binding QueryCommand}"
                             Content="查询"
-                            IsEnabled="{Binding IsScanCode, Converter={StaticResource BoolInverter}}"
-                            Style="{StaticResource ButtonPrimary.Small}" />
+                            IsEnabled="{Binding IsScanCode, Converter={StaticResource BoolInverter}}" />
                         <Button
                             Grid.Row="2"
                             Grid.Column="5"
                             Command="{Binding SaveQueryCommand}"
-                            Content="导出"
-                            Style="{StaticResource ButtonInfo.Small}" />
+                            Content="导出" />
                         <CheckBox
                             Name="IsScanCode"
-                            Grid.Row="0"
-                            Grid.Column="6"
+                            Grid.Row="2"
+                            Grid.Column="3"
+                            HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Command="{Binding OpenScanCodeModelCommand}"
                             CommandParameter="{Binding ElementName=MarkingNo}"
