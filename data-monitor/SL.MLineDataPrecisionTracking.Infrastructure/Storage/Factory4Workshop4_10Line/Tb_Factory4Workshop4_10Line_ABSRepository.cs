@@ -1,6 +1,5 @@
 using NPOI.SS.Formula.Functions;
 using SL.MLineDataPrecisionTracking.Models.Entities.Factory4Workshop4_10Line;
-using SL.MLineDataPrecisionTracking.Models.Entitss.Factory4Workshop4_10Line;
 using SqlSugar;
 using System;
 using System.Collections.Generic;
