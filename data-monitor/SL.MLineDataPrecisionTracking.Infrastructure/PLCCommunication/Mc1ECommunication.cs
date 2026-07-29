@@ -57,7 +57,13 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
 
                 byte[] req = new Mc1ERead().ToByte(prefix, addr, wordLen,readPlcInfo.DataType);
                 byte[] resp = SendWithRetry(readPlcInfo.IpAddress, readPlcInfo.Port, req);
-                byte[] rawData = Mc1ERead.GetResponseData(resp);
+                if (resp == null || resp.Length < 1)
+                    throw new Exception("读响应为空");
+
+                if (resp[0] != (byte)(req[0] | 0x80))
+                    throw new Exception($"PLC 返回错误: 完成码 0x{resp[0]:X2}");
+
+                byte[] rawData = resp.Length > 1 ? resp.Skip(2).ToArray() : new byte[0];
 
                 readPlcInfo.Value = rawData.ConvertToValues(
                     0,
@@ -95,9 +101,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                     {
                         x.Dto,
                         x.Prefix,
-                        Addr = x.Prefix.IsHexDevice()
-                            ? (int)Convert.ToUInt32(x.Dto.Address, 16)
-                            : int.Parse(x.Dto.Address),
+                        Addr =int.Parse(x.Dto.Address),
                         WordLen =x.Dto.DataType == TypeCode.String?(int)Math.Ceiling((double)x.Dto.Length / 2) :x.Dto.Length * x.Dto.DataType.GetTypeOfShortOffset(),
                     })
                     .ToList();
