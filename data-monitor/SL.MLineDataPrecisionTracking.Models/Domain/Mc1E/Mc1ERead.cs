@@ -29,7 +29,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Domain.Mc1E
         /// <param name="wordCount">读取字数</param>
         /// <param name="outTime">监视定时器（ms）</param>
         /// <returns>完整的 1E 读请求帧</returns>
-        public byte[] ToByte(Prefix prefix, int address, int wordCount, TypeCode dataType, int outTime = 10)
+        public byte[] ToByte(Prefix prefix, int address, int wordCount, TypeCode dataType, int outTime = 100)
         {
             this.FunctionCode = dataType==TypeCode.Boolean
                     ? Mc1EFunctionCodeEnum.BatchBitRead:Mc1EFunctionCodeEnum.BatchWordRead;
@@ -60,22 +60,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Domain.Mc1E
             return bytes.ToArray();
         }
 
-        /// <summary>
-        /// 校验响应完成码并提取数据
-        /// </summary>
-        /// <param name="response">PLC 返回的完整响应帧</param>
-        /// <returns>数据部分字节（去除完成码后的剩余字节）</returns>
-        public static byte[] GetResponseData(byte[] response)
-        {
-            if (response == null || response.Length < 1)
-                throw new Exception("读响应为空");
-
-            if (response[0] != 0x00)
-                throw new Exception($"PLC 返回错误: 完成码 0x{response[0]:X2}");
-
-            return response.Length > 1 ? response.Skip(1).ToArray() : new byte[0];
-        }
-
+      
       
     }
 }
