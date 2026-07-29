@@ -10,6 +10,7 @@ using SqlSugar.DbConvert;
 
 namespace SL.MLineDataPrecisionTracking.Models.Entities.Factory4Workshop4_10Line
 {
+    [SugarIndex("unique_Factory4Workshop4_10Line_Vib_SN", nameof(Tb_Factory4Workshop4_10Line_Vib.SN), OrderByType.Desc, true)]
     [SugarTable("Factory4Workshop4_10Line_Vib")]
     public class Tb_Factory4Workshop4_10Line_Vib : Factory4Workshop4_10LineBase
     {

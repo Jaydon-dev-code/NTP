@@ -9,8 +9,9 @@ using SL.MLineDataPrecisionTracking.Models.Enum;
 using SqlSugar;
 using SqlSugar.DbConvert;
 
-namespace SL.MLineDataPrecisionTracking.Models.Entitss.Factory4Workshop4_10Line
+namespace SL.MLineDataPrecisionTracking.Models.Entities.Factory4Workshop4_10Line
 {
+    [SugarIndex("unique_Factory4Workshop4_10Line_ABS_SN", nameof(Tb_Factory4Workshop4_10Line_ABS.SN), OrderByType.Desc, true)]
     [SugarTable("Factory4Workshop4_10Line_ABS")]
     public class Tb_Factory4Workshop4_10Line_ABS : Factory4Workshop4_10LineBase
     {
