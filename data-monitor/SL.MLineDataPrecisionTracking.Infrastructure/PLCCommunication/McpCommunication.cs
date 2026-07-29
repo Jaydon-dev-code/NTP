@@ -40,13 +40,13 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                         readPlcInfo.Port,
                         readPlcInfo.Prefix.ToPrefix(),
                         readPlcInfo.Address,
-                        (ushort)readPlcInfo.Length
+                        (ushort)readPlcInfo.Length,
+                        readPlcInfo.DataType
                     );
                     re.IsSuccess = true;
                 }
                 catch (Exception ex)
                 {
-                    
                     //data = new byte[readPlcInfo.Length * 2];
                     Serilog.Log.Warning(
                         "[Mcp通讯异常]同步读取信息：{readPlcInfo.IpAddress}-{readPlcInfo.Port}-{readPlcInfo.Prefix}-{readPlcInfo.Address}-{readPlcInfo.Length}\r\n{@ex}",
@@ -57,13 +57,14 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                         readPlcInfo.Length,
                         ex
                     );
+                    return Result<DevPlcPointDto>.Fail(re.Message);
                 }
-                //re.Data.Value = data.ConvertToValues(
-                //    0 * readPlcInfo.DataType.GetTypeOfShortOffset(),
-                //    readPlcInfo.DataType,
-                //    readPlcInfo.Length
-                //);
-                return Result<DevPlcPointDto>.Fail(re.Message);
+                re.Data.Value = data.ConvertToValues(
+                    0 * readPlcInfo.DataType.GetTypeOfShortOffset(),
+                    readPlcInfo.DataType,
+                    readPlcInfo.Length
+                );
+
             }
             else
             {
@@ -139,16 +140,15 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             try
             {
                 var prefix = readPlcInfo.Prefix.ToPrefix();
-                //int address = prefix.IsHexDevice()
-                //    ? (int)Convert.ToUInt32(readPlcInfo.Address, 16)
-                //    : int.Parse(readPlcInfo.Address);
-                int address = int.Parse(readPlcInfo.Address);
+                int address = prefix.IsHexDevice()
+                    ? (int)Convert.ToUInt32(StripNonHexChars(readPlcInfo.Address), 16)
+                    : int.Parse(StripNonDigitChars(readPlcInfo.Address));
                 var readValue = PaginatedReadingSync(
                     readPlcInfo.IpAddress,
                     readPlcInfo.Port,
                     prefix,
                     address,
-                    readPlcInfo.Length,
+                    readPlcInfo.Length * readPlcInfo.DataType.GetTypeByteLength(),
                     readPlcInfo.DataType
                 );
 
@@ -205,8 +205,8 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                             {
                                 Item = item,
                                 Addr = isHex
-                                    ? (int)Convert.ToUInt32(item.Address, 16)
-                                    : int.Parse(item.Address),
+                                    ? (int)Convert.ToUInt32(StripNonHexChars(item.Address), 16)
+                                    : int.Parse(StripNonDigitChars(item.Address)),
                             })
                             .ToList();
 
@@ -311,10 +311,44 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             return result;
         }
 
+        private static string StripNonHexChars(string address)
+        {
+            if (string.IsNullOrEmpty(address))
+                return "0";
+            int start = 0;
+            while (start < address.Length && !IsHexChar(address[start]))
+                start++;
+            return start < address.Length ? address.Substring(start) : "0";
+        }
+
+        private static string StripNonDigitChars(string address)
+        {
+            if (string.IsNullOrEmpty(address))
+                return "0";
+            int start = 0;
+            while (start < address.Length && !char.IsDigit(address[start]))
+                start++;
+            return start < address.Length ? address.Substring(start) : "0";
+        }
+
+        private static bool IsHexChar(char c)
+        {
+            return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f');
+        }
+
         private static int ParseAddress(string address, string prefix)
         {
             var p = prefix.ToPrefix();
-            return p.IsHexDevice() ? (int)Convert.ToUInt32(address, 16) : int.Parse(address);
+            if (p.IsHexDevice())
+            {
+                var clean = StripNonHexChars(address);
+                return (int)Convert.ToUInt32(clean, 16);
+            }
+            else
+            {
+                var clean = StripNonDigitChars(address);
+                return int.Parse(clean);
+            }
         }
 
         /// <summary>
@@ -338,13 +372,17 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             {
                 ushort readLen = (ushort)Math.Min(remaining, 960);
 
+                string addrStr = prefix.IsHexDevice()
+                    ? currentAddress.ToString("X")
+                    : currentAddress.ToString();
+
                 try
                 {
                     var data = ReadWithRetrySync(
                         ipAddress,
                         port,
                         prefix,
-                        currentAddress.ToString(),
+                        addrStr,
                         readLen,
                         typeCode
                     );
@@ -356,7 +394,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                             ipAddress,
                             port,
                             prefix,
-                            currentAddress.ToString(),
+                            addrStr,
                             readLen,
                             typeCode
                         );
@@ -454,8 +492,8 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
         {
             var prefix = pointMcWriteDto.Prefix.ToPrefix();
             int address = prefix.IsHexDevice()
-                ? (int)Convert.ToUInt32(pointMcWriteDto.Address, 16)
-                : int.Parse(pointMcWriteDto.Address);
+                ? (int)Convert.ToUInt32(StripNonHexChars(pointMcWriteDto.Address), 16)
+                : int.Parse(StripNonDigitChars(pointMcWriteDto.Address));
 
             return PaginatedWriteing(
                 pointMcWriteDto.IpAddress,
@@ -506,6 +544,8 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             int retryInterval = 300
         )
         {
+            string addrStr = prefix.IsHexDevice() ? address.ToString("X") : address.ToString();
+
             for (int i = 0; i < maxRetry; i++)
             {
                 try
@@ -516,54 +556,54 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                         case TypeCode.Boolean:
                             mcp.BatchWriteBool(
                                 prefix,
-                                address.ToString(),
+                                addrStr,
                                 value.Select(x => bool.Parse(x?.ToString())).ToArray()
                             );
                             break;
                         case TypeCode.Int16:
                             mcp.BatchWriteInt16(
                                 prefix,
-                                address.ToString(),
+                                addrStr,
                                 value.Select(x => short.Parse(x?.ToString())).ToArray()
                             );
                             break;
                         case TypeCode.UInt16:
                             mcp.BatchWriteUInt16(
                                 prefix,
-                                address.ToString(),
+                                addrStr,
                                 value.Select(x => ushort.Parse(x?.ToString())).ToArray()
                             );
                             break;
                         case TypeCode.Int32:
                             mcp.BatchWriteInt32(
                                 prefix,
-                                address.ToString(),
+                                addrStr,
                                 value.Select(x => int.Parse(x?.ToString())).ToArray()
                             );
                             break;
                         case TypeCode.UInt32:
                             mcp.BatchWriteUInt32(
                                 prefix,
-                                address.ToString(),
+                                addrStr,
                                 value.Select(x => UInt32.Parse(x?.ToString())).ToArray()
                             );
                             break;
                         case TypeCode.Single:
                             mcp.BatchWriteSingle(
                                 prefix,
-                                address.ToString(),
+                                addrStr,
                                 value.Select(x => float.Parse(x?.ToString())).ToArray()
                             );
                             break;
                         case TypeCode.Double:
                             mcp.BatchWriteDouble(
                                 prefix,
-                                address.ToString(),
+                                addrStr,
                                 value.Select(x => double.Parse(x?.ToString())).ToArray()
                             );
                             break;
                         case TypeCode.String:
-                            mcp.WriteString(prefix, address.ToString(), string.Concat(value));
+                            mcp.WriteString(prefix, addrStr, string.Concat(value));
                             break;
                         default:
                             throw new NotSupportedException($"不支持的数据类型: {typeCode}");
@@ -588,8 +628,8 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
         {
             var prefix = pointMcWriteDto.Prefix.ToPrefix();
             int address = prefix.IsHexDevice()
-                ? (int)Convert.ToUInt32(pointMcWriteDto.Address, 16)
-                : int.Parse(pointMcWriteDto.Address);
+                ? (int)Convert.ToUInt32(StripNonHexChars(pointMcWriteDto.Address), 16)
+                : int.Parse(StripNonDigitChars(pointMcWriteDto.Address));
 
             return await PaginatedWriteingAsync(
                 pointMcWriteDto.IpAddress,
@@ -640,6 +680,8 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             int retryInterval = 300
         )
         {
+            string addrStr = prefix.IsHexDevice() ? address.ToString("X") : address.ToString();
+
             for (int i = 0; i < maxRetry; i++)
             {
                 try
@@ -650,58 +692,54 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                         case TypeCode.Boolean:
                             await mcp.BatchWriteBoolAsync(
                                 prefix,
-                                address.ToString(),
+                                addrStr,
                                 value.Select(x => bool.Parse(x?.ToString())).ToArray()
                             );
                             break;
                         case TypeCode.Int16:
                             await mcp.BatchWriteInt16Async(
                                 prefix,
-                                address.ToString(),
+                                addrStr,
                                 value.Select(x => short.Parse(x?.ToString())).ToArray()
                             );
                             break;
                         case TypeCode.UInt16:
                             await mcp.BatchWriteUInt16Async(
                                 prefix,
-                                address.ToString(),
+                                addrStr,
                                 value.Select(x => ushort.Parse(x?.ToString())).ToArray()
                             );
                             break;
                         case TypeCode.Int32:
                             await mcp.BatchWriteInt32Async(
                                 prefix,
-                                address.ToString(),
+                                addrStr,
                                 value.Select(x => int.Parse(x?.ToString())).ToArray()
                             );
                             break;
                         case TypeCode.UInt32:
                             await mcp.BatchWriteUInt32Async(
                                 prefix,
-                                address.ToString(),
+                                addrStr,
                                 value.Select(x => UInt32.Parse(x?.ToString())).ToArray()
                             );
                             break;
                         case TypeCode.Single:
                             await mcp.BatchWriteSingleAsync(
                                 prefix,
-                                address.ToString(),
+                                addrStr,
                                 value.Select(x => float.Parse(x?.ToString())).ToArray()
                             );
                             break;
                         case TypeCode.Double:
                             await mcp.BatchWriteDoubleAsync(
                                 prefix,
-                                address.ToString(),
+                                addrStr,
                                 value.Select(x => double.Parse(x?.ToString())).ToArray()
                             );
                             break;
                         case TypeCode.String:
-                            await mcp.WriteStringAsync(
-                                prefix,
-                                address.ToString(),
-                                string.Concat(value)
-                            );
+                            await mcp.WriteStringAsync(prefix, addrStr, string.Concat(value));
                             break;
                         default:
                             throw new NotSupportedException($"不支持的数据类型: {typeCode}");
@@ -728,8 +766,8 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             {
                 var prefix = readPlcInfo.Prefix.ToPrefix();
                 int address = prefix.IsHexDevice()
-                    ? (int)Convert.ToUInt32(readPlcInfo.Address, 16)
-                    : int.Parse(readPlcInfo.Address);
+                    ? (int)Convert.ToUInt32(StripNonHexChars(readPlcInfo.Address), 16)
+                    : int.Parse(StripNonDigitChars(readPlcInfo.Address));
 
                 readValue = await PaginatedReading(
                     readPlcInfo.IpAddress,
@@ -790,8 +828,8 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                             {
                                 Item = item,
                                 Addr = isHex
-                                    ? (int)Convert.ToUInt32(item.Address, 16)
-                                    : int.Parse(item.Address),
+                                    ? (int)Convert.ToUInt32(StripNonHexChars(item.Address), 16)
+                                    : int.Parse(StripNonDigitChars(item.Address)),
                             })
                             .ToList();
 
@@ -929,6 +967,10 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             int retryInterval = 300
         )
         {
+            string addrStr = prefix.IsHexDevice()
+                ? currentAddress.ToString("X")
+                : currentAddress.ToString();
+
             for (int i = 0; i < maxRetry; i++)
             {
                 try
@@ -938,13 +980,13 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                     {
                         data = BoolArrayToByteArrayHighBit(
                             await GetMcp(ipAddress, port)
-                                .BatchReadBoolAsync(prefix, currentAddress.ToString(), readLen)
+                                .BatchReadBoolAsync(prefix, addrStr, readLen)
                         );
                     }
                     else
                     {
                         data = await GetMcp(ipAddress, port)
-                            .BatchReadByteAsync(prefix, currentAddress.ToString(), readLen);
+                            .BatchReadByteAsync(prefix, addrStr, readLen);
                     }
 
                     return data;
