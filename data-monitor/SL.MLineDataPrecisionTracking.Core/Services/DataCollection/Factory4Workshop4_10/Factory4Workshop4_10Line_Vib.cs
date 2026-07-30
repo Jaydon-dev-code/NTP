@@ -94,7 +94,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
 
         protected override async Task<Result<object>> InteractAsync()
         {
-            Tb_Factory4Workshop4_10Line_Vib dataValue;
+            Tb_Factory4Workshop4_10Line_Vib dataValue = null;
             if (_vibReTmp == 0)
             {
                 return Result<object>.Success(null);
@@ -102,15 +102,12 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
 
             var revalue = _mc1ECommunication.Read(_vibSN);
 
-          
             if (revalue.IsSuccess)
             {
                 var sn = _vibSN.Value[0].ToString();
                 if (string.IsNullOrEmpty(sn) == false)
                 {
-                    var clearanceInfo = await _vibRepository.QueryableFirstAsync(x =>
-                    x.SN ==sn
-                );
+                    var clearanceInfo = await _vibRepository.QueryableFirstAsync(x => x.SN == sn);
                     dataValue = new Tb_Factory4Workshop4_10Line_Vib()
                     {
                         VibCrackResult = _vibReTmp == 1 ? ResultEnum.OK : ResultEnum.NG,
@@ -133,7 +130,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                     await _summaryRepository.UpDataAsync(
                         dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
                         x => new { x.SN },
-                        x => new { x.VibCrackResult, x.RecordTime }
+                        x => new { x.VibCrackResult, x.VibCrackTime }
                     );
 
                     ((IClientProxy)_chatHub.Clients.All).Invoke(
@@ -142,12 +139,12 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                         {
                             SN = dataValue.SN,
                             VibCrackResult = dataValue.VibCrackResult,
-                            RecordTime = dataValue.RecordTime,
+                            VibCrackTime = dataValue.VibCrackTime,
                         }
                     );
                 }
             }
-            return Result<object>.Success(null);
+            return Result<object>.Success(dataValue);
         }
 
         protected override async Task NotifyAsync(Result<object> interact)
@@ -253,8 +250,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                     var ccanInfo = soureByte.BytesToAscii(soureLen);
                     //if (!Expand.IsRunningInMSTest())
                     //{
-                        _issueSancInfoPoint.Value[0] = ccanInfo;
-                        _mc1ECommunication.Write(_issueSancInfoPoint);
+                    _issueSancInfoPoint.Value[0] = ccanInfo;
+                    _mc1ECommunication.Write(_issueSancInfoPoint);
                     //}
                     //else
                     //{

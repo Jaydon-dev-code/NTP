@@ -66,7 +66,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         [Description("型号名称")]
         public string ModelName { get; set; }
 
-        [Description("型号名称")]
+        [Description("型号编号")]
         public string ModelNo { get; set; }
 
         [Description("检测结果")]

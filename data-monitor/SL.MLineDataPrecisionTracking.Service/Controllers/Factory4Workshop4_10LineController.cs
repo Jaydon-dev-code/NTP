@@ -149,22 +149,23 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
                 {
                     SN = sn,
                     VibCrackResult = results[rng.Next(2)],
-                    RecordTime = now,
+                    VibCrackTime = now,
                 });
 
                 all.Invoke("RivetingData", new Factory4Workshop4_10Line_RivetAndCrack_RivetingDto
                 {
                     SN = sn,
                     RivetingResult = results[rng.Next(2)],
+                    RivetingInspection1Height = $"{rng.NextDouble() * 10:F3}",
+                    RivetingInspection2Height = $"{rng.NextDouble() * 10:F3}",
+                    RivetingInspectionFormingHeight = $"{rng.NextDouble() * 10:F3}",
                     RivetingTime = now,
                 });
 
                 all.Invoke("SpinRivetingData", new Factory4Workshop4_10Line_RivetAndCrack_SpinRivetingDto
                 {
                     SN = sn,
-                    RivetingInspection1Height = $"{rng.NextDouble() * 10:F3}",
-                    RivetingInspection2Height = $"{rng.NextDouble() * 10:F3}",
-                    SpiralRivetingFormingHeight = $"{rng.NextDouble() * 10:F3}",
+                  
                     SpinRivetingTime = now,
                 });
 

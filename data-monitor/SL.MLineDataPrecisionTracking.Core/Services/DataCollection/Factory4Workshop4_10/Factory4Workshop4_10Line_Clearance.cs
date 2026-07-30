@@ -147,7 +147,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
 
         protected override async Task<Result<object>> InteractAsync()
         {
-            Tb_Factory4Workshop4_10Line_Clearance dataValue;
+            Tb_Factory4Workshop4_10Line_Clearance dataValue = null;
             if (_clearance1ReTmp != _clearance1Re && _clearance1ReTmp != 0)
             {
                 var revalue = _mcp.Read(_clearance1PlcInfo);
@@ -298,7 +298,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                 }
             }
 
-            return Result<object>.Success(null);
+            return Result<object>.Success(dataValue);
         }
 
         protected override async Task NotifyAsync(Result<object> interact)

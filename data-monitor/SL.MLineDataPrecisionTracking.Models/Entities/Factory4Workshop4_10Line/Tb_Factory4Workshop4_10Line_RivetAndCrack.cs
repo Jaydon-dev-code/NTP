@@ -36,13 +36,13 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities.Factory4Workshop4_10Line
         [SugarColumn(ColumnDescription = "旋铆检测时间", IsNullable = true)]
         public DateTime? SpinRivetingTime { get; set; }
 
-        [SugarColumn(ColumnDescription = "旋铆检测1高度", IsNullable = true)]
+        [SugarColumn(ColumnDescription = "铆接检测1高度", IsNullable = true)]
         public string? RivetingInspection1Height { get; set; }
 
-        [SugarColumn(ColumnDescription = "旋铆检测2高度", IsNullable = true)]
+        [SugarColumn(ColumnDescription = "铆接检测2高度", IsNullable = true)]
         public string? RivetingInspection2Height { get; set; }
 
-        [SugarColumn(ColumnDescription = "旋铆成型高度", IsNullable = true)]
-        public string? SpiralRivetingFormingHeight { get; set; }
+        [SugarColumn(ColumnDescription = "铆接成型高度", IsNullable = true)]
+        public string? RivetingInspectionFormingHeight { get; set; }
     }
 }

@@ -1,5 +1,5 @@
-using SL.MLineDataPrecisionTracking.Models.Enum;
 using System;
+using SL.MLineDataPrecisionTracking.Models.Enum;
 
 namespace SL.MLineDataPrecisionTracking.Models.Dtos.Factory4Workshop4_10Line
 {
@@ -7,6 +7,9 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos.Factory4Workshop4_10Line
     {
         public string? SN { get; set; }
         public ResultEnum? RivetingResult { get; set; }
+        public string? RivetingInspection1Height { get; set; }
+        public string? RivetingInspectionFormingHeight { get; set; }
+        public string? RivetingInspection2Height { get; set; }
         public DateTime? RivetingTime { get; set; }
     }
 }

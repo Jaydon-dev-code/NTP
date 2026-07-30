@@ -103,7 +103,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
 
         protected override async Task<Result<object>> InteractAsync()
         {
-            Tb_Factory4Workshop4_10Line_ABS dataValue;
+            Tb_Factory4Workshop4_10Line_ABS dataValue = null;
             if (_aBSPressDownRe != _aBSPressDownReTmp && _aBSPressDownReTmp != 0)
             {
                 var reSN = _mcp.Read(_aBSPressDownSN);
@@ -157,7 +157,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
             if (_absCheckReTmp != _absCheckRe && _absCheckReTmp != 0)
             {
                 var reSN = _mcp.Read(_aBSCheckSN);
-                
+
                 if (reSN.IsSuccess)
                 {
                     var sn = reSN.Data.Value[0].ToString();
@@ -181,17 +181,26 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                                 x => new { x.SN },
                                 x => new { x.ABSCheckResult, x.ABSCheckTime }
                             );
+                            await _summaryRepository.UpDataAsync(
+                                dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
+                                x => x.SN,
+                                x => new { x.ABSCheckResult, x.ABSCheckTime }
+                            );
                         }
                         else
                         {
                             await _aBSRepository.InsertableAsync(dataValue);
+                            await _summaryRepository.UpDataAsync(
+                                dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
+                                x => x.SN,
+                                x => new
+                                {
+                                    x.ABSCheckResult,
+                                    x.ABSCheckTime,
+                                    x.RecordTime,
+                                }
+                            );
                         }
-
-                        await _summaryRepository.UpDataAsync(
-                            dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
-                            x => x.SN,
-                            x => new { x.ABSCheckResult, x.ABSCheckTime }
-                        );
 
                         ((IClientProxy)_chatHub.Clients.All).Invoke(
                             "ABSCheckData",
@@ -206,7 +215,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                 }
             }
 
-            return Result<object>.Success(null);
+            return Result<object>.Success(dataValue);
         }
 
         protected override async Task NotifyAsync(Result<object> interact)

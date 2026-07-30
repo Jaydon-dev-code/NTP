@@ -31,9 +31,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
         List<DevPlcPointDto> _rivetAndCrackResultPlcInfo;
         DevPlcPointDto _rivetingSN;
         DevPlcPointDto _rivetingInspection1HeightPlcInfo;
-        DevPlcPointDto _spiralRivetingFormingHeightPlcInfo;
+        DevPlcPointDto _RivetingInspectionFormingHeightPlcInfo;
         DevPlcPointDto _rivetingInspection2HeightPlcInfo;
-        List<DevPlcPointDto> _spinRivetingPlcInfo;
+        List<DevPlcPointDto> _rivetingInspectionPlcInfo;
         DevPlcPointDto _spinRivetingSNPlcInfo;
         byte _rivetingRe;
         byte _rivetingReTmp;
@@ -59,6 +59,15 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
 
             _spinRivetingOK = _linePlcInfo.First(x => x.PointName == "旋铆检测OK");
             _spinRivetingNG = _linePlcInfo.First(x => x.PointName == "旋铆检测NG");
+            _rivetingInspection1HeightPlcInfo = _linePlcInfo.First(x =>
+               x.PointName == "铆接检测1高度"
+           );
+            _RivetingInspectionFormingHeightPlcInfo = _linePlcInfo.First(x =>
+                x.PointName == "铆接成型高度"
+            );
+            _rivetingInspection2HeightPlcInfo = _linePlcInfo.First(x =>
+                x.PointName == "铆接检测2高度"
+            );
             _rivetAndCrackResultPlcInfo = new()
             {
                 _rivetingOK,
@@ -67,22 +76,15 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                 _spinRivetingNG,
             };
             _rivetingSN = _linePlcInfo.First(x => x.PointName == "铆接SN");
-            _rivetingInspection1HeightPlcInfo = _linePlcInfo.First(x =>
-                x.PointName == "旋铆检测1高度"
-            );
-            _spiralRivetingFormingHeightPlcInfo = _linePlcInfo.First(x =>
-                x.PointName == "旋铆成型高度"
-            );
-            _rivetingInspection2HeightPlcInfo = _linePlcInfo.First(x =>
-                x.PointName == "旋铆检测2高度"
-            );
+           
             _spinRivetingSNPlcInfo = _linePlcInfo.First(x => x.PointName == "旋铆检测SN");
-            _spinRivetingPlcInfo = new List<DevPlcPointDto>()
+            _rivetingInspectionPlcInfo = new List<DevPlcPointDto>()
             {
                 _rivetingInspection1HeightPlcInfo,
-                _spiralRivetingFormingHeightPlcInfo,
+                _RivetingInspectionFormingHeightPlcInfo,
                 _rivetingInspection2HeightPlcInfo,
                 _spinRivetingSNPlcInfo,
+                _rivetingSN
             };
             return Result.Success();
         }
@@ -118,57 +120,84 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
 
         protected override async Task<Result<object>> InteractAsync()
         {
-            Tb_Factory4Workshop4_10Line_RivetAndCrack dataValue;
+            Tb_Factory4Workshop4_10Line_RivetAndCrack dataValue = null;
             if (_rivetingReTmp != _rivetingRe && _rivetingReTmp != 0)
             {
-                var revalue = _mcp.Read(_rivetingSN);
+                var revalue = _mcp.Read(_rivetingInspectionPlcInfo);
                 if (revalue.IsSuccess)
                 {
                     var sn = _rivetingSN.Value[0].ToString();
-                    if (string.IsNullOrEmpty(sn) == false) { }
-
-                    var clearanceInfo = await _rivetAndCrackRepository.QueryableFirstAsync(x =>
-                        x.SN == _rivetingSN.Value[0].ToString()
-                    );
-                    dataValue = new Tb_Factory4Workshop4_10Line_RivetAndCrack()
+                    if (string.IsNullOrEmpty(sn) == false)
                     {
-                        RivetingResult = _rivetingReTmp == 1 ? ResultEnum.OK : ResultEnum.NG,
-                        SN = sn,
-                        RivetingTime = DateTime.Now,
-                    };
+                        var clearanceInfo = await _rivetAndCrackRepository.QueryableFirstAsync(x =>
+                            x.SN == _rivetingSN.Value[0].ToString()
+                        );
+                        dataValue = new Tb_Factory4Workshop4_10Line_RivetAndCrack()
+                        {
+                            RivetingResult = _rivetingReTmp == 1 ? ResultEnum.OK : ResultEnum.NG,
+                            RivetingInspection1Height = _rivetingInspection1HeightPlcInfo
+                                .Value[0]
+                                .ToString(),
+                            RivetingInspectionFormingHeight = _RivetingInspectionFormingHeightPlcInfo
+                                .Value[0]
+                                .ToString(),
+                            RivetingInspection2Height = _rivetingInspection2HeightPlcInfo
+                                .Value[0]
+                                .ToString(),
+                            SN = sn,
+                            RivetingTime = DateTime.Now,
+                        };
 
-                    if (clearanceInfo != null)
-                    {
-                        await _rivetAndCrackRepository.UpDataAsync(
-                            dataValue,
+                        if (clearanceInfo != null)
+                        {
+                            await _rivetAndCrackRepository.UpDataAsync(
+                                dataValue,
+                                x => new { x.SN },
+                                x => new
+                                {
+                                    x.RivetingResult,
+                                    x.RivetingTime,
+                                    x.RivetingInspection1Height,
+                                    x.RivetingInspectionFormingHeight,
+                                    x.RivetingInspection2Height,
+                                }
+                            );
+                        }
+                        else
+                        {
+                            await _rivetAndCrackRepository.InsertableAsync(dataValue);
+                        }
+                        await _summaryRepository.UpDataAsync(
+                            dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
                             x => new { x.SN },
-                            x => new { x.RivetingResult, x.RivetingTime }
+                            x => new
+                            {
+                                x.RivetingResult,
+                                x.RivetingTime,
+                                x.RivetingInspection1Height,
+                                x.RivetingInspectionFormingHeight,
+                                x.RivetingInspection2Height,
+                            }
+                        );
+
+                        ((IClientProxy)_chatHub.Clients.All).Invoke(
+                            "RivetingData",
+                            new Factory4Workshop4_10Line_RivetAndCrack_RivetingDto
+                            {
+                                SN = dataValue.SN,
+                                RivetingResult = dataValue.RivetingResult,
+                                RivetingInspection1Height = dataValue.RivetingInspection1Height,
+                                RivetingInspectionFormingHeight = dataValue.RivetingInspectionFormingHeight,
+                                RivetingInspection2Height = dataValue.RivetingInspection2Height,
+                                RivetingTime = dataValue.RivetingTime,
+                            }
                         );
                     }
-                    else
-                    {
-                        await _rivetAndCrackRepository.InsertableAsync(dataValue);
-                    }
-                    await _summaryRepository.UpDataAsync(
-                        dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
-                        x => new { x.SN },
-                        x => new { x.RivetingResult, x.RivetingTime }
-                    );
-
-                    ((IClientProxy)_chatHub.Clients.All).Invoke(
-                        "RivetingData",
-                        new Factory4Workshop4_10Line_RivetAndCrack_RivetingDto
-                        {
-                            SN = dataValue.SN,
-                            RivetingResult = dataValue.RivetingResult,
-                            RivetingTime = dataValue.RivetingTime,
-                        }
-                    );
                 }
             }
             if (_spinRivetingRe != _spinRivetingReTmp && _spinRivetingReTmp != 0)
             {
-                var revalue = _mcp.Read(_spinRivetingPlcInfo);
+                var revalue = _mcp.Read(_spinRivetingSNPlcInfo);
                 if (revalue.IsSuccess)
                 {
                     var sn = _spinRivetingSNPlcInfo.Value[0].ToString();
@@ -181,15 +210,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                         {
                             SpinRivetingResult =
                                 _spinRivetingReTmp == 1 ? ResultEnum.OK : ResultEnum.NG,
-                            RivetingInspection1Height = _rivetingInspection1HeightPlcInfo
-                                .Value[0]
-                                .ToString(),
-                            SpiralRivetingFormingHeight = _spiralRivetingFormingHeightPlcInfo
-                                .Value[0]
-                                .ToString(),
-                            RivetingInspection2Height = _rivetingInspection2HeightPlcInfo
-                                .Value[0]
-                                .ToString(),
+
                             SN = sn,
                             SpinRivetingTime = DateTime.Now,
                         };
@@ -199,14 +220,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                             await _rivetAndCrackRepository.UpDataAsync(
                                 dataValue,
                                 x => new { x.SN },
-                                x => new
-                                {
-                                    x.RivetingInspection1Height,
-                                    x.SpiralRivetingFormingHeight,
-                                    x.RivetingInspection2Height,
-                                    x.SpinRivetingTime,
-                                    x.SpinRivetingResult,
-                                }
+                                x => new { x.SpinRivetingTime, x.SpinRivetingResult }
                             );
                         }
                         else
@@ -217,14 +231,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                         await _summaryRepository.UpDataAsync(
                             dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
                             x => x.SN,
-                            x => new
-                            {
-                                x.SpinRivetingResult,
-                                x.RivetingInspection1Height,
-                                x.SpiralRivetingFormingHeight,
-                                x.RivetingInspection2Height,
-                                x.SpinRivetingTime,
-                            }
+                            x => new { x.SpinRivetingResult, x.SpinRivetingTime }
                         );
 
                         ((IClientProxy)_chatHub.Clients.All).Invoke(
@@ -232,9 +239,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                             new Factory4Workshop4_10Line_RivetAndCrack_SpinRivetingDto
                             {
                                 SN = dataValue.SN,
-                                RivetingInspection1Height = dataValue.RivetingInspection1Height,
-                                SpiralRivetingFormingHeight = dataValue.SpiralRivetingFormingHeight,
-                                RivetingInspection2Height = dataValue.RivetingInspection2Height,
+
                                 SpinRivetingTime = dataValue.SpinRivetingTime,
                             }
                         );

@@ -151,8 +151,8 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             set => SetProperty(ref _paginationPages, value);
         }
 
-        private ObservableCollection<Tb_Factory4Workshop4_10LineSummary> _queryValue = new();
-        public ObservableCollection<Tb_Factory4Workshop4_10LineSummary> QueryValue
+        private ObservableCollection<Factory4Workshop4_10LineSummaryDto> _queryValue = new();
+        public ObservableCollection<Factory4Workshop4_10LineSummaryDto> QueryValue
         {
             get => _queryValue;
             set => SetProperty(ref _queryValue, value);
@@ -173,8 +173,8 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
         }
 
         Factory4Workshop4_10LineSummaryApi _summaryApi;
-        List<Tb_Factory4Workshop4_10LineSummary> _quValues = new();
-        List<Tb_Factory4Workshop4_10LineSummary> _mkNoQuValues = new();
+        List<Factory4Workshop4_10LineSummaryDto> _quValues = new();
+        List<Factory4Workshop4_10LineSummaryDto> _mkNoQuValues = new();
 
         private AsyncRelayCommand _queryCommand;
         public AsyncRelayCommand QueryCommand
@@ -340,7 +340,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             if (saveFileDialog.ShowDialog() != true)
                 return;
 
-            List<Tb_Factory4Workshop4_10LineSummary> re;
+            List<Factory4Workshop4_10LineSummaryDto> re;
             if (IsScanCode)
             {
                 if (HistoryScanMarkingNos.Count == 0)
@@ -420,14 +420,14 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             };
             var apiResult = await _summaryApi.SNQuery(request);
 
-            Tb_Factory4Workshop4_10LineSummary findValue;
+            Factory4Workshop4_10LineSummaryDto findValue;
             if (apiResult.IsSuccess && apiResult.Data?.List?.Count > 0)
             {
                 findValue = apiResult.Data.List.First();
             }
             else
             {
-                findValue = new Tb_Factory4Workshop4_10LineSummary { SN = QuerySN };
+                findValue = new Factory4Workshop4_10LineSummaryDto { SN = QuerySN };
             }
 
             var historyScan = HistoryScanMarkingNos.FirstOrDefault(x => x.MarkingNo == QuerySN);

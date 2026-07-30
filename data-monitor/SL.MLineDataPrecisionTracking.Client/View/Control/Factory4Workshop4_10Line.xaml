@@ -29,8 +29,6 @@
                 <Setter Property="BorderThickness" Value="0" />
                 <Setter Property="IsReadOnly" Value="True" />
                 <Setter Property="FontSize" Value="18" />
-
-
             </Style>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -140,6 +138,9 @@
                                     <hc:TextBox hc:InfoElement.Title="检测结果：" Text="{Binding RivetingData.RivetingResult}" />
                                     <hc:TextBox hc:InfoElement.Title="SN：" Text="{Binding RivetingData.SN}" />
                                     <hc:TextBox hc:InfoElement.Title="采集时间：" Text="{Binding RivetingData.RivetingTime, StringFormat={}{0:yyyy/MM/dd HH:mm:ss}}" />
+                                    <hc:TextBox hc:InfoElement.Title="高度检测#1：" Text="{Binding RivetingData.RivetingInspection1Height}" />
+                                    <hc:TextBox hc:InfoElement.Title="高度检测#2：" Text="{Binding RivetingData.RivetingInspection2Height}" />
+                                    <hc:TextBox hc:InfoElement.Title="成型高度：" Text="{Binding RivetingData.RivetingInspectionFormingHeight}" />
                                 </hc:UniformSpacingPanel>
                             </Grid>
                         </GroupBox>
@@ -172,9 +173,6 @@
                                     Spacing="10">
                                     <hc:TextBox hc:InfoElement.Title="SN：" Text="{Binding SpinRivetingData.SN}" />
                                     <hc:TextBox hc:InfoElement.Title="采集时间：" Text="{Binding SpinRivetingData.SpinRivetingTime, StringFormat={}{0:yyyy/MM/dd HH:mm:ss}}" />
-                                    <hc:TextBox hc:InfoElement.Title="高度检测#1：" Text="{Binding SpinRivetingData.RivetingInspection1Height}" />
-                                    <hc:TextBox hc:InfoElement.Title="高度检测#2：" Text="{Binding SpinRivetingData.RivetingInspection2Height}" />
-                                    <hc:TextBox hc:InfoElement.Title="成型高度：" Text="{Binding SpinRivetingData.SpiralRivetingFormingHeight}" />
                                 </hc:UniformSpacingPanel>
                             </Grid>
                         </GroupBox>
@@ -197,11 +195,19 @@
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
                                 <UniformGrid Grid.Row="0" Columns="2">
-                                    <TextBlock Style="{DynamicResource TextBlockSubTitle}" Text="设备状态" />
+                                    <TextBlock
+                                        Margin="10,0,0,0"
+                                        HorizontalAlignment="Left"
+                                        Style="{DynamicResource TextBlockSubTitle}"
+                                        Text="设备状态" />
                                     <Label Content="{Binding IsOnlieVib, Converter={StaticResource BoolToStringConverter}}" Style="{Binding IsOnlieVib, Converter={StaticResource BoolToStyleConverter}}" />
                                 </UniformGrid>
                                 <UniformGrid Grid.Row="1" Columns="2">
-                                    <TextBlock Style="{DynamicResource TextBlockSubTitle}" Text="扫码枪状态" />
+                                    <TextBlock
+                                        Margin="10,0,0,0"
+                                        HorizontalAlignment="Left"
+                                        Style="{DynamicResource TextBlockSubTitle}"
+                                        Text="扫码枪状态" />
                                     <Label Content="{Binding IsOnlieVibScan, Converter={StaticResource BoolToStringConverter}}" Style="{Binding IsOnlieVibScan, Converter={StaticResource BoolToStyleConverter}}" />
                                 </UniformGrid>
                                 <hc:UniformSpacingPanel
@@ -212,7 +218,7 @@
                                     Spacing="10">
                                     <hc:TextBox hc:InfoElement.Title="检测结果：" Text="{Binding VibData.VibCrackResult}" />
                                     <hc:TextBox hc:InfoElement.Title="SN：" Text="{Binding VibData.SN}" />
-                                    <hc:TextBox hc:InfoElement.Title="采集时间：" Text="{Binding VibData.RecordTime, StringFormat={}{0:yyyy/MM/dd HH:mm:ss}}" />
+                                    <hc:TextBox hc:InfoElement.Title="采集时间：" Text="{Binding VibData.VibCrackTime, StringFormat={}{0:yyyy/MM/dd HH:mm:ss}}" />
                                 </hc:UniformSpacingPanel>
                             </Grid>
                         </GroupBox>
@@ -482,11 +488,6 @@
                                             IsReadOnly="True" />
                                         <DataGridTextColumn
                                             MinWidth="100"
-                                            Binding="{Binding SpinRivetingResult}"
-                                            Header="旋铆结果"
-                                            IsReadOnly="True" />
-                                        <DataGridTextColumn
-                                            MinWidth="100"
                                             Binding="{Binding RivetingInspection1Height}"
                                             Header="旋铆高度1"
                                             IsReadOnly="True" />
@@ -497,9 +498,15 @@
                                             IsReadOnly="True" />
                                         <DataGridTextColumn
                                             MinWidth="100"
-                                            Binding="{Binding SpiralRivetingFormingHeight}"
+                                            Binding="{Binding RivetingInspectionFormingHeight}"
                                             Header="成型高度"
                                             IsReadOnly="True" />
+                                        <DataGridTextColumn
+                                            MinWidth="100"
+                                            Binding="{Binding SpinRivetingResult}"
+                                            Header="旋铆结果"
+                                            IsReadOnly="True" />
+
                                         <DataGridTextColumn
                                             MinWidth="100"
                                             Binding="{Binding VibCrackResult}"
