@@ -71,13 +71,14 @@ namespace UnitTestProject
             var rivetingOK = lineInfo.First(x => x.PointName == "铆接OK");
             var rivetingNG = lineInfo.First(x => x.PointName == "铆接NG");
             var rivetingSN = lineInfo.First(x => x.PointName == "铆接SN");
+            var rivetingInspection1Height = lineInfo.First(x => x.PointName == "铆接检测1高度");
+            var RivetingInspectionFormingHeight = lineInfo.First(x => x.PointName == "铆接成型高度");
+            var rivetingInspection2Height = lineInfo.First(x => x.PointName == "铆接检测2高度");
 
             var spinRivetingOK = lineInfo.First(x => x.PointName == "旋铆检测OK");
             var spinRivetingNG = lineInfo.First(x => x.PointName == "旋铆检测NG");
             var spinRivetingSN = lineInfo.First(x => x.PointName == "旋铆检测SN");
-            var rivetingInspection1Height = lineInfo.First(x => x.PointName == "旋铆检测1高度");
-            var spiralRivetingFormingHeight = lineInfo.First(x => x.PointName == "旋铆成型高度");
-            var rivetingInspection2Height = lineInfo.First(x => x.PointName == "旋铆检测2高度");
+        
 
             int num = 2000;
 
@@ -85,7 +86,9 @@ namespace UnitTestProject
             {
                 string sn = $"TEST_{i}";
                 _server.Write(rivetingSN.Prefix + rivetingSN.Address, sn);
-
+                _server.Write(rivetingInspection1Height.Prefix + rivetingInspection1Height.Address, num++);
+                _server.Write(RivetingInspectionFormingHeight.Prefix + RivetingInspectionFormingHeight.Address, num++);
+                _server.Write(rivetingInspection2Height.Prefix + rivetingInspection2Height.Address, num++);
                 _server.Write(rivetingOK.Prefix + rivetingOK.Address, true);
                 _server.Write(rivetingNG.Prefix + rivetingNG.Address, false);
 
@@ -100,9 +103,7 @@ namespace UnitTestProject
             {
                 string sn = $"TEST_{i}";
                 _server.Write(spinRivetingSN.Prefix + spinRivetingSN.Address, sn);
-                _server.Write(rivetingInspection1Height.Prefix + rivetingInspection1Height.Address, num++);
-                _server.Write(spiralRivetingFormingHeight.Prefix + spiralRivetingFormingHeight.Address, num++);
-                _server.Write(rivetingInspection2Height.Prefix + rivetingInspection2Height.Address, num++);
+               
 
                 _server.Write(spinRivetingOK.Prefix + spinRivetingOK.Address, true);
                 _server.Write(spinRivetingNG.Prefix + spinRivetingNG.Address, false);
@@ -114,7 +115,7 @@ namespace UnitTestProject
                 await Task.Delay(3 * 1000);
             }
 
-            await Task.Delay(10 * 100000);
+            await Task.Delay(5 * 1000);
         }
 
         private async Task<List<DevPlcPointDto>> InitPlcAddre(string lineName)

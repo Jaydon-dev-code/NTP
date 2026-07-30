@@ -38,7 +38,7 @@ namespace UnitTestProject
                 ActiveTimeSpan = TimeSpan.Parse("01:00:00"),
                 EnableIPv6 = false,
             };
-            _server.ServerStart(9000);
+            _server.ServerStart(4005);
         }
 
         [TestMethod]
@@ -125,7 +125,7 @@ namespace UnitTestProject
                 await Task.Delay(3 * 1000);
             }
 
-            await Task.Delay(10 * 100000);
+            await Task.Delay(5*1000);
         }
 
         private async Task<List<DevPlcPointDto>> InitPlcAddre(string lineName)
