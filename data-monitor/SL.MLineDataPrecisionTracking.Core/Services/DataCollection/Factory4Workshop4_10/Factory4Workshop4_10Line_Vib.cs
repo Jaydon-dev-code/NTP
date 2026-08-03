@@ -236,6 +236,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                 while (true)
                 {
                     int len = client.Receive(buffer);
+                    ((IClientProxy)_chatHub.Clients.All).Invoke("IsOnlieVibScan", true);
                     if (len <= 0)
                     {
                         Serilog.Log.Warning(
