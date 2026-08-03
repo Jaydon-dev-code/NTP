@@ -60,8 +60,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
             _spinRivetingOK = _linePlcInfo.First(x => x.PointName == "旋铆检测OK");
             _spinRivetingNG = _linePlcInfo.First(x => x.PointName == "旋铆检测NG");
             _rivetingInspection1HeightPlcInfo = _linePlcInfo.First(x =>
-               x.PointName == "铆接检测1高度"
-           );
+                x.PointName == "铆接检测1高度"
+            );
             _RivetingInspectionFormingHeightPlcInfo = _linePlcInfo.First(x =>
                 x.PointName == "铆接成型高度"
             );
@@ -76,7 +76,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                 _spinRivetingNG,
             };
             _rivetingSN = _linePlcInfo.First(x => x.PointName == "铆接SN");
-           
+
             _spinRivetingSNPlcInfo = _linePlcInfo.First(x => x.PointName == "旋铆检测SN");
             _rivetingInspectionPlcInfo = new List<DevPlcPointDto>()
             {
@@ -84,7 +84,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                 _RivetingInspectionFormingHeightPlcInfo,
                 _rivetingInspection2HeightPlcInfo,
                 _spinRivetingSNPlcInfo,
-                _rivetingSN
+                _rivetingSN,
             };
             return Result.Success();
         }
@@ -138,9 +138,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                             RivetingInspection1Height = _rivetingInspection1HeightPlcInfo
                                 .Value[0]
                                 .ToString(),
-                            RivetingInspectionFormingHeight = _RivetingInspectionFormingHeightPlcInfo
-                                .Value[0]
-                                .ToString(),
+                            RivetingInspectionFormingHeight =
+                                _RivetingInspectionFormingHeightPlcInfo.Value[0].ToString(),
                             RivetingInspection2Height = _rivetingInspection2HeightPlcInfo
                                 .Value[0]
                                 .ToString(),
@@ -187,7 +186,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                                 SN = dataValue.SN,
                                 RivetingResult = dataValue.RivetingResult,
                                 RivetingInspection1Height = dataValue.RivetingInspection1Height,
-                                RivetingInspectionFormingHeight = dataValue.RivetingInspectionFormingHeight,
+                                RivetingInspectionFormingHeight =
+                                    dataValue.RivetingInspectionFormingHeight,
                                 RivetingInspection2Height = dataValue.RivetingInspection2Height,
                                 RivetingTime = dataValue.RivetingTime,
                             }
@@ -195,12 +195,14 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                     }
                 }
             }
+
             if (_spinRivetingRe != _spinRivetingReTmp && _spinRivetingReTmp != 0)
             {
                 var revalue = _mcp.Read(_spinRivetingSNPlcInfo);
                 if (revalue.IsSuccess)
                 {
                     var sn = _spinRivetingSNPlcInfo.Value[0].ToString();
+
                     if (string.IsNullOrEmpty(sn) == false)
                     {
                         var spinInfo = await _rivetAndCrackRepository.QueryableFirstAsync(x =>
@@ -239,14 +241,14 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                             new Factory4Workshop4_10Line_RivetAndCrack_SpinRivetingDto
                             {
                                 SN = dataValue.SN,
-
+                                SpinRivetingResult = dataValue.SpinRivetingResult,
                                 SpinRivetingTime = dataValue.SpinRivetingTime,
                             }
                         );
                     }
                 }
             }
-            return Result<object>.Success(null);
+            return Result<object>.Success(dataValue);
         }
 
         protected override async Task NotifyAsync(Result<object> interact)
