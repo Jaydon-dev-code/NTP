@@ -171,6 +171,7 @@
                                     HorizontalAlignment="Left"
                                     Orientation="Vertical"
                                     Spacing="10">
+                                    <hc:TextBox hc:InfoElement.Title="检测结果：" Text="{Binding SpinRivetingData.SpinRivetingResult}" />
                                     <hc:TextBox hc:InfoElement.Title="SN：" Text="{Binding SpinRivetingData.SN}" />
                                     <hc:TextBox hc:InfoElement.Title="采集时间：" Text="{Binding SpinRivetingData.SpinRivetingTime, StringFormat={}{0:yyyy/MM/dd HH:mm:ss}}" />
                                 </hc:UniformSpacingPanel>
@@ -195,19 +196,11 @@
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
                                 <UniformGrid Grid.Row="0" Columns="2">
-                                    <TextBlock
-                                        Margin="10,0,0,0"
-                                        HorizontalAlignment="Left"
-                                        Style="{DynamicResource TextBlockSubTitle}"
-                                        Text="设备状态" />
+                                    <TextBlock Style="{DynamicResource TextBlockSubTitle}" Text="设备状态" />
                                     <Label Content="{Binding IsOnlieVib, Converter={StaticResource BoolToStringConverter}}" Style="{Binding IsOnlieVib, Converter={StaticResource BoolToStyleConverter}}" />
                                 </UniformGrid>
                                 <UniformGrid Grid.Row="1" Columns="2">
-                                    <TextBlock
-                                        Margin="10,0,0,0"
-                                        HorizontalAlignment="Left"
-                                        Style="{DynamicResource TextBlockSubTitle}"
-                                        Text="扫码枪状态" />
+                                    <TextBlock Style="{DynamicResource TextBlockSubTitle}" Text="扫码枪状态" />
                                     <Label Content="{Binding IsOnlieVibScan, Converter={StaticResource BoolToStringConverter}}" Style="{Binding IsOnlieVibScan, Converter={StaticResource BoolToStyleConverter}}" />
                                 </UniformGrid>
                                 <hc:UniformSpacingPanel
