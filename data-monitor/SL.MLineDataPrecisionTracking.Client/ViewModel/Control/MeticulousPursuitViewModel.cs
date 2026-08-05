@@ -19,6 +19,7 @@ using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Dtos;
 using SL.MLineDataPrecisionTracking.Models.Dtos.Request;
 using SL.MLineDataPrecisionTracking.Models.Entities;
+using static SL.MLineDataPrecisionTracking.Infrastructure.Common.Expand;
 
 namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 {
@@ -343,8 +344,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             if (saveFileDialog.ShowDialog() != true)
                 return;
 
-            List<LineSummaryDto> re = new List<LineSummaryDto>();
-            // 扫码模式单独判断
+            // 扫码模式：直接导出当前已加载的数据（数据量小）
             if (QueryConditions?.IsScanCode == true)
             {
                 if (HistoryScanMarkingNos.Count == 0)
@@ -353,48 +353,90 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                     return;
                 }
 
-                re = QueryValue.ToList();
+                var scanData = QueryValue.ToList();
+                if (scanData.Count == 0)
+                {
+                    HandyControl.Controls.MessageBox.Warning(
+                        "未检测到导出的数据信息，请检测搜索条件后再次导出！"
+                    );
+                    return;
+                }
+                var scanEx = Expand.ExportToExcel(scanData, saveFileDialog.FileName);
+                if (scanEx.IsSuccess)
+                {
+                    HandyControl.Controls.MessageBox.Success("导出完成！");
+                }
+                else
+                {
+                    HandyControl.Controls.MessageBox.Warning($"导出失败！/r/n{scanEx.Message}");
+                }
+                return;
             }
-            else
+
+            // 时间范围查询：分页导出，边查边写，避免大数据量占用内存
+            var startTime = QueryConditions.StartDate.Date + QueryConditions.StartTime.TimeOfDay;
+            var endTime = QueryConditions.EndDate.Date + QueryConditions.EndTime.TimeOfDay;
+            if (startTime > endTime)
             {
-                // 时间校验
-                var startTime = QueryConditions.StartDate.Date + QueryConditions.StartTime.TimeOfDay;
-                var endTime = QueryConditions.EndDate.Date + QueryConditions.EndTime.TimeOfDay;
-                if (startTime > endTime)
-                {
-                    HandyControl.Controls.MessageBox.Warning("起始时间不能大于结束时间！");
-                    return;
-                }
-
-                var request = new LineSummaryQueryRequestDto
-                {
-                    RefinedSearch = QueryConditions
-                };
-
-                var apiResult = await _meticulousPursuitApi.SaveQuery(request);
-
-                if (!apiResult.IsSuccess)
-                {
-                    HandyControl.Controls.MessageBox.Warning($"查询失败：{apiResult.Message}");
-                    return;
-                }
-
-                re = apiResult.Data.List.Select(x => new LineSummaryDto(x)).ToList();
+                HandyControl.Controls.MessageBox.Warning("起始时间不能大于结束时间！");
+                return;
             }
 
-            if (re?.Count == 0)
+            const int exportPageSize = 5000;
+            var request = new LineSummaryQueryRequestDto
+            {
+                RefinedSearch = QueryConditions,
+                PageNumber = 1,
+                PageSize = exportPageSize
+            };
+
+            var firstPage = await _meticulousPursuitApi.QueryablToPagee(request);
+
+            if (!firstPage.IsSuccess)
+            {
+                HandyControl.Controls.MessageBox.Warning($"查询失败：{firstPage.Message}");
+                return;
+            }
+
+            if (firstPage.Data?.List == null || firstPage.Data.List.Count == 0)
             {
                 HandyControl.Controls.MessageBox.Warning(
                     "未检测到导出的数据信息，请检测搜索条件后再次导出！"
                 );
                 return;
             }
-            var ex = Expand.ExportToExcel<LineSummaryDto>(re, saveFileDialog.FileName);
-            if (ex.IsSuccess)
+
+            try
             {
+                using (
+                    ExcelExportWriter<LineSummaryDto> writer =
+                        new ExcelExportWriter<LineSummaryDto>(saveFileDialog.FileName)
+                )
+                {
+                    writer.WriteRows(
+                        firstPage.Data.List.Select(x => new LineSummaryDto(x))
+                    );
+
+                    for (int page = 2; page <= firstPage.Data.TotalPage; page++)
+                    {
+                        request.PageNumber = page;
+                        var apiResult = await _meticulousPursuitApi.QueryablToPagee(request);
+                        if (!apiResult.IsSuccess)
+                        {
+                            HandyControl.Controls.MessageBox.Warning(
+                                $"查询失败：{apiResult.Message}"
+                            );
+                            return;
+                        }
+                        writer.WriteRows(
+                            apiResult.Data.List.Select(x => new LineSummaryDto(x))
+                        );
+                    }
+                }
+
                 HandyControl.Controls.MessageBox.Success("导出完成！");
             }
-            else
+            catch (Exception ex)
             {
                 HandyControl.Controls.MessageBox.Warning($"导出失败！/r/n{ex.Message}");
             }

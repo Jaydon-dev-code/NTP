@@ -108,6 +108,7 @@
     </Compile>
     <Compile Include="Common\EnumDescriptionConverter.cs" />
     <Compile Include="Common\EnumToStringtConverter.cs" />
+    <Compile Include="Common\IntEqualsConverter.cs" />
     <Compile Include="Common\ViewLinkServerInfoAttribute.cs" />
     <Compile Include="Common\ViewServiceMapper.cs" />
     <Compile Include="Http\BaseHttp.cs" />

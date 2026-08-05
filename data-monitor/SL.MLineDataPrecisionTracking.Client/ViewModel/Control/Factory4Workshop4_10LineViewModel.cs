@@ -13,6 +13,7 @@ using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Dtos.Factory4Workshop4_10Line;
 using SL.MLineDataPrecisionTracking.Models.Dtos.Request;
 using SL.MLineDataPrecisionTracking.Models.Entities.Factory4Workshop4_10Line;
+using static SL.MLineDataPrecisionTracking.Infrastructure.Common.Expand;
 
 namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 {
@@ -340,7 +341,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             if (saveFileDialog.ShowDialog() != true)
                 return;
 
-            List<Factory4Workshop4_10LineSummaryDto> re;
+            // 扫码模式：直接导出当前已加载的数据（数据量小）
             if (IsScanCode)
             {
                 if (HistoryScanMarkingNos.Count == 0)
@@ -348,39 +349,84 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                     HandyControl.Controls.MessageBox.Warning("暂无可导出的扫码数据！");
                     return;
                 }
-                re = QueryValue.ToList();
-            }
-            else
-            {
-                var startTime = QueryStartDate.Date + QueryStartTime.TimeOfDay;
-                var endTime = QueryEndDate.Date + QueryEndTime.TimeOfDay;
-                var request = new Factory4Workshop4_10LineSummaryQueryRequestDto
+                var scanData = QueryValue.ToList();
+                if (scanData?.Count == 0)
                 {
-                    StartTime = startTime,
-                    EndTime = endTime,
-                    SN = QuerySN,
-                };
-                var apiResult = await _summaryApi.SaveQuery(request);
-
-                if (!apiResult.IsSuccess)
-                {
-                    HandyControl.Controls.MessageBox.Warning($"导出查询失败：{apiResult.Message}");
+                    HandyControl.Controls.MessageBox.Warning("未检测到导出的数据信息，请检测搜索条件后再次导出！");
                     return;
                 }
-                re = apiResult.Data.List;
+                var scanEx = Expand.ExportToExcel(scanData, saveFileDialog.FileName);
+                if (scanEx.IsSuccess)
+                {
+                    HandyControl.Controls.MessageBox.Success("导出完成！");
+                }
+                else
+                {
+                    HandyControl.Controls.MessageBox.Warning($"导出失败！\r\n{scanEx.Message}");
+                }
+                return;
             }
 
-            if (re?.Count == 0)
+            // 时间范围查询：分页导出，边查边写，避免大数据量占用内存
+            var startTime = QueryStartDate.Date + QueryStartTime.TimeOfDay;
+            var endTime = QueryEndDate.Date + QueryEndTime.TimeOfDay;
+            if (startTime > endTime)
+            {
+                HandyControl.Controls.MessageBox.Warning("起始时间不能大于结束时间！");
+                return;
+            }
+
+            const int exportPageSize = 5000;
+            var request = new Factory4Workshop4_10LineSummaryQueryRequestDto
+            {
+                StartTime = startTime,
+                EndTime = endTime,
+                SN = QuerySN,
+                PageNumber = 1,
+                PageSize = exportPageSize
+            };
+
+            var firstPage = await _summaryApi.QueryablToPagee(request);
+
+            if (!firstPage.IsSuccess)
+            {
+                HandyControl.Controls.MessageBox.Warning($"导出查询失败：{firstPage.Message}");
+                return;
+            }
+
+            if (firstPage.Data?.List == null || firstPage.Data.List.Count == 0)
             {
                 HandyControl.Controls.MessageBox.Warning("未检测到导出的数据信息，请检测搜索条件后再次导出！");
                 return;
             }
-            var ex = Expand.ExportToExcel(re, saveFileDialog.FileName);
-            if (ex.IsSuccess)
+
+            try
             {
+                using (
+                    ExcelExportWriter<Factory4Workshop4_10LineSummaryDto> writer =
+                        new ExcelExportWriter<Factory4Workshop4_10LineSummaryDto>(
+                            saveFileDialog.FileName
+                        )
+                )
+                {
+                    writer.WriteRows(firstPage.Data.List);
+
+                    for (int page = 2; page <= firstPage.Data.TotalPage; page++)
+                    {
+                        request.PageNumber = page;
+                        var apiResult = await _summaryApi.QueryablToPagee(request);
+                        if (!apiResult.IsSuccess)
+                        {
+                            HandyControl.Controls.MessageBox.Warning($"导出查询失败：{apiResult.Message}");
+                            return;
+                        }
+                        writer.WriteRows(apiResult.Data.List);
+                    }
+                }
+
                 HandyControl.Controls.MessageBox.Success("导出完成！");
             }
-            else
+            catch (Exception ex)
             {
                 HandyControl.Controls.MessageBox.Warning($"导出失败！\r\n{ex.Message}");
             }
