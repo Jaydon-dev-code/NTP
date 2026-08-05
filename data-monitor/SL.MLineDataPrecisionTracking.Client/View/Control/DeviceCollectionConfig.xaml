@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="http://schemas.superdev.ch/valueconverters/2016/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
     xmlns:local="clr-namespace:SL.MLineDataPrecisionTracking.Client.View.Control"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="450"
@@ -16,9 +17,16 @@
             FalseValue="启用"
             TrueValue="禁用" />
     </UserControl.Resources>
-    <StackPanel Margin="10">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
         <!--  导入导出功能  -->
-        <StackPanel Margin="0,0,0,20" Orientation="Horizontal">
+        <StackPanel Grid.Row="0" Margin="0,0,0,20" Orientation="Horizontal">
             <Button
                 Width="100"
                 Margin="0,0,10,0"
@@ -32,13 +40,14 @@
 
         <!--  服务管理标题  -->
         <TextBlock
+            Grid.Row="1"
             Margin="0,0,0,10"
             FontSize="16"
             FontWeight="Bold"
             Text="服务管理" />
 
         <!--  批量操作  -->
-        <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
+        <StackPanel Grid.Row="2" Margin="0,0,0,10" Orientation="Horizontal">
             <Button
                 Width="120"
                 Margin="0,0,10,0"
@@ -57,9 +66,15 @@
 
         <!--  服务列表  -->
         <DataGrid
+            Grid.Row="3"
             Margin="0,10,0,0"
+            hc:DataGridAttach.ShowRowNumber="True"
             AutoGenerateColumns="False"
-            ItemsSource="{Binding Services}">
+            CanUserSortColumns="False"
+            ItemsSource="{Binding Services}"
+            ScrollViewer.CanContentScroll="True"
+            ScrollViewer.HorizontalScrollBarVisibility="Visible"
+            ScrollViewer.VerticalScrollBarVisibility="Visible">
             <DataGrid.Columns>
                 <DataGridTextColumn
                     Width="100"
@@ -145,8 +160,9 @@
 
         <!--  加载状态  -->
         <TextBlock
+            Grid.Row="4"
             Margin="0,10,0,0"
             Text="加载中..."
             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}" />
-    </StackPanel>
+    </Grid>
 </UserControl>

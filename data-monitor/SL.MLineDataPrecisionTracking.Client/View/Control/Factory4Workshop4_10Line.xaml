@@ -414,6 +414,7 @@
                                     Grid.Column="0"
                                     Margin="0,0,15,0"
                                     AutoGenerateColumns="False"
+                                    CanUserSortColumns="False"
                                     ItemsSource="{Binding QueryValue}"
                                     ScrollViewer.CanContentScroll="True"
                                     ScrollViewer.HorizontalScrollBarVisibility="Visible"
