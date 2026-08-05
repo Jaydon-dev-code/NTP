@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Mapster;
 using SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Workshop6_3;
-using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Domain;
@@ -54,22 +54,22 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
         {
             var lineData = (Tb_Factory6Workshop6_1AssemblyLineB)interact.Data;
 
-            lineData.VibrationDetectionResults= GetVibrationDetectionResults(lineData?.VibrationDetectionResults?.Trim());
+            lineData.VibrationDetectionResults = GetVibrationDetectionResults(
+                lineData?.VibrationDetectionResults?.Trim()
+            );
 
             Tb_Factory6Workshop6_1AssemblyLineABSummary tb_LineSummary =
-              new Tb_Factory6Workshop6_1AssemblyLineABSummary() { Result = ResultEnum.OK };
+                new Tb_Factory6Workshop6_1AssemblyLineABSummary() { Result = ResultEnum.OK };
             Tb_Factory6Workshop6_1AssemblyLineA aLineInfo = null;
-            if (lineData.LineATrayNo != "0" && !string.IsNullOrEmpty(lineData.LineATrayNo))
-            {
-                aLineInfo = await _factory6Workshop6_1AssemblyLineARepository.QueryableFirstAsync(
-                    x => x.TrayNoA == lineData.LineATrayNo,
-                    o => o.RecordTime
-                );
-            }
-            else
-            {
-                tb_LineSummary.TrayNoA = lineData.LineATrayNo;
-            }
+
+            // 从数据库查 a 线已绑定（a b 托盘相同）的最新未使用数据
+            aLineInfo = await _factory6Workshop6_1AssemblyLineARepository.QueryableFirstAsync(
+                x =>
+                    x.TrayNoA == lineData.LineATrayNo
+                    && x.TrayNoB == lineData.TrayNoB
+                    && x.IsUsed == false,
+                o => o.RecordTime
+            );
 
           
 
@@ -103,13 +103,21 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                 lineData.ALineFID = aLineInfo.Id;
                 lineData.ALineRecordTime = aLineInfo.RecordTime;
             }
-
+            if (aLineInfo == null)
+            {
+                // 未找到绑定：只搞b线，并标记a线托盘号为0
+                lineData.LineATrayNo = "!" + lineData.LineATrayNo;
+            }
             var bLineFid =
                 await _factory6Workshop6_1AssemblyLineBRepository.InsertableReturnIdentityAsync(
                     lineData
                 );
             ABToSummary(aLineInfo, lineData, tb_LineSummary, new List<string>() { "A线托盘编号" });
-
+            if (aLineInfo == null && lineData.LineATrayNo!="0" && !string.IsNullOrEmpty(lineData.LineATrayNo) )
+            {
+                // 未找到绑定：只搞b线，并标记a线托盘号为0
+                tb_LineSummary.LineATrayNo = "!" + tb_LineSummary.LineATrayNo;
+            }
             tb_LineSummary.ModelNo = lineData.ModelNoB;
             var modelNameB = _models
                 .FirstOrDefault(x => x.ModelNo == tb_LineSummary.ModelNo)
@@ -119,6 +127,14 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
             await _factory6Workshop6_1AssemblyLineABSummaryRepository.InsertableAsync(
                 tb_LineSummary
             );
+
+            // 把 a 线数据标记为已使用
+            if (aLineInfo != null)
+            {
+                aLineInfo.IsUsed = true;
+                await _factory6Workshop6_1AssemblyLineARepository.UpdateableAsync(aLineInfo);
+            }
+
             return lineData;
         }
 
@@ -127,7 +143,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
             switch (vibrationDetectionResults)
             {
                 case null:
-                    return string.Empty;    
+                    return string.Empty;
                 case "0":
                     return "未采集";
 
@@ -138,7 +154,6 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                     return "NG";
                 default:
                     return vibrationDetectionResults;
-                
             }
         }
 
