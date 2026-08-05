@@ -1,6 +1,11 @@
-﻿using Autofac;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Autofac;
 using HslCommunication.Profinet.Melsec;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NPOI.SS.Formula.Functions;
 using SL.MLineDataPrecisionTracking.Core.Middleware;
 using SL.MLineDataPrecisionTracking.Core.Services;
 using SL.MLineDataPrecisionTracking.Core.Services.DataCollection;
@@ -11,10 +16,6 @@ using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Dtos;
 using SL.MLineDataPrecisionTracking.Models.Entities;
 using SqlSugar.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace UnitTestProject.DataCollection
 {
@@ -26,7 +27,7 @@ namespace UnitTestProject.DataCollection
 
         public Factory6Workshop6_1Test()
         {
-           var builder = new ContainerBuilder();
+            var builder = new ContainerBuilder();
             builder.AddInfrastructureMiddleware();
             builder.AddCoreMiddleware();
             builder.AddSqlSugerMiddleware();
@@ -84,13 +85,9 @@ namespace UnitTestProject.DataCollection
             lineInfo.Remove(startPoint);
             lineInfo.Remove(trayNoPoint);
 
-            //EndServer(endPoint, startPoint, mcp);
-
             int val = 1000;
             for (int i = 0; i < 100; i++)
             {
-                //if ((mcp.Read(startPoint)).Data.Value[0].ObjToBool() is false)
-                //{
                 trayNoPoint.Value = new List<object>() { val };
                 mcp.Write(trayNoPoint);
 
@@ -105,15 +102,8 @@ namespace UnitTestProject.DataCollection
                     val++;
                 }
 
-             
-                await Task.Delay(2*1000);
+                await Task.Delay(2 * 1000);
             }
-            //else
-            //{
-            //i--;
-
-        
-            
         }
 
         #endregion
@@ -145,45 +135,34 @@ namespace UnitTestProject.DataCollection
             bService.Start();
 
             var lineInfo = await InitPlcAddre("六分厂6-1装配B线");
-            //var endPoint = lineInfo.FirstOrDefault(x => x.PointName == "采集结束");
+
             var startPoint = lineInfo.FirstOrDefault(x => x.PointName == "采集开始");
             var trayNoPoint = lineInfo.FirstOrDefault(x => x.PointName == "托盘号B");
-            //lineInfo.Remove(endPoint);
+
             lineInfo.Remove(startPoint);
             lineInfo.Remove(trayNoPoint);
             startPoint.Value = new List<object>() { true };
             mcp.Write(startPoint);
 
-            //EndServer(endPoint, startPoint, mcp);
-
             int val = 200;
             for (int i = 0; i < 100; i++)
             {
-  
-                //if ((mcp.Read(startPoint)).Data.Value[0].ObjToBool() is false)
-                //{
                 trayNoPoint.Value = new List<object>() { val };
-                    mcp.Write(trayNoPoint);
+                mcp.Write(trayNoPoint);
 
-                    foreach (var item in lineInfo)
+                foreach (var item in lineInfo)
+                {
+                    item.Value = new List<object>() { val };
+                    if (item.DataType == TypeCode.String)
                     {
-                        item.Value = new List<object>() { val };
-                        if (item.DataType == TypeCode.String)
-                        {
-                            item.Value = new List<object>() { val.ToString() };
-                        }
-                        mcp.Write(item);
-                        val++;
+                        item.Value = new List<object>() { val.ToString() };
                     }
+                    mcp.Write(item);
+                    val++;
+                }
 
-                await Task.Delay(2*1000);
+                await Task.Delay(2 * 1000);
             }
-            //    else
-            //    {
-            //        i--;
-                    
-            //    }
-            //}
         }
 
         #endregion
@@ -210,7 +189,10 @@ namespace UnitTestProject.DataCollection
 
             Task aTask = RunAsync("六分厂6-1装配A线", aService, aTrayNos);
             await Task.Delay(5000);
-            Task bTask = RunAsync("六分厂6-1装配B线", bService, bTrayNos,
+            Task bTask = RunAsync(
+                "六分厂6-1装配B线",
+                bService,
+                bTrayNos,
                 async (lineInfo, index) =>
                 {
                     await Task.Delay(100);
@@ -247,7 +229,10 @@ namespace UnitTestProject.DataCollection
 
             Task aTask = RunAsync("六分厂6-1装配A线", aService, aTrayNos);
             await Task.Delay(5000);
-            Task bTask = RunAsync("六分厂6-1装配B线", bService, bTrayNos,
+            Task bTask = RunAsync(
+                "六分厂6-1装配B线",
+                bService,
+                bTrayNos,
                 async (lineInfo, index) =>
                 {
                     await Task.Delay(100);
@@ -264,6 +249,71 @@ namespace UnitTestProject.DataCollection
             await Task.Delay(20000 * 10);
         }
 
+        [TestMethod]
+        public async Task DataCollectionBindingTest()
+        {
+            await Task.Delay(1000);
+
+            var aService = Container
+                .Resolve<IEnumerable<DataCollectionServiceAbstract>>()
+                .First(x => x.GetType().Name == nameof(Factory6Workshop6_1AssemblyLineA));
+
+            var bService = Container
+                .Resolve<IEnumerable<DataCollectionServiceAbstract>>()
+                .First(x => x.GetType().Name == nameof(Factory6Workshop6_1AssemblyLineB));
+
+            var bindService = Container
+                .Resolve<IEnumerable<DataCollectionServiceAbstract>>()
+                .First(x => x.GetType().Name == nameof(Factory6Workshop6_1AssemblyLineABBinding));
+
+            int[] aTrayNos = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            int[] bTrayNos = new int[] { 10, 20, 30, 40, 50, 60, 70, 80, 90 };
+
+            var mcp = Container.Resolve<McpCommunication>();
+
+            var bLinePoints = await InitPlcAddre("六分厂6-1装配B线");
+            var aBindPoint = bLinePoints.FirstOrDefault(x => x.PointName == "A托盘绑定");
+            var bBindPoint = bLinePoints.FirstOrDefault(x => x.PointName == "B托盘绑定");
+            Assert.IsNotNull(aBindPoint, "未找到点位：A托盘绑定");
+            Assert.IsNotNull(bBindPoint, "未找到点位：B托盘绑定");
+
+            bindService.Start();
+
+            Task aTask = RunAsync("六分厂6-1装配A线", aService, aTrayNos, null);
+            await Task.Delay(5000);
+            var binTask = (async () =>
+            {
+                for (int i = 0; i < 9; i++)
+                {
+                    aBindPoint.Value = new List<object>() { aTrayNos[i] };
+                    bBindPoint.Value = new List<object>() { bTrayNos[i] };
+                    mcp.Write(aBindPoint);
+                    mcp.Write(bBindPoint);
+                    await Task.Delay(1000);
+                }
+            });
+            await Task.WhenAll(aTask);
+            await binTask();
+            Task bTask = RunAsync(
+                "六分厂6-1装配B线",
+                bService,
+                bTrayNos,
+                async (lineInfo, index) =>
+                {
+                    await Task.Delay(100);
+                    var aTrayNoPoint = lineInfo.FirstOrDefault(x => x.PointName == "A线托盘编号");
+                    if (aTrayNoPoint != null)
+                    {
+                        aTrayNoPoint.Value = new List<object>() { aTrayNos[index] };
+                        mcp.Write(aTrayNoPoint);
+                    }
+                }
+            );
+
+            await Task.WhenAll(aTask, bTask);
+            await Task.Delay(2000 * 10);
+        }
+
         #endregion
 
         #region 辅助方法
@@ -278,9 +328,13 @@ namespace UnitTestProject.DataCollection
             lineServer.Start();
 
             var lineInfo = await InitPlcAddre(lineName);
+            var bindPoints = lineInfo.Where(x => x.PointName.Contains("绑定")).ToList();
+            foreach (var bindPoint in bindPoints)
+            {
+                lineInfo.Remove(bindPoint);
+            }
             var startPoint = lineInfo.FirstOrDefault(x => x.PointName == "采集开始");
 
-    
             var pallNotPoint = lineInfo.FirstOrDefault(x => x.PointName.Contains("托盘号"));
             var modelNoPoint = lineInfo.FirstOrDefault(x => x.PointName.Contains("型号"));
             var ngCodeoPoint = lineInfo.FirstOrDefault(x => x.PointName.Contains("NG代码"));
@@ -288,7 +342,6 @@ namespace UnitTestProject.DataCollection
             modelNoPoint.Value = new List<object>() { 4 };
             ngCodeoPoint.Value = new List<object>() { 0 };
 
-     
             lineInfo.Remove(pallNotPoint);
             lineInfo.Remove(ngCodeoPoint);
             lineInfo.Remove(modelNoPoint);
@@ -304,17 +357,14 @@ namespace UnitTestProject.DataCollection
             int val = 1;
             for (int i = 0; i < pallNo.Length; i++)
             {
-              
-                    val = await WriteValueAsync(lineInfo, pallNotPoint, mcp, val, pallNo[i]);
+                if (func != null)
+                {
+                    await func(lineInfo, i);
+                }
 
-                    if (func != null)
-                    {
-                        await func(lineInfo, i);
-                    }
+                val = await WriteValueAsync(lineInfo, pallNotPoint, mcp, val, pallNo[i]);
 
-             
-                    await Task.Delay(2*1000);
-               
+                await Task.Delay(2 * 1000);
             }
         }
 
@@ -331,6 +381,10 @@ namespace UnitTestProject.DataCollection
 
             for (int i = 0; i < lineInfo.Count; i++)
             {
+                if (lineInfo[i].PointName.Contains("托盘编号"))
+                {
+                    continue;
+                }
                 lineInfo[i].Value = new List<object>() { val };
                 val++;
                 mcp.Write(lineInfo[i]);
