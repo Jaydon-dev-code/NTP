@@ -186,6 +186,8 @@
                                 Margin="0,0,15,0"
                                 hc:DataGridAttach.ShowRowNumber="True"
                                 AutoGenerateColumns="False"
+                                CanUserReorderColumns="False"
+                                CanUserResizeColumns="False"
                                 CanUserSortColumns="False"
                                 ItemsSource="{Binding QueryValue}"
                                 ScrollViewer.CanContentScroll="True"
