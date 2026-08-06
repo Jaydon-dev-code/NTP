@@ -267,6 +267,71 @@ namespace UnitTestProject.DataCollection
             await Task.Delay(20000 * 10);
         }
 
+        [TestMethod]
+        public async Task DataCollectionBindingTest()
+        {
+            await Task.Delay(1000);
+
+            var aService = Container
+                .Resolve<IEnumerable<DataCollectionServiceAbstract>>()
+                .First(x => x.GetType().Name == nameof(Factory6Workshop6_3AssemblyLineA));
+
+            var bService = Container
+                .Resolve<IEnumerable<DataCollectionServiceAbstract>>()
+                .First(x => x.GetType().Name == nameof(Factory6Workshop6_3AssemblyLineB));
+
+            var bindService = Container
+                .Resolve<IEnumerable<DataCollectionServiceAbstract>>()
+                .First(x => x.GetType().Name == nameof(Factory6Workshop6_3AssemblyLineABBinding));
+
+            int[] aTrayNos = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            int[] bTrayNos = new int[] { 10, 20, 30, 40, 50, 60, 70, 80, 90 };
+
+            var mcp = Container.Resolve<McpCommunication>();
+
+            var bLinePoints = await InitPlcAddre("B线");
+            var aBindPoint = bLinePoints.FirstOrDefault(x => x.PointName == "A托盘绑定");
+            var bBindPoint = bLinePoints.FirstOrDefault(x => x.PointName == "B托盘绑定");
+            Assert.IsNotNull(aBindPoint, "未找到点位：A托盘绑定");
+            Assert.IsNotNull(bBindPoint, "未找到点位：B托盘绑定");
+
+            bindService.Start();
+
+            Task aTask = RunAsync("A线", aService, aTrayNos, null);
+            await Task.Delay(5000);
+            var binTask = (async () =>
+            {
+                for (int i = 0; i < 9; i++)
+                {
+                    aBindPoint.Value = new List<object>() { aTrayNos[i] };
+                    bBindPoint.Value = new List<object>() { bTrayNos[i] };
+                    mcp.Write(aBindPoint);
+                    mcp.Write(bBindPoint);
+                    await Task.Delay(1000);
+                }
+            });
+            await Task.WhenAll(aTask);
+            await binTask();
+            Task bTask = RunAsync(
+                "B线",
+                bService,
+                bTrayNos,
+                async (lineInfo, index) =>
+                {
+                    await Task.Delay(100);
+                    var aTrayNoPoint = lineInfo.FirstOrDefault(x => x.PointName == "A线托盘编号");
+                    if (aTrayNoPoint != null)
+                    {
+                        aTrayNoPoint.Value = new List<object>() { aTrayNos[index] };
+                        mcp.Write(aTrayNoPoint);
+                    }
+                }
+            );
+
+            await Task.WhenAll(aTask, bTask);
+            await Task.Delay(2000 * 10);
+        }
+
         #endregion
 
         #region 辅助方法
@@ -281,6 +346,11 @@ namespace UnitTestProject.DataCollection
             lineServer.Start();
 
             var lineInfo = await InitPlcAddre(lineName);
+            var bindPoints = lineInfo.Where(x => x.PointName.Contains("绑定")).ToList();
+            foreach (var bindPoint in bindPoints)
+            {
+                lineInfo.Remove(bindPoint);
+            }
             var endPoint = lineInfo.FirstOrDefault(x => x.PointName == "采集结束");
             var startPoint = lineInfo.FirstOrDefault(x => x.PointName == "采集开始");
             var pallNotPoint = lineInfo.FirstOrDefault(x => x.PointName.Contains("托盘号"));
@@ -351,6 +421,10 @@ namespace UnitTestProject.DataCollection
 
             for (int i = 0; i < lineInfo.Count; i++)
             {
+                if (lineInfo[i].PointName.Contains("托盘编号"))
+                {
+                    continue;
+                }
                 lineInfo[i].Value = new List<object>() { val };
                 val++;
                 mcp.Write(lineInfo[i]);

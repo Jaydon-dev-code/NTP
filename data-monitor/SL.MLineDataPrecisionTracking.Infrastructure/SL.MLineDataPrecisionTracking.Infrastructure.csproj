@@ -62,6 +62,8 @@
     <Compile Include="Storage\Factory6Workshop6_1AssemblyLine\Tb_Factory6Workshop6_1AssemblyLineARepository.cs" />
     <Compile Include="Storage\Factory6Workshop6_1AssemblyLine\Tb_Factory6Workshop6_1AssemblyLineBRepository.cs" />
     <Compile Include="Storage\Factory6Workshop6_1AssemblyLine\Tb_Factory6Workshop6_1AssemblyLineABSummaryRepository.cs" />
+    <Compile Include="Storage\Factory6Workshop6_3AssemblyLine\Tb_Factory6Workshop6_3Line_EnergyRangePointRepository.cs" />
+    <Compile Include="Storage\Factory6Workshop6_3AssemblyLine\Tb_Factory6Workshop6_3Line_EnergyRangeRepository.cs" />
     <Compile Include="Storage\Tb_EnergyRangeDetailRepository.cs" />
     <Compile Include="Storage\Tb_EnergyRangeRepository.cs" />
     <Compile Include="Storage\Tb_EquipmentRepository.cs" />
