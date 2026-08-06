@@ -184,5 +184,17 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// </summary>
         [SugarColumn(ColumnDescription = "螺栓压装AVG", DefaultValue = "0")]
         public string BoltPressAssembleAVG { get; set; }
+
+        /// <summary>
+        /// B线托盘编号
+        /// </summary>
+        [SugarColumn(ColumnDescription = "B线托盘编号", DefaultValue = " ")]
+        public string TrayNoB { get; set; } = "";
+
+        /// <summary>
+        /// 是否已使用
+        /// </summary>
+        [SugarColumn(ColumnDescription = "是否已使用", DefaultValue = "false")]
+        public bool IsUsed { get; set; }
     }
 }
