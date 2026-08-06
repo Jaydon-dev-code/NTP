@@ -51,18 +51,15 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
 
             Tb_LineSummary tb_LineSummary = new Tb_LineSummary() { Result = ResultEnum.OK };
             Tb_LineA aLineInfo = null;
-            //如果有数据且不等于0
-            if (lineData.LineATrayNo != "0" && !string.IsNullOrEmpty(lineData.LineATrayNo))
-            {
-                aLineInfo = await _lineARepository.QueryableFirstAsync(
-                    x => x.TrayNoA == lineData.LineATrayNo,
-                    o => o.RecordTime
-                );
-            }
-            else
-            {
-                tb_LineSummary.TrayNoA = lineData.LineATrayNo;
-            }
+
+            // 从数据库查 a 线已绑定（a b 托盘相同）的最新未使用数据
+            aLineInfo = await _lineARepository.QueryableFirstAsync(
+                x =>
+                    x.TrayNoA == lineData.LineATrayNo
+                    && x.TrayNoB == lineData.TrayNoB
+                    && x.IsUsed == false,
+                o => o.RecordTime
+            );
           
 
             if (lineData.ShieldStationB != "0")
@@ -95,9 +92,18 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                 lineData.ALineFID = aLineInfo.Id;
                 lineData.ALineRecordTime = aLineInfo.RecordTime;
             }
+            if (aLineInfo == null)
+            {
+                // 未找到绑定：只搞b线，并标记a线托盘号为0
+                lineData.LineATrayNo = "!" + lineData.LineATrayNo;
+            }
 
             var bLineFid = await _LineBRepository.InsertableReturnIdentityAsync(lineData);
             ABToSummary(aLineInfo, lineData, tb_LineSummary, new List<string>() { "A线托盘编号" });
+            if (aLineInfo == null && lineData.LineATrayNo != "0" && !string.IsNullOrEmpty(lineData.LineATrayNo))
+            {
+                tb_LineSummary.LineATrayNo = tb_LineSummary.LineATrayNo;
+            }
 
             tb_LineSummary.ModelNo = lineData.ModelNoB;
             var modelNameB = _models
@@ -106,6 +112,14 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
             tb_LineSummary.ModelName = modelNameB ?? "";
             tb_LineSummary.BLineFID = bLineFid;
             await _lineSummaryRepository.InsertableAsync(tb_LineSummary);
+
+            // 把 a 线数据标记为已使用
+            if (aLineInfo != null)
+            {
+                aLineInfo.IsUsed = true;
+                await _lineARepository.UpdateableAsync(aLineInfo);
+            }
+
             return lineData;
         }
     }

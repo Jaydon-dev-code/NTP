@@ -12,14 +12,16 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
     public abstract class DataCollectionServiceAbstract
     {
         public string ServiceName => _serviceName;
+
         /// <summary>
         /// 服务名称
         /// </summary>
-       protected abstract string _serviceName { get; }
+        protected abstract string _serviceName { get; }
+
         /// <summary>
         /// 间隔时间
         /// </summary>
-        protected TimeSpan _sleepTimeSpan { get; set; }= TimeSpan.FromMilliseconds(500);
+        protected TimeSpan _sleepTimeSpan { get; set; } = TimeSpan.FromMilliseconds(500);
 
         /// <summary>服务运行状态</summary>
         public ServiceStatusEnum Status { get; private set; } = ServiceStatusEnum.Stopped;
@@ -54,7 +56,10 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
             if (Status == ServiceStatusEnum.Stopped)
                 return;
 
-            if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
+            if (
+                _cancellationTokenSource != null
+                && !_cancellationTokenSource.IsCancellationRequested
+            )
             {
                 _cancellationTokenSource.Cancel();
                 _cancellationTokenSource.Dispose();
@@ -110,11 +115,14 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
                         {
                             // 第三步：通知 — 交互完成后的处理
                             Description = "交互成功，通知中...";
-                            Serilog.Log.Information(
-                                "[数据交互]【{_serverName}】{@Data}",
-                                _serviceName,
-                                interact.Data
-                            );
+                            if (interact?.Data != null)
+                            {
+                                Serilog.Log.Information(
+                                    "[数据交互]【{_serverName}】{@Data}",
+                                    _serviceName,
+                                    interact.Data
+                                );
+                            }
 
                             await NotifyAsync(interact);
                             Description = "通知完成，等待下次握手";
