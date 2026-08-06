@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using NPOI.SS.Formula.Functions;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
@@ -17,7 +18,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
     /// </summary>
     public class Factory6Workshop6_1AssemblyLineABBinding : DataCollectionServiceAbstract
     {
-        private const string _lineName = "六分厂6-1装配B线";
+        protected  string _lineName = "六分厂6-1装配B线";
         private const string _aBindPointName = "A托盘绑定";
         private const string _bBindPointName = "B托盘绑定";
 
@@ -104,13 +105,13 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
             {
                 var aTrayNo = aResult.Data.Value?.FirstOrDefault()?.ToString() ?? "0";
                 var bTrayNo = bResult.Data.Value?.FirstOrDefault()?.ToString() ?? "0";
-     
 
+               
                 // 条件：a 托盘号非0/空 且 与上次数据不同
                 if (
                     aTrayNo != "0"
                     && !string.IsNullOrWhiteSpace(aTrayNo)
-                    && aTrayNo!=_lastATrayNo
+                    && aTrayNo != _lastATrayNo
                     && bTrayNo != "0"
                     && !string.IsNullOrWhiteSpace(bTrayNo)
                     && bTrayNo != _lastBTrayNo
@@ -126,10 +127,13 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                         aLineInfo.TrayNoB = bTrayNo;
                         await _aLineRepository.UpdateableAsync(aLineInfo);
                     }
+                    _lastATrayNo = aTrayNo;
+                    _lastBTrayNo = bTrayNo;
                 }
-                _lastATrayNo = aTrayNo;
-                _lastBTrayNo = bTrayNo;
+               
+             
             }
+
             return Result<object>.Success(null);
         }
 

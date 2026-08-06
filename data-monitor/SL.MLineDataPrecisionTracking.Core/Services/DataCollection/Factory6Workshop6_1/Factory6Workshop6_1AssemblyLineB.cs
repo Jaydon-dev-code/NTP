@@ -116,7 +116,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
             if (aLineInfo == null && lineData.LineATrayNo!="0" && !string.IsNullOrEmpty(lineData.LineATrayNo) )
             {
                 // 未找到绑定：只搞b线，并标记a线托盘号为0
-                tb_LineSummary.LineATrayNo = "!" + tb_LineSummary.LineATrayNo;
+                tb_LineSummary.LineATrayNo = tb_LineSummary.LineATrayNo;
             }
             tb_LineSummary.ModelNo = lineData.ModelNoB;
             var modelNameB = _models
