@@ -364,6 +364,11 @@
                                 Header="正游隙检测值"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
+                                MinWidth="120"
+                                Binding="{Binding ClearancePressureValue}"
+                                Header="正游隙检测值"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
                                 MinWidth="90"
                                 Binding="{Binding DisplacementValue}"
                                 Header="位移量"

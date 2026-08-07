@@ -115,6 +115,12 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         [Description("正游隙检测值")]
         public string PositiveClearanceValue { get; set; }
 
+        /// <summary>
+        /// 游隙压力值
+        /// </summary>
+        [Description("游隙压力值")]
+        public string ClearancePressureValue { get; set; }
+
         [Description("位移量")]
         public string DisplacementValue { get; set; }
 

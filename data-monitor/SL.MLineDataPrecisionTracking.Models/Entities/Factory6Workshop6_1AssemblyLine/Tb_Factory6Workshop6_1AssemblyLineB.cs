@@ -74,6 +74,12 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities.Factory6Workshop6_1Assem
         public string PositiveClearanceValue { get; set; }
 
         /// <summary>
+        /// 游隙压力值
+        /// </summary>
+        [SugarColumn(ColumnDescription = "游隙压力值", DefaultValue = " ")]
+        public string ClearancePressureValue { get; set; }
+
+        /// <summary>
         /// 位移量
         /// </summary>
         [SugarColumn(ColumnDescription = "位移量")]
