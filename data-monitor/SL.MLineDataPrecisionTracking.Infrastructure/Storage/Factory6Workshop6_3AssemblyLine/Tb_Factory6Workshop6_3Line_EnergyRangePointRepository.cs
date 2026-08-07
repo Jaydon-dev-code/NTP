@@ -45,6 +45,38 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage.Factory6Workshop6
 
             return (list, totalCountRef.Value, totalPageRef.Value);
         }
+
+        /// <summary>
+        /// 只取分页数据，不做 count 统计（总条数由子项的 Count 字段提供，避免全表扫描）
+        /// </summary>
+        public async Task<List<Tb_Factory6Workshop6_3Line_EnergyRangePoint>> QueryablePageAsync(
+            Expression<Func<Tb_Factory6Workshop6_3Line_EnergyRangePoint, bool>> expression,
+            int pageNumber,
+            int pageSize
+        )
+        {
+            return await _db.Queryable<Tb_Factory6Workshop6_3Line_EnergyRangePoint>()
+                .Where(expression)
+                .OrderBy(x => x.Time)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// 按条件一次查出全部点（已知子项 Count，直接取全量，不分页）
+        /// </summary>
+        public async Task<List<Tb_Factory6Workshop6_3Line_EnergyRangePoint>> QueryableAllAsync(
+            Expression<Func<Tb_Factory6Workshop6_3Line_EnergyRangePoint, bool>> expression,
+            int count
+        )
+        {
+            return await _db.Queryable<Tb_Factory6Workshop6_3Line_EnergyRangePoint>()
+                .Where(expression)
+                .OrderBy(x => x.Time)
+                .Take(count)
+                .ToListAsync();
+        }
         public async Task<int> InsertableAsync(List<Tb_Factory6Workshop6_3Line_EnergyRangePoint> device)
         {
             return await _db.Insertable<Tb_Factory6Workshop6_3Line_EnergyRangePoint>(device).ExecuteCommandAsync();

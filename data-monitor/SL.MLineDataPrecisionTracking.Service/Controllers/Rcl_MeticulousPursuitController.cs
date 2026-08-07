@@ -283,13 +283,13 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
         {
             try
             {
-                var re = await _energyRangePointRepository.QueryableAsync(
+                // 已知子项 Count，按条件一次查出全部点（Take(count) 限定，避免全表扫描），不分页
+                var list = await _energyRangePointRepository.QueryableAllAsync(
                     x => x.EnergyRange_RecordTime == request.EnergyRangeRecordTime,
-                    request.PageIndex,
-                    request.DataCountPerPage
+                    request.Count
                 );
                 return ApiResult<EnergyRangePointQueryResponseDto>.Success(
-                    new EnergyRangePointQueryResponseDto(re.List, re.TotalCount, re.TotalPage)
+                    new EnergyRangePointQueryResponseDto(list, list.Count, 1)
                 );
             }
             catch (Exception ex)

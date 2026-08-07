@@ -8,7 +8,8 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos.Request
     public class EnergyRangePointQueryRequestDto
     {
         public DateTime EnergyRangeRecordTime { get; set; }
-        public int PageIndex { get; set; }
-        public int DataCountPerPage { get; set; }
+
+        /// <summary>该子项的点数（由 Tb_Factory6Workshop6_3Line_EnergyRange.Count 提供），查询时 Take(count) 限定，避免全表扫描</summary>
+        public int Count { get; set; }
     }
 }

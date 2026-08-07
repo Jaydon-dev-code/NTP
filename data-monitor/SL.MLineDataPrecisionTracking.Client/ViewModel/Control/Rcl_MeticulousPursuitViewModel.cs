@@ -34,7 +34,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
     public partial class Rcl_MeticulousPursuitViewModel : ObservableObject
     {
         const double _xDefMaxValue = 12.5;
-        const double _yDefMaxValue = 1250;
+        const double _yDefMaxValue = 1400;
         #region 能量监控
         List<HeatTreatmentDataDto> _mkNoQuValues;
         List<HeatTreatmentDataDto> _quValues;
@@ -139,7 +139,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             {
                 if (SetProperty(ref _selectedEnergyRange, value))
                 {
-                    _ = LoadEnergyPointsAsync(1);
+                    _ = LoadEnergyPointsAsync();
                 }
             }
         }
@@ -154,13 +154,6 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
         public ObservableCollection<Tb_Factory6Workshop6_3Line_EnergyRangePoint> EnergyPointItems { get; } =
             new ObservableCollection<Tb_Factory6Workshop6_3Line_EnergyRangePoint>();
 
-        private PaginationPage _energyPointPagination = new PaginationPage();
-        public PaginationPage EnergyPointPagination
-        {
-            get => _energyPointPagination;
-            set => SetProperty(ref _energyPointPagination, value);
-        }
-
         public WpfPlot EnergyPointPlot
         {
             get => _energyPointPlot;
@@ -171,7 +164,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 
         public ICommand EnergyRangeQueryCommand { get; }
         public ICommand EnergyRangePageUpdatedCommand { get; }
-     
+      
         #endregion
 
         #region 精追
@@ -362,7 +355,6 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 
             #region 能量监控查询
             EnergyPointPlot = IntiPlot();
-            EnergyPointPagination.DataCountPerPage = 100;
             EnergyRangeQueryCommand = new AsyncRelayCommand(EnergyRangeQueryAsync);
             EnergyRangePageUpdatedCommand = new AsyncRelayCommand(EnergyRangePageUpdated);
             #endregion
@@ -820,8 +812,6 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 
                 SelectedEnergyRange = null;
                 EnergyPointItems.Clear();
-                EnergyPointPagination.TotalCount = 0;
-                EnergyPointPagination.MaxPageCount = 0;
                 EnergyPointPlot.Plot.Clear();
                 EnergyPointPlot.Refresh();
             }
@@ -831,20 +821,18 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             }
         }
 
-        private async Task LoadEnergyPointsAsync(int pageIndex)
+        private async Task LoadEnergyPointsAsync()
         {
             if (SelectedEnergyRange == null)
                 return;
 
             try
             {
-                EnergyPointPagination.PageIndex = pageIndex;
-
+                // 已知子项 Count，按 RecordTime 条件一次查出全部点，不分页
                 var request = new EnergyRangePointQueryRequestDto
                 {
                     EnergyRangeRecordTime = SelectedEnergyRange.RecordTime,
-                    PageIndex = EnergyPointPagination.PageIndex,
-                    DataCountPerPage = EnergyPointPagination.DataCountPerPage,
+                    Count = SelectedEnergyRange.Count,
                 };
 
                 var result = await _meticulousPursuitApi.GetEnergyRangePointsAsync(request);
@@ -859,9 +847,6 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 foreach (var item in result.Data.List ?? new List<Tb_Factory6Workshop6_3Line_EnergyRangePoint>())
                     EnergyPointItems.Add(item);
 
-                EnergyPointPagination.TotalCount = result.Data.TotalCount;
-                EnergyPointPagination.MaxPageCount = result.Data.TotalPage;
-
                 DrawEnergyPointPlot();
             }
             catch (Exception ex)
@@ -870,7 +855,6 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             }
         }
 
-    
         private void DrawEnergyPointPlot()
         {
             EnergyPointPlot.Plot.Clear();
