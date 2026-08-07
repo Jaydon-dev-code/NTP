@@ -188,7 +188,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                     var permitResult = _mcp.Read(_plcEnergyCollectionPermitPoint);
                     if (permitResult.IsSuccess)
                     {
-                            if (permitResult.Data.Value[0].ObjToBool())
+                        if (permitResult.Data.Value[0].ObjToBool())
                         {
                             var valueResult = _mcp.Read(_plcEnergyPoint);
                             if (valueResult.IsSuccess)
@@ -202,6 +202,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                                         _plcEnergyTimePoint.Value[0].ToString(),
                                         out double energyTime
                                     )
+                                    && energyTime > 0
                                 )
                                 {
                                     var energy = new PointData<double, double>
@@ -230,7 +231,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                                 var energyRang =
                                     new Models.Entities.Factory6Workshop6_3AssemblyLine.Tb_Factory6Workshop6_3Line_EnergyRange()
                                     {
-                                        RecordTime = dtSec,
+                                        RecordTime = dtSec,Count= _historyData.Count
                                     };
                                 await _energyRangeRepository.InsertableAsync(energyRang);
                                 // TODO: 将 _historyData 存入数据库
