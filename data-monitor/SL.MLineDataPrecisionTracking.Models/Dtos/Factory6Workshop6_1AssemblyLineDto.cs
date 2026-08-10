@@ -133,9 +133,6 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         [Description("实测间隙")]
         public string ActualGap { get; set; }
 
-        [Description("铆接前成型高度")]
-        public string PreRivetingHeight { get; set; }
-
         [Description("密封圈压装压力")]
         public string SealRingPressPressure { get; set; }
 

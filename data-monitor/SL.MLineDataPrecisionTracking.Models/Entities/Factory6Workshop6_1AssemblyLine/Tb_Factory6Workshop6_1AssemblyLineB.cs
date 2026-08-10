@@ -92,12 +92,6 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities.Factory6Workshop6_1Assem
         public string NegativeClearanceValue { get; set; }
 
         /// <summary>
-        /// 铆接前成型高度
-        /// </summary>
-        [SugarColumn(ColumnDescription = "铆接前成型高度")]
-        public string PreRivetingHeight { get; set; }
-
-        /// <summary>
         /// 密封圈压装压力
         /// </summary>
         [SugarColumn(ColumnDescription = "密封圈压装压力")]

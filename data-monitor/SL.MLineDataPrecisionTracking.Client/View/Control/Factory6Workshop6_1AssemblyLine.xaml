@@ -366,7 +366,7 @@
                             <DataGridTextColumn
                                 MinWidth="120"
                                 Binding="{Binding ClearancePressureValue}"
-                                Header="正游隙检测值"
+                                Header="游隙压力值"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
                                 MinWidth="90"
@@ -382,11 +382,6 @@
                                 MinWidth="110"
                                 Binding="{Binding ActualGap}"
                                 Header="实测间隙"
-                                IsReadOnly="True" />
-                            <DataGridTextColumn
-                                MinWidth="120"
-                                Binding="{Binding PreRivetingHeight}"
-                                Header="铆接前成型高度"
                                 IsReadOnly="True" />
 
                             <DataGridTextColumn
