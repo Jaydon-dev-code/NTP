@@ -108,10 +108,10 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                 // 条件：a 托盘号非0/空 且 与上次数据不同
                 if (
                     aTrayNo != "0"
-                    && !string.IsNullOrWhiteSpace(aTrayNo)
+                    && !string.IsNullOrEmpty(aTrayNo)
                     && aTrayNo != _lastATrayNo
                     && bTrayNo != "0"
-                    && !string.IsNullOrWhiteSpace(bTrayNo)
+                    && !string.IsNullOrEmpty(bTrayNo)
                     && bTrayNo != _lastBTrayNo
                 )
                 {
