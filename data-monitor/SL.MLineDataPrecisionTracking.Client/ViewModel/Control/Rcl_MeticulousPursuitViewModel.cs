@@ -144,7 +144,10 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             }
         }
 
-        private PaginationPage _energyRangePagination = new PaginationPage() {  DataCountPerPage=100};
+        private PaginationPage _energyRangePagination = new PaginationPage()
+        {
+            DataCountPerPage = 100,
+        };
         public PaginationPage EnergyRangePagination
         {
             get => _energyRangePagination;
@@ -164,7 +167,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 
         public ICommand EnergyRangeQueryCommand { get; }
         public ICommand EnergyRangePageUpdatedCommand { get; }
-      
+
         #endregion
 
         #region 精追
@@ -341,7 +344,35 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             _renderTimer.Tick += RenderTick;
             _renderTimer.Start();
 
+            // 一开始就显示线段描述（图例），不等数据
+            PlotControl.Plot.Legend.ManualItems.Add(
+                new ScottPlot.LegendItem
+                {
+                    LabelText = "能量",
+                    LineColor = Colors.Green,
+                    LineWidth = 2,
+                }
+            );
+            PlotControl.Plot.Legend.ManualItems.Add(
+                new ScottPlot.LegendItem
+                {
+                    LabelText = "能量范围",
+                    LineColor = Colors.Red,
+                    LineWidth = 2,
+                }
+            );
+            PlotControl.Plot.ShowLegend();
+
             SettingPlotControl = IntiPlot();
+            SettingPlotControl.Plot.Legend.ManualItems.Add(
+                new ScottPlot.LegendItem
+                {
+                    LabelText = "能量范围",
+                    LineColor = Colors.Red,
+                    LineWidth = 2,
+                }
+            );
+            SettingPlotControl.Plot.ShowLegend();
             RefreshEnergyRangeCommand = new AsyncRelayCommand(RefreshEnergyRangeAsync);
             ImportEnergyRangeCommand = new AsyncRelayCommand(ImportEnergyRangeAsync);
             DeleteMonitorItemCommand = new AsyncRelayCommand(DeleteMonitorItem);
@@ -355,6 +386,15 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 
             #region 能量监控查询
             EnergyPointPlot = IntiPlot();
+            EnergyPointPlot.Plot.Legend.ManualItems.Add(
+                new ScottPlot.LegendItem
+                {
+                    LabelText = "能量",
+                    LineColor = Colors.Green,
+                    LineWidth = 2,
+                }
+            );
+            EnergyPointPlot.Plot.ShowLegend();
             EnergyRangeQueryCommand = new AsyncRelayCommand(EnergyRangeQueryAsync);
             EnergyRangePageUpdatedCommand = new AsyncRelayCommand(EnergyRangePageUpdated);
             #endregion
@@ -371,16 +411,18 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 
             foreach (var point in batch)
             {
-                // 新工件开始：时间倒退（X 小于上一采集点），清空上一工件曲线，避免首尾相连画成闭合图形
-                if (point.X + 0.001 < _lastX)
+                // 新工件开始：时间倒退（X 小于上一采集点），清空上一工件数据，避免首尾相连画成闭合图形
+                if (point.X + 0.001 < _lastX || _lastX == 0)
                 {
                     _displayPoints.Clear();
-                    PlotControl.Plot.Clear();
                     _displayPoints.Add(_firstPoint);
                 }
                 _displayPoints.Add(point);
                 _lastX = point.X;
             }
+
+            // 每帧先清空再重绘整条曲线，避免叠加出重复曲线
+            PlotControl.Plot.Clear();
 
             double currentMaxX = _displayPoints.Max(p => p.X);
 
@@ -390,7 +432,13 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             double dataMaxY = _displayPoints.Max(p => p.Y);
             var xLimits = currentMaxX + 2.5;
             var yLimits = dataMaxY + 500;
-            PlotControl.Plot.Axes.SetLimits(0, xLimits > _xDefMaxValue? xLimits : _xDefMaxValue, 0, yLimits > _yDefMaxValue? yLimits : _yDefMaxValue);
+            PlotControl.Plot.Axes.SetLimits(
+                0,
+                xLimits > _xDefMaxValue ? xLimits : _xDefMaxValue,
+                0,
+                yLimits > _yDefMaxValue ? yLimits : _yDefMaxValue
+            );
+            PlotControl.Plot.ShowLegend();
             PlotControl.Refresh();
         }
 
@@ -545,10 +593,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             if (SelectedProductModel == null)
                 return;
 
-            await _meticulousPursuitApi.SetCurrentStationModelAsync(
-                SelectedProductModel.Id,
-                "A"
-            );
+            await _meticulousPursuitApi.SetCurrentStationModelAsync(SelectedProductModel.Id, "A");
 
             var result = await _meticulousPursuitApi.GetAllAsync();
             if (result.IsSuccess && result.Data != null)
@@ -582,9 +627,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                         ProductModels.Clear();
                         foreach (var model in result.Data)
                             ProductModels.Add(model);
-                        CurrentModelNo = result.Data
-                            .FirstOrDefault(m => m.Station == "A")
-                            ?.Id;
+                        CurrentModelNo = result.Data.FirstOrDefault(m => m.Station == "A")?.Id;
                     });
                 }
                 else
@@ -739,12 +782,11 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             double yMax = 0;
             foreach (var d in sorted)
             {
-                var tmp = new Coordinates(d.Time, (double)d.LowerLimit);
-                coords.Add(tmp);
-                if (tmp.X > xMax)
-                    xMax = tmp.X;
-                if (tmp.Y > yMax)
-                    yMax = tmp.Y;
+                coords.Add(new Coordinates(d.Time, (double)d.LowerLimit));
+                if (d.Time > xMax)
+                    xMax = d.Time;
+                if ((double)d.UpperLimit > yMax)
+                    yMax = (double)d.UpperLimit;
             }
             foreach (var d in Enumerable.Reverse(sorted))
             {
@@ -760,7 +802,14 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 polygon.LineStyle.Pattern = LinePattern.Solid;
             }
 
-            SettingPlotControl.Plot.Axes.SetLimits(0, xMax + 2.5, 0, yMax + 500);
+            var xLimits = xMax + 2.5;
+            var yLimits = yMax + 500;
+            SettingPlotControl.Plot.Axes.SetLimits(
+                0,
+                xLimits > _xDefMaxValue ? xLimits : _xDefMaxValue,
+                0,
+                yLimits > _yDefMaxValue ? yLimits : _yDefMaxValue
+            );
             SettingPlotControl.Refresh();
         }
 
@@ -804,7 +853,10 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 }
 
                 EnergyRangeItems.Clear();
-                foreach (var item in result.Data.List ?? new List<Tb_Factory6Workshop6_3Line_EnergyRange>())
+                foreach (
+                    var item in result.Data.List
+                        ?? new List<Tb_Factory6Workshop6_3Line_EnergyRange>()
+                )
                     EnergyRangeItems.Add(item);
 
                 EnergyRangePagination.TotalCount = result.Data.TotalCount;
@@ -843,8 +895,13 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 }
 
                 EnergyPointItems.Clear();
-                EnergyPointItems.Add(new Tb_Factory6Workshop6_3Line_EnergyRangePoint() { Time=0, Value=0 });
-                foreach (var item in result.Data.List ?? new List<Tb_Factory6Workshop6_3Line_EnergyRangePoint>())
+                EnergyPointItems.Add(
+                    new Tb_Factory6Workshop6_3Line_EnergyRangePoint() { Time = 0, Value = 0 }
+                );
+                foreach (
+                    var item in result.Data.List
+                        ?? new List<Tb_Factory6Workshop6_3Line_EnergyRangePoint>()
+                )
                     EnergyPointItems.Add(item);
 
                 DrawEnergyPointPlot();
@@ -873,7 +930,14 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 
             double xMax = EnergyPointItems.Max(p => p.Time);
             double yMax = EnergyPointItems.Max(p => p.Value);
-            EnergyPointPlot.Plot.Axes.SetLimits(0, xMax + 0.5, 0, yMax + 30);
+            var xLimits = xMax + 2.5;
+            var yLimits = yMax + 500;
+            EnergyPointPlot.Plot.Axes.SetLimits(
+                0,
+                xLimits > _xDefMaxValue ? xLimits : _xDefMaxValue,
+                0,
+                yLimits > _yDefMaxValue ? yLimits : _yDefMaxValue
+            );
             EnergyPointPlot.Refresh();
         }
         #endregion
@@ -1079,8 +1143,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             }
 
             // 时间范围查询：分页导出，边查边写，避免大数据量占用内存
-            var startTime =
-                QueryConditions.StartDate.Date + QueryConditions.StartTime.TimeOfDay;
+            var startTime = QueryConditions.StartDate.Date + QueryConditions.StartTime.TimeOfDay;
             var endTime = QueryConditions.EndDate.Date + QueryConditions.EndTime.TimeOfDay;
             if (startTime > endTime)
             {
@@ -1093,7 +1156,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             {
                 RefinedSearch = QueryConditions,
                 PageIndex = 1,
-                DataCountPerPage = exportPageSize
+                DataCountPerPage = exportPageSize,
             };
 
             var firstPage = await _meticulousPursuitApi.QueryablToPagee(request);
@@ -1119,9 +1182,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                         new ExcelExportWriter<HeatTreatmentDataDto>(saveFileDialog.FileName)
                 )
                 {
-                    writer.WriteRows(
-                        firstPage.Data.List.Select(x => new HeatTreatmentDataDto(x))
-                    );
+                    writer.WriteRows(firstPage.Data.List.Select(x => new HeatTreatmentDataDto(x)));
 
                     for (int page = 2; page <= firstPage.Data.TotalPage; page++)
                     {

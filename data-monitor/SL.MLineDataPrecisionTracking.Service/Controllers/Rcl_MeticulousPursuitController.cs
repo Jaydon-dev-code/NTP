@@ -370,7 +370,7 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
                         {
                             double progress = i / 20.0;
                             value = (int)Math.Round(
-                                7000 * progress + (rnd.NextDouble() - 0.5) * 200
+                                700 * progress + (rnd.NextDouble() - 0.5) * 20
                             );
                             if (value < 0)
                                 value = 0;
@@ -378,7 +378,7 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
                         else
                         {
                             // 2 秒后在 7000 ~ 8500 之间随机波动
-                            value = (int)Math.Round(7000 + rnd.NextDouble() * 1500);
+                            value = (int)Math.Round(700 + rnd.NextDouble() * 150);
                         }
 
                         await WritePlcPointAsync(timePoint, time);
