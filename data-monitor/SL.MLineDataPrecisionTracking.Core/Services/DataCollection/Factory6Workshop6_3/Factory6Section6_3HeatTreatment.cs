@@ -44,6 +44,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
 
         CancellationTokenSource _energyCts;
 
+        double _lastEnergyTime;
         protected override string _serviceName => "六分厂6-3热处理";
 
         public Factory6Section6_3HeatTreatment(
@@ -202,9 +203,10 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                                         _plcEnergyTimePoint.Value[0].ToString(),
                                         out double energyTime
                                     )
-                                    && energyTime > 0
+                                    && energyTime > 0&& _lastEnergyTime != energyTime
                                 )
                                 {
+                                    _lastEnergyTime= energyTime;
                                     var energy = new PointData<double, double>
                                     {
                                         X = energyTime,
