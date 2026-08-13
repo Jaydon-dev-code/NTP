@@ -17,7 +17,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
     {
         private readonly object _lockObj = new object();
         private readonly Dictionary<string, McpX> _mcpDic = new Dictionary<string, McpX>();
-
+        const int MaxPerFrame= 240;
         public McpCommunication() { }
 
         #region 同步读取方法
@@ -275,12 +275,12 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
         }
 
         /// <summary>
-        /// PLC 地址分组工具（间隔 >128 断开）
+        /// PLC 地址分组工具（间隔 >MaxPerFrame 断开）
         /// </summary>
         /// <summary>
         /// 对 DevPlcPointReadDto 集合按 Address 连续分组
-        /// 规则：后地址 - 前地址 <= 128 → 同一组
-        ///      后地址 - 前地址 > 128 → 新组
+        /// 规则：后地址 - 前地址 <= MaxPerFrame → 同一组
+        ///      后地址 - 前地址 > MaxPerFrame → 新组（不读取中间无用地址，按新的起始地址计算）
         /// </summary>
         List<List<DevPlcPointReadDto>> GroupByAddress(IEnumerable<DevPlcPointReadDto> pointList)
         {
@@ -299,7 +299,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
 
             for (int i = 1; i < sorted.Count; i++)
             {
-                if (sorted[i].Addr - sorted[i - 1].Addr > 128)
+                if (sorted[i].Addr - sorted[i - 1].Addr > MaxPerFrame)
                 {
                     currentGroup = new List<DevPlcPointReadDto>();
                     result.Add(currentGroup);
@@ -370,7 +370,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
 
             while (remaining > 0)
             {
-                ushort readLen = (ushort)Math.Min(remaining, 960);
+                ushort readLen = (ushort)Math.Min(remaining, MaxPerFrame);
 
                 string addrStr = prefix.IsHexDevice()
                     ? currentAddress.ToString("X")
@@ -906,7 +906,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
 
             while (remaining > 0)
             {
-                ushort readLen = (ushort)Math.Min(remaining, 960);
+                ushort readLen = (ushort)Math.Min(remaining, MaxPerFrame);
 
                 try
                 {
