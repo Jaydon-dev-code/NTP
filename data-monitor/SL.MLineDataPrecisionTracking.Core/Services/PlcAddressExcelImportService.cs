@@ -12,6 +12,7 @@ using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Dtos;
 using SL.MLineDataPrecisionTracking.Models.Entities;
+using SqlSugar;
 namespace SL.MLineDataPrecisionTracking.Core.Services
 {
     public class PlcAddressExcelImportService
@@ -38,9 +39,6 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
         {
             try
             {
-                await _equipmentRepository.DeleteableAsync(x => true);
-                await _plcConnectionRepository.DeleteableAsync(x => true);
-                await _plcPointRepository.DeleteableAsync(x => true);
                 var list = ReadExcel(excelStream);
                 // 按【设备+IP】分组导入
                 var groups = list.GroupBy(x => new
@@ -58,7 +56,27 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
 
                     var firstRow = group.First();
                   
-                    // 1. 找设备，没有就新增
+                    // 1. 按 DeviceName 找设备，存在则删除原有数据（点位、连接、设备）后重新插入
+                    var existing = await _equipmentRepository.QueryableFirstAsync(x =>
+                        x.DeviceName == deviceName
+                    );
+                    if (existing != null)
+                    {
+                        await _plcPointRepository.DeleteableAsync(p =>
+                            SqlFunc.Subqueryable<Tb_PlcConnection>()
+                                .Where(c =>
+                                    c.EquipmentId == existing.Id
+                                    && c.Id == p.PlcConnectionId
+                                )
+                                .Any()
+                        );
+                        await _plcConnectionRepository.DeleteableAsync(c =>
+                            c.EquipmentId == existing.Id
+                        );
+                        await _equipmentRepository.DeleteableAsync(e => e.Id == existing.Id);
+                    }
+
+                    // 2. 找设备，没有就新增
                     var device = await _equipmentRepository.QueryableFirstAsync(x =>
                         x.DeviceName == deviceName
                     );
@@ -73,7 +91,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                         deviceId = device.Id;
                     }
 
-                    // 2. 找PLC连接，没有就新增
+                    // 3. 找PLC连接，没有就新增
                     var plc = await _plcConnectionRepository.QueryableFirstAsync(x =>
                         x.EquipmentId == deviceId && x.IpAddress == ip && x.Port == port
                     );
@@ -95,7 +113,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                         plcId = plc.Id;
                     }
 
-                    // 3. 批量插入点位
+                    // 4. 批量插入点位
                     List<Tb_PlcPoint> points = group
                         .Select(x => new Tb_PlcPoint
                         {
