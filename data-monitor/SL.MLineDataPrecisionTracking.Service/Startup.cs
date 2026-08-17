@@ -2,9 +2,12 @@
 using Autofac.Core;
 using Autofac.Integration.WebApi;
 using Microsoft.AspNet.SignalR;
+using Microsoft.Owin.FileSystems;
+using Microsoft.Owin.StaticFiles;
 using Owin;
 using SL.MLineDataPrecisionTracking.Core.Middleware;
 using SL.MLineDataPrecisionTracking.Models.Domain;
+using SL.MLineDataPrecisionTracking.Service.Middleware;
 using SL.MLineDataPrecisionTracking.Service.Services;
 using System;
 using System.Collections.Generic;
@@ -28,6 +31,8 @@ namespace SL.MLineDataPrecisionTracking.Service
 
             //// ↓↓↓ 现在这个方法一定能找到了
             app.UseAutofacMiddleware(Container);
+            app.UseCorsMiddleware();
+            LodeHtml(app);
 
             //// WebAPI 设置
             var config = new HttpConfiguration();
@@ -45,6 +50,32 @@ namespace SL.MLineDataPrecisionTracking.Service
             app.MapSignalR();
         }
 
+        void LodeHtml(IAppBuilder app)
+        {
+            var fileSystem = new PhysicalFileSystem(@"./StaticHtml");
+
+            // 默认首页
+            var defaultOpts = new DefaultFilesOptions { FileSystem = fileSystem };
+            defaultOpts.DefaultFileNames.Add("index.html");
+            app.UseDefaultFiles(defaultOpts);
+
+            // 提供html/css/js
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileSystem = fileSystem,
+                ServeUnknownFileTypes = true,
+                // ✅ 关闭浏览器缓存，实现修改html立刻生效
+                //    OnPrepareResponse = ctx =>
+                //    {
+                //        // 全部使用英文半角 "-"
+                //        ctx.OwinContext.Response.Headers.Remove("Cache-Control");
+                //        ctx.OwinContext.Response.Headers.Remove("ETag");
+                //        ctx.OwinContext.Response.Headers.Remove("Last-Modified");
+
+                //        ctx.OwinContext.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+                //    }
+            });
+        }
         private void InitAutofac()
         {
             var builder = new ContainerBuilder();

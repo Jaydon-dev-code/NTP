@@ -24,6 +24,10 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// <summary>描述</summary>
         public string Description { get; set; } = "";
 
+        /// <summary>功能分类（如 警报/采集等，用于区分点位用途）</summary>
+        [SugarColumn(IsNullable = true)]
+        public string FunctionType { get; set; } = "";
+
         /// <summary>区块 D/M/X/Y/R</summary>
         public string Area { get; set; }
 

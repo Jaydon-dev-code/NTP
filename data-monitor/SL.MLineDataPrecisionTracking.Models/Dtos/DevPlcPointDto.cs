@@ -1,9 +1,10 @@
-﻿using System;
+﻿using McpXLib.Enums;
+using SL.MLineDataPrecisionTracking.Models.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using McpXLib.Enums;
 
 namespace SL.MLineDataPrecisionTracking.Models.Dtos
 {
@@ -37,7 +38,6 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
             WriteFormula = writeFormula;
             Value = value;
         }
-
         public string DeviceName { get; set; }
         public string PointName { get; set; }
         public string IpAddress { get; set; } // PLC_IP

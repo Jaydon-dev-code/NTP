@@ -67,6 +67,9 @@
     <Compile Include="Storage\Tb_EnergyRangeDetailRepository.cs" />
     <Compile Include="Storage\Tb_EnergyRangeRepository.cs" />
     <Compile Include="Storage\Tb_EquipmentRepository.cs" />
+    <Compile Include="Storage\Tb_FactoryRepository.cs" />
+    <Compile Include="Storage\Tb_ProductionLineRepository.cs" />
+    <Compile Include="Storage\Tb_DeviceCollectionRepository.cs" />
     <Compile Include="Storage\Tb_HeatTreatmentDatatRepository.cs" />
     <Compile Include="Storage\Tb_LineARepository.cs" />
     <Compile Include="Storage\Tb_LineBRepository.cs" />

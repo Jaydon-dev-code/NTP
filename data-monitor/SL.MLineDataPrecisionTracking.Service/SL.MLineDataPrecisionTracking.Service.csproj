@@ -62,11 +62,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\DeviceCollectionConfigController.cs" />
+    <Compile Include="Controllers\DeviceDataCollectionController.cs" />
+    <Compile Include="Controllers\EquipmentController.cs" />
     <Compile Include="Controllers\Factory4Workshop4_10LineController.cs" />
     <Compile Include="Controllers\Factory6Workshop6_1AssemblyLineController.cs" />
     <Compile Include="Controllers\MeticulousPursuitController.cs" />
     <Compile Include="Controllers\Rcl_MeticulousPursuitController.cs" />
     <Compile Include="Controllers\ServiceController.cs" />
+    <Compile Include="Middleware\CorsMiddleware.cs" />
     <Compile Include="OwinHostService.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -116,11 +119,20 @@
     <PackageReference Include="Microsoft.AspNet.WebApi.Owin">
       <Version>5.3.0</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.Owin.FileSystems">
+      <Version>4.2.3</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.Owin.Host.HttpListener">
+      <Version>4.2.3</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Owin.Host.SystemWeb">
       <Version>4.2.3</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Owin.Hosting">
       <Version>4.2.2</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Owin.StaticFiles">
+      <Version>4.2.3</Version>
     </PackageReference>
     <PackageReference Include="Serilog">
       <Version>4.2.0</Version>
@@ -136,7 +148,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CompanyIcon.ico" />
+    <None Include="StaticHtml\index.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>:: 复制 Npgsql.dll 到输出根目录

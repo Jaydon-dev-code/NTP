@@ -39,6 +39,20 @@ namespace SL.MLineDataPrecisionTracking.Service
             Startup.Container.Resolve<DataCollectionServiceManager>().StartAllAsync();
             Log.Information("采集服务已启动。");
 
+            // 恢复工位采集注册：上次运行中的工位自动启动，并启动并行 Worker
+            try
+            {
+                Startup.Container
+                    .Resolve<SL.MLineDataPrecisionTracking.Core.Services.DataCollection.StationCollectionManager>()
+                    .RestoreAsync()
+                    .GetAwaiter()
+                    .GetResult();
+                Log.Information("工位采集注册已恢复。");
+            }
+            catch (Exception ex)
+            {
+                Log.Error("恢复工位采集注册失败：{Message}", ex.Message);
+            }
         }
 
         protected override void OnStop()

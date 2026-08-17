@@ -46,13 +46,16 @@
   <ItemGroup>
     <Compile Include="Domain\ApiResult.cs" />
     <Compile Include="Domain\ChartMonitorItem.cs" />
+    <Compile Include="Domain\CollectionInfo.cs" />
     <Compile Include="Domain\EnergyRangePoint.cs" />
     <Compile Include="Domain\Factory4Workshop4_10LineBase.cs" />
     <Compile Include="Domain\Factory4Workshop4_10Line\Factory4Workshop4_10LineBase.cs" />
     <Compile Include="Domain\Mc1E\Mc1EBase.cs" />
     <Compile Include="Domain\Mc1E\Mc1ERead.cs" />
     <Compile Include="Domain\Mc1E\Mc1EWirte.cs" />
+    <Compile Include="Domain\Mqtt\MqttPublishConfig.cs" />
     <Compile Include="Domain\MenuItem.cs" />
+    <Compile Include="Domain\StationCollectionInfo.cs" />
     <Compile Include="Domain\TimeAxisConfig.cs" />
     <Compile Include="Domain\PaginationPage.cs" />
     <Compile Include="Domain\RefinedSearchCriteria.cs" />
@@ -62,6 +65,7 @@
     <Compile Include="Dtos\DevPlcPointDto.cs" />
     <Compile Include="Dtos\DevPlcPointReadDto.cs" />
     <Compile Include="Dtos\DevPlcPointWriteDto.cs" />
+    <Compile Include="Dtos\DeviceDataCollectionDtos.cs" />
     <Compile Include="Dtos\Factory4Workshop4_10Line\Factory4Workshop4_10LineSummaryDto.cs" />
     <Compile Include="Dtos\Factory4Workshop4_10Line\Factory4Workshop4_10Line_ABSDto.cs" />
     <Compile Include="Dtos\Factory4Workshop4_10Line\Factory4Workshop4_10Line_ABS_CheckDto.cs" />
@@ -101,6 +105,9 @@
     <Compile Include="Entities\Tb_EnergyRange.cs" />
     <Compile Include="Entities\Tb_EnergyRangeDetail.cs" />
     <Compile Include="Entities\Tb_Equipment.cs" />
+    <Compile Include="Entities\Tb_Factory.cs" />
+    <Compile Include="Entities\Tb_ProductionLine.cs" />
+    <Compile Include="Entities\Tb_DeviceCollection.cs" />
     <Compile Include="Entities\Factory6Workshop6_1AssemblyLine\Tb_Factory6Workshop6_1AssemblyLineA.cs" />
     <Compile Include="Entities\Factory6Workshop6_1AssemblyLine\Tb_Factory6Workshop6_1AssemblyLineB.cs" />
     <Compile Include="Entities\Tb_HeatTreatmentData.cs" />

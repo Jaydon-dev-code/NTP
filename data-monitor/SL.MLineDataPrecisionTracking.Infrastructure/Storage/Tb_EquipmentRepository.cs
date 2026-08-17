@@ -47,9 +47,51 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
             ;
         }
 
+        /// <summary>
+        /// 查询设备 + 归属产线 + 厂
+        /// </summary>
+        public async Task<List<Tb_Equipment>> GetListWithLineAsync()
+        {
+            return await _db
+                .Queryable<Tb_Equipment>()
+                .Includes(e => e.ProductionLine)
+                .Includes(e => e.ProductionLine.Factory)
+                .OrderBy(e => e.Id)
+                .ToListAsync();
+        }
+
+        public async Task<Tb_Equipment> GetWithLineAsync(
+            Expression<Func<Tb_Equipment, bool>> expression
+        )
+        {
+            return await _db
+                .Queryable<Tb_Equipment>()
+                .Includes(e => e.ProductionLine)
+                .Includes(e => e.ProductionLine.Factory)
+                .Includes(e => e.PlcConnections)
+                .FirstAsync(expression);
+        }
+
+        /// <summary>
+        /// 将设备加入/移出产线（按设备编号）
+        /// </summary>
+        public async Task<int> UpdateLineAsync(string equipmentId, int? lineId)
+        {
+            return await _db
+                .Updateable<Tb_Equipment>()
+                .SetColumns(e => e.LineId == lineId)
+                .Where(e => e.EquipmentId == equipmentId)
+                .ExecuteCommandAsync();
+        }
+
         public async Task<int> InsertableAsync(Tb_Equipment device)
         {
             return await _db.Insertable<Tb_Equipment>(device).ExecuteCommandAsync();
+        }
+
+        public async Task<int> UpdateAsync(Tb_Equipment device)
+        {
+            return await _db.Updateable<Tb_Equipment>(device).ExecuteCommandAsync();
         }
 
         public async Task<int> ExecuteReturnIdentityAsync(Tb_Equipment device)

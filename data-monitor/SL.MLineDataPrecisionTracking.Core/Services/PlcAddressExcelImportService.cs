@@ -40,9 +40,10 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
             try
             {
                 var list = ReadExcel(excelStream);
-                // 按【设备+IP】分组导入
+                // 按【设备编号+IP】分组导入
                 var groups = list.GroupBy(x => new
                 {
+                    x.EquipmentId,
                     x.DeviceName,
                     x.IpAddress,
                     x.Port,
@@ -50,15 +51,16 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
 
                 foreach (var group in groups)
                 {
+                    string equipmentId = group.Key.EquipmentId;
                     string deviceName = group.Key.DeviceName;
                     string ip = group.Key.IpAddress;
                     int port = group.Key.Port;
 
                     var firstRow = group.First();
                   
-                    // 1. 按 DeviceName 找设备，存在则删除原有数据（点位、连接、设备）后重新插入
+                    // 1. 按设备编号找设备，存在则删除原有数据（点位、连接、设备）后重新插入
                     var existing = await _equipmentRepository.QueryableFirstAsync(x =>
-                        x.DeviceName == deviceName
+                        x.EquipmentId == equipmentId
                     );
                     if (existing != null)
                     {
@@ -76,14 +78,14 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                         await _equipmentRepository.DeleteableAsync(e => e.Id == existing.Id);
                     }
 
-                    // 2. 找设备，没有就新增
+                    // 2. 找设备，没有就新增（设备编号唯一）
                     var device = await _equipmentRepository.QueryableFirstAsync(x =>
-                        x.DeviceName == deviceName
+                        x.EquipmentId == equipmentId
                     );
                     int deviceId = 0;
                     if (device == null)
                     {
-                        device = new Tb_Equipment() { DeviceName = deviceName };
+                        device = new Tb_Equipment() { DeviceName = deviceName, EquipmentId = equipmentId };
                         deviceId = await _equipmentRepository.ExecuteReturnIdentityAsync(device);
                     }
                     else
@@ -120,6 +122,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                             PlcConnectionId = plcId,
                             PointName = x.PointName,
                             Description = x.Description == null ? "" : x.Description,
+                            FunctionType = x.FunctionType,
                             Area = x.Area,
                             Address = x.Address,
                             DataType = x.DataType,
@@ -155,20 +158,23 @@ namespace SL.MLineDataPrecisionTracking.Core.Services
                 IRow row = sheet.GetRow(i);
                 if (row == null)
                     continue;
-
+                int indenx = 0;
                 var dto = new PlcPointImportDto
                 {
-                    DeviceName = row.GetCell(0)?.ToString()?.Trim(),
-                    IpAddress = row.GetCell(1)?.ToString()?.Trim(),
-                    Port = int.TryParse(row.GetCell(2)?.ToString(), out int p) ? p : 8000,
-                    PointName = row.GetCell(3)?.ToString()?.Trim(),
-                    Description = row.GetCell(4)?.ToString()?.Trim(),
-                    Area = row.GetCell(5)?.ToString()?.Trim(),
-                    Address = row.GetCell(6)?.ToString()?.Trim(),
-                    DataType = row.GetCell(7)?.ToString()?.Trim(),
-                    Length = int.TryParse(row.GetCell(8)?.ToString(), out int len) ? len : 1,
-                    ReadFormula = row.GetCell(9)?.ToString()?.Trim() ?? "",
-                    WriteFormula = row.GetCell(10)?.ToString()?.Trim() ?? "",
+                    EquipmentId = row.GetCell(indenx++)?.ToString()?.Trim(),
+                    DeviceName = row.GetCell(indenx++)?.ToString()?.Trim(),
+                    IpAddress = row.GetCell(indenx++)?.ToString()?.Trim(),
+                    Port = int.TryParse(row.GetCell(indenx++)?.ToString(), out int p) ? p : 8000,
+                    FunctionType = row.GetCell(indenx++)?.ToString()?.Trim() ?? "",
+                    PointName = row.GetCell(indenx++)?.ToString()?.Trim(),
+                    Description = row.GetCell(indenx++)?.ToString()?.Trim(),
+                    Area = row.GetCell(cellnum: indenx++)?.ToString()?.Trim(),
+                    Address = row.GetCell(indenx++)?.ToString()?.Trim(),
+                    DataType = row.GetCell(indenx++)?.ToString()?.Trim(),
+                    Length = int.TryParse(row.GetCell(indenx++)?.ToString(), out int len) ? len : 1,
+                    ReadFormula = row.GetCell(indenx++)?.ToString()?.Trim() ?? "",
+                    WriteFormula = row.GetCell(indenx++)?.ToString()?.Trim() ?? "",
+       
                    
                 };
 
