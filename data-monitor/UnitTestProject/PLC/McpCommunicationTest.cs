@@ -119,6 +119,46 @@ namespace UnitTestProject.PLC
         }
 
         [TestMethod]
+        public void Read_WordBitAddress()
+        {
+            _server.Write("W808", (short)0b0000000000001001);
+            _server.Write("W809", (short)0b0001000000000000);
+
+            var re = _plcCommunication.Read(
+                new List<DevPlcPointDto>()
+                {
+                    GetDevPlcPointDto("808.0", TypeCode.Boolean, "W"),
+                    GetDevPlcPointDto("808.C", TypeCode.Boolean, "W"),
+                    GetDevPlcPointDto("809.C", TypeCode.Boolean, "W"),
+                }
+            );
+
+            Assert.IsTrue(re.IsSuccess);
+            Assert.AreEqual(true, bool.Parse(re.Data[0].Value[0].ToString()));
+            Assert.AreEqual(false, bool.Parse(re.Data[1].Value[0].ToString()));
+            Assert.AreEqual(true, bool.Parse(re.Data[2].Value[0].ToString()));
+        }
+
+        [TestMethod]
+        public void Read_WordBitAddress_Single()
+        {
+            _server.Write("W808", (short)0b0000000000000100);
+            var re = _plcCommunication.Read(GetDevPlcPointDto("808.2", TypeCode.Boolean, "W"));
+            Assert.IsTrue(re.IsSuccess);
+            Assert.AreEqual(true, bool.Parse(re.Data.Value[0].ToString()));
+
+            _server.Write("W808", (short)0b0000000000000010);
+            var reFalse = _plcCommunication.Read(
+                GetDevPlcPointDto("808.2", TypeCode.Boolean, "W")
+            );
+            Assert.AreEqual(false, bool.Parse(reFalse.Data.Value[0].ToString()));
+            var reTrue = _plcCommunication.Read(
+                GetDevPlcPointDto("808.1", TypeCode.Boolean, "W")
+            );
+            Assert.AreEqual(true, bool.Parse(reTrue.Data.Value[0].ToString()));
+        }
+
+        [TestMethod]
         public void Read_X16Address_Bacth()
         {
             _server.Write("XA", true);

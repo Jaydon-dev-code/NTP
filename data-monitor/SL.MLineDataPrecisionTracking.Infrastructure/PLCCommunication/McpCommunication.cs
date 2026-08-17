@@ -30,7 +30,10 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             {
                 Data = new DevPlcPointReadDto(),
             };
-            if (int.TryParse(readPlcInfo.Address, result: out int result) is false)
+            if (
+                int.TryParse(readPlcInfo.Address, result: out int result) is false
+                && (readPlcInfo.Address?.Contains(".") ?? false) is false
+            )
             {
                 byte[] data = null;
                 try
@@ -140,34 +143,37 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             try
             {
                 var prefix = readPlcInfo.Prefix.ToPrefix();
-                int address = prefix.IsHexDevice()
-                    ? (int)Convert.ToUInt32(StripNonHexChars(readPlcInfo.Address), 16)
-                    : int.Parse(StripNonDigitChars(readPlcInfo.Address));
+                var (address, bitPos) = ParseAddressParts(readPlcInfo.Address, readPlcInfo.Prefix);
+
+                bool isBitAddress = bitPos >= 0;
+
                 var readValue = PaginatedReadingSync(
                     readPlcInfo.IpAddress,
                     readPlcInfo.Port,
                     prefix,
                     address,
-                    readPlcInfo.Length * readPlcInfo.DataType.GetTypeByteLength(),
-                    readPlcInfo.DataType
+                    isBitAddress
+                        ? readPlcInfo.Length * readPlcInfo.DataType.GetTypeOfShortOffset()
+                        : readPlcInfo.Length * readPlcInfo.DataType.GetTypeByteLength(),
+                    isBitAddress ? TypeCode.Object : readPlcInfo.DataType
                 );
 
                 if (!readValue.IsSuccess)
                 {
-                    byte[] bytes = new byte[readPlcInfo.Length * 2];
-                    readPlcInfo.Value = bytes.ConvertToValues(
-                        0 * readPlcInfo.ShortOffset,
-                        readPlcInfo.DataType,
-                        readPlcInfo.Length
-                    );
+                    readPlcInfo.Value = isBitAddress
+                        ? new List<object> { false }
+                        : new byte[readPlcInfo.Length * 2]
+                            .ConvertToValues(0, readPlcInfo.DataType, readPlcInfo.Length);
                 }
                 else
                 {
-                    readPlcInfo.Value = readValue.Data.ConvertToValues(
-                        0 * readPlcInfo.ShortOffset,
-                        readPlcInfo.DataType,
-                        readPlcInfo.Length
-                    );
+                    readPlcInfo.Value = isBitAddress
+                        ? ExtractWordBit(readValue.Data, 0, bitPos)
+                        : readValue.Data.ConvertToValues(
+                            0,
+                            readPlcInfo.DataType,
+                            readPlcInfo.Length
+                        );
                 }
 
                 return Result<DevPlcPointReadDto>.Success(readPlcInfo);
@@ -196,17 +202,17 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                 foreach (var group in groups)
                 {
                     var prefix = group.Key.Prefix.ToPrefix();
-                    bool isHex = prefix.IsHexDevice();
 
                     foreach (var groupAddre in GroupByAddress(group))
                     {
                         var list = groupAddre
-                            .Select(item => new
+                            .Select(item =>
                             {
-                                Item = item,
-                                Addr = isHex
-                                    ? (int)Convert.ToUInt32(StripNonHexChars(item.Address), 16)
-                                    : int.Parse(StripNonDigitChars(item.Address)),
+                                var (addr, bitPos) = ParseAddressParts(
+                                    item.Address,
+                                    group.Key.Prefix
+                                );
+                                return new { Item = item, Addr = addr, BitPos = bitPos };
                             })
                             .ToList();
 
@@ -222,7 +228,9 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                             )
                             - startAddre;
 
-                        var typeCode = list.All(x => x.Item.DataType == TypeCode.Boolean)
+                        var typeCode = list.All(
+                            x => x.BitPos < 0 && x.Item.DataType == TypeCode.Boolean
+                        )
                             ? TypeCode.Boolean
                             : TypeCode.Object;
 
@@ -237,29 +245,31 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
 
                         if (!readValue.IsSuccess)
                         {
-                            //byte[] bytes = new byte[length * 2];
-                            //foreach (var x in list)
-                            //{
-                            //    x.Item.Value = bytes.ConvertToValues(
-                            //        (x.Addr - startAddre) * x.Item.ShortOffset,
-                            //        x.Item.DataType,
-                            //        x.Item.Length
-                            //    );
-                            //}
                             return Result<List<DevPlcPointReadDto>>.Fail(readValue.Message);
                         }
                         else
                         {
                             foreach (var x in list)
                             {
-                                x.Item.Value = readValue.Data.ConvertToValues(
-                                    (
-                                        (x.Addr - startAddre)
-                                        * (x.Item.DataType == TypeCode.Boolean ? 1 : 2)
-                                    ),
-                                    x.Item.DataType,
-                                    x.Item.Length
-                                );
+                                if (x.BitPos >= 0)
+                                {
+                                    x.Item.Value = ExtractWordBit(
+                                        readValue.Data,
+                                        (x.Addr - startAddre) * 2,
+                                        x.BitPos
+                                    );
+                                }
+                                else
+                                {
+                                    x.Item.Value = readValue.Data.ConvertToValues(
+                                        (
+                                            (x.Addr - startAddre)
+                                            * (x.Item.DataType == TypeCode.Boolean ? 1 : 2)
+                                        ),
+                                        x.Item.DataType,
+                                        x.Item.Length
+                                    );
+                                }
                             }
                         }
                     }
@@ -338,17 +348,46 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
 
         private static int ParseAddress(string address, string prefix)
         {
+            return ParseAddressParts(address, prefix).Address;
+        }
+
+        /// <summary>
+        /// 解析地址（支持 W000808.0 / W000808.C 形式的字寄存器位地址）
+        /// 小数点前为字地址（按设备类型规则解析），小数点后为位号（十六进制 0~F）
+        /// </summary>
+        private static (int Address, int BitPosition) ParseAddressParts(
+            string address,
+            string prefix
+        )
+        {
+            string wordPart = address;
+            string bitPart = null;
+            int dotIndex = address?.IndexOf('.') ?? -1;
+            if (dotIndex >= 0)
+            {
+                wordPart = address.Substring(0, dotIndex);
+                bitPart = address.Substring(dotIndex + 1);
+            }
+
             var p = prefix.ToPrefix();
-            if (p.IsHexDevice())
-            {
-                var clean = StripNonHexChars(address);
-                return (int)Convert.ToUInt32(clean, 16);
-            }
-            else
-            {
-                var clean = StripNonDigitChars(address);
-                return int.Parse(clean);
-            }
+            int wordAddr = p.IsHexDevice()
+                ? (int)Convert.ToUInt32(StripNonHexChars(wordPart), 16)
+                : int.Parse(StripNonDigitChars(wordPart));
+
+            int bitPos = -1;
+            if (!string.IsNullOrEmpty(bitPart))
+                bitPos = Convert.ToInt32(StripNonHexChars(bitPart), 16);
+
+            return (wordAddr, bitPos);
+        }
+
+        /// <summary>
+        /// 从已读取的字（int16）中按位解析出 bit 位
+        /// </summary>
+        private static List<object> ExtractWordBit(byte[] data, int startIndex, int bitPos)
+        {
+            short wordValue = data.ToInt16(startIndex);
+            return new List<object> { ((wordValue >> bitPos) & 1) == 1 };
         }
 
         /// <summary>
@@ -765,35 +804,39 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
             try
             {
                 var prefix = readPlcInfo.Prefix.ToPrefix();
-                int address = prefix.IsHexDevice()
-                    ? (int)Convert.ToUInt32(StripNonHexChars(readPlcInfo.Address), 16)
-                    : int.Parse(StripNonDigitChars(readPlcInfo.Address));
+                var (address, bitPos) = ParseAddressParts(readPlcInfo.Address, readPlcInfo.Prefix);
+
+                bool isBitAddress = bitPos >= 0;
 
                 readValue = await PaginatedReading(
                     readPlcInfo.IpAddress,
                     readPlcInfo.Port,
                     prefix,
                     address,
-                    readPlcInfo.Length,
-                    readPlcInfo.DataType
+                    isBitAddress
+                        ? readPlcInfo.Length * readPlcInfo.DataType.GetTypeOfShortOffset()
+                        : readPlcInfo.Length,
+                    isBitAddress ? TypeCode.Object : readPlcInfo.DataType
                 );
                 if (readValue.IsSuccess is false)
                 {
-                    byte[] bytes = new byte[readPlcInfo.Length * 2];
-
-                    readPlcInfo.Value = bytes.ConvertToValues(
-                        0 * readPlcInfo.ShortOffset,
-                        readPlcInfo.DataType,
-                        readPlcInfo.Length
-                    );
+                    readPlcInfo.Value = isBitAddress
+                        ? new List<object> { false }
+                        : new byte[readPlcInfo.Length * 2].ConvertToValues(
+                            0,
+                            readPlcInfo.DataType,
+                            readPlcInfo.Length
+                        );
                 }
                 else
                 {
-                    readPlcInfo.Value = readValue.Data.ConvertToValues(
-                        0 * readPlcInfo.ShortOffset,
-                        readPlcInfo.DataType,
-                        readPlcInfo.Length
-                    );
+                    readPlcInfo.Value = isBitAddress
+                        ? ExtractWordBit(readValue.Data, 0, bitPos)
+                        : readValue.Data.ConvertToValues(
+                            0,
+                            readPlcInfo.DataType,
+                            readPlcInfo.Length
+                        );
                 }
                 return Result<DevPlcPointReadDto>.Success(readPlcInfo);
             }
@@ -819,17 +862,17 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                 foreach (var group in groups)
                 {
                     var prefix = group.Key.Prefix.ToPrefix();
-                    bool isHex = prefix.IsHexDevice();
 
                     foreach (var groupAddre in GroupByAddress(group))
                     {
                         var list = groupAddre
-                            .Select(item => new
+                            .Select(item =>
                             {
-                                Item = item,
-                                Addr = isHex
-                                    ? (int)Convert.ToUInt32(StripNonHexChars(item.Address), 16)
-                                    : int.Parse(StripNonDigitChars(item.Address)),
+                                var (addr, bitPos) = ParseAddressParts(
+                                    item.Address,
+                                    group.Key.Prefix
+                                );
+                                return new { Item = item, Addr = addr, BitPos = bitPos };
                             })
                             .ToList();
 
@@ -844,7 +887,9 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                             )
                             - startAddre;
 
-                        var typeCode = list.All(x => x.Item.DataType == TypeCode.Boolean)
+                        var typeCode = list.All(
+                            x => x.BitPos < 0 && x.Item.DataType == TypeCode.Boolean
+                        )
                             ? TypeCode.Boolean
                             : TypeCode.Object;
 
@@ -861,22 +906,40 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication
                             byte[] bytes = new byte[lenght * 2];
                             foreach (var x in list)
                             {
-                                x.Item.Value = bytes.ConvertToValues(
-                                    (x.Addr - startAddre) * x.Item.ShortOffset,
-                                    x.Item.DataType,
-                                    x.Item.Length
-                                );
+                                if (x.BitPos >= 0)
+                                {
+                                    x.Item.Value = new List<object> { false };
+                                }
+                                else
+                                {
+                                    x.Item.Value = bytes.ConvertToValues(
+                                        (x.Addr - startAddre) * x.Item.ShortOffset,
+                                        x.Item.DataType,
+                                        x.Item.Length
+                                    );
+                                }
                             }
                         }
                         else
                         {
                             foreach (var x in list)
                             {
-                                x.Item.Value = readValue.Data.ConvertToValues(
-                                    ((x.Addr - startAddre) * 2),
-                                    x.Item.DataType,
-                                    x.Item.Length
-                                );
+                                if (x.BitPos >= 0)
+                                {
+                                    x.Item.Value = ExtractWordBit(
+                                        readValue.Data,
+                                        (x.Addr - startAddre) * 2,
+                                        x.BitPos
+                                    );
+                                }
+                                else
+                                {
+                                    x.Item.Value = readValue.Data.ConvertToValues(
+                                        ((x.Addr - startAddre) * 2),
+                                        x.Item.DataType,
+                                        x.Item.Length
+                                    );
+                                }
                             }
                         }
                     }
