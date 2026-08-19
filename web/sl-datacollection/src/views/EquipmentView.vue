@@ -418,6 +418,7 @@ async function removeFromLine(equipment: TbEquipment) {
             stripe
             size="small"
           >
+            <el-table-column prop="EquipmentId" label="设备编号" width="120" />
             <el-table-column prop="DeviceName" label="设备名称" />
             <el-table-column prop="CreateTime" label="创建时间" width="170" />
             <el-table-column label="操作" width="160">
@@ -441,6 +442,7 @@ async function removeFromLine(equipment: TbEquipment) {
           <template v-if="unassignedEquipments.length">
             <el-divider content-position="left">未归属产线的设备</el-divider>
             <el-table :data="unassignedEquipments" border stripe size="small">
+              <el-table-column prop="EquipmentId" label="设备编号" width="120" />
               <el-table-column prop="DeviceName" label="设备名称" />
               <el-table-column prop="CreateTime" label="创建时间" width="170" />
               <el-table-column label="操作" width="200">
