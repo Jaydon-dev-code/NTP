@@ -27,6 +27,11 @@ async function load() {
       if (selectedFactory.value) {
         const match = factories.value.find((f) => f.Id === selectedFactory.value!.Id)
         selectedFactory.value = match ?? null
+        // 刷新选中产线
+        if (selectedLine.value && match) {
+          const lineMatch = match.ProductionLines?.find((l) => l.Id === selectedLine.value!.Id)
+          selectedLine.value = lineMatch ?? null
+        }
       }
     } else {
       ElMessage.error(res.Message)
@@ -51,6 +56,13 @@ async function loadUnassigned() {
   if (res.IsSuccess) {
     unassignedEquipments.value = (res.Data ?? []).filter((e) => e.LineId == null)
   }
+}
+
+function refreshSelectedLine() {
+  if (!selectedFactory.value || !selectedLine.value) return
+  const factory = factories.value.find((f) => f.Id === selectedFactory.value!.Id)
+  const line = factory?.ProductionLines?.find((l) => l.Id === selectedLine.value!.Id)
+  selectedLine.value = line ?? null
 }
 
 // ---------------- 导入点位 Excel ----------------
@@ -229,6 +241,7 @@ async function saveEquipment() {
   if (res.IsSuccess) {
     ElMessage.success(res.Message)
     equipmentDialog.value = false
+    await load()
     await loadUnassigned()
   } else {
     ElMessage.error(res.Message)
@@ -265,8 +278,9 @@ async function addToLine(equipment: TbEquipment) {
   })
   if (res.IsSuccess) {
     ElMessage.success(res.Message)
-    await loadUnassigned()
     await load()
+    refreshSelectedLine()
+    await loadUnassigned()
   } else {
     ElMessage.error(res.Message)
   }
@@ -276,8 +290,9 @@ async function removeFromLine(equipment: TbEquipment) {
   const res = await equipmentApi.removeEquipmentFromLine(equipment.EquipmentId)
   if (res.IsSuccess) {
     ElMessage.success(res.Message)
-    await loadUnassigned()
     await load()
+    refreshSelectedLine()
+    await loadUnassigned()
   } else {
     ElMessage.error(res.Message)
   }
@@ -289,9 +304,9 @@ async function removeFromLine(equipment: TbEquipment) {
     <div class="toolbar">
       <el-button type="primary" @click="openFactoryDialog()">新增厂</el-button>
       <el-button type="success" @click="openLineDialog()">新增产线</el-button>
-      <el-button @click="openEquipmentDialog()">新增设备</el-button>
+      <el-button v-show="false" @click="openEquipmentDialog()">新增设备</el-button>
       <el-button type="warning" :loading="importing" @click="openImportPicker">导入点位</el-button>
-      <el-button @click="load()">刷新</el-button>
+      <el-button v-show="false" @click="load()">刷新</el-button>
       <input
         ref="importFileInput"
         type="file"
@@ -380,10 +395,17 @@ async function removeFromLine(equipment: TbEquipment) {
             <div class="card-header">
               <span>设备 {{ selectedLine ? `· ${selectedLine.LineName}` : '· 未归属产线' }}</span>
               <span class="card-header-actions">
-                <el-button size="small" text type="primary" @click="openEquipmentDialog()"
+                <el-button
+                  size="small"
+                  v-show="false"
+                  text
+                  type="primary"
+                  @click="openEquipmentDialog()"
                   >新增</el-button
                 >
-                <el-button size="small" text @click="loadUnassigned()">刷新</el-button>
+                <el-button v-show="false" size="small" text @click="loadUnassigned()"
+                  >刷新</el-button
+                >
               </span>
             </div>
           </template>
