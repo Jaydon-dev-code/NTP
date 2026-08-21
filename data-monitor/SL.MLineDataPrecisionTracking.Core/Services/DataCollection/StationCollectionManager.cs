@@ -1,3 +1,14 @@
+using System;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Diagnostics;
+using System.Linq;
+using System.Net.NetworkInformation;
+using System.Threading;
+using System.Threading.Tasks;
+using MQTTnet.Internal;
 using Newtonsoft.Json.Linq;
 using SL.MLineDataPrecisionTracking.Core.Mqtt;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
@@ -5,14 +16,6 @@ using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Domain.Mqtt;
 using SL.MLineDataPrecisionTracking.Models.Entities;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
 {
@@ -85,10 +88,6 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
         private CancellationTokenSource _workersCts; // Worker 的取消令牌源（StopWorkers 时取消）
         private Task[] _workers; // 并行 Worker 任务数组
         private readonly int _workerCount; // Worker 数量（= CPU 核数）
-
-        private CancellationTokenSource _heartbeatCts; // 心跳循环取消令牌源
-        private Task _heartbeatTask; // 心跳循环任务
-        private TimeSpan _heartbeatInterval = TimeSpan.FromSeconds(30); // 心跳发布间隔
 
         /// <summary>当前 Worker 数量（外部可查）</summary>
         public int WorkerCount => _workerCount;
@@ -172,20 +171,19 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
                 IStationCollection station = null;
                 lock (_scheduleLock)
                 {
-                    foreach (var kv in _stations)
-                    {
-                        var rt = kv.Value;
-                        // 条件：正在运行 && 没被别的 Worker 占用 && 距上次执行 ≥ 该工位配置的间隔
-                        if (
+                    // 筛选满足条件，取上次执行完成时间最早的工位
+                    var candidate = _stations
+                        .Values.Where(rt =>
                             rt.Station.IsRunning
                             && !rt.InProgress
-                            && DateTime.Now - rt.LastRun >= rt.Station.Interval
+                            && DateTime.UtcNow - rt.LastRun >= rt.Station.Interval
                         )
-                        {
-                            rt.InProgress = true; // 占住该工位
-                            station = rt.Station;
-                            break;
-                        }
+                        .OrderBy(rt => rt.LastRun)
+                        .FirstOrDefault();
+                    if (candidate != null)
+                    {
+                        candidate.InProgress = true;
+                        station = candidate.Station;
                     }
                 }
 
@@ -206,7 +204,30 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
                 // ③ 执行工位采集（锁外，不阻塞其他 Worker 抢位）
                 try
                 {
-                    await station.DataCollectionAsync();
+                    using (var timeoutCts = new CancellationTokenSource())
+                    {
+                        var collectTask = station.DataCollectionAsync();
+                        var delayTask = Task.Delay(5000, timeoutCts.Token);
+
+                        var completed = await Task.WhenAny(collectTask, delayTask);
+
+                        if (completed == delayTask)
+                        {
+                            // 超时分支
+                            Serilog.Log.Warning(
+                                "[工位采集]【{StationName}】采集执行超时({TimeoutMs}ms)",
+                                station.StationName,
+                                5000
+                            );
+                        }
+                        else
+                        {
+                            // 采集先完成，取消delay，释放timer
+                            timeoutCts.Cancel();
+                            // ⭐关键：必须await，把业务异常抛到外层catch
+                            await collectTask;
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -224,7 +245,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
                     {
                         if (_stations.TryGetValue(station.StationId, out var rt))
                         {
-                            rt.LastRun = DateTime.Now;
+                            rt.LastRun = DateTime.UtcNow; // 统一UtcNow
                             rt.InProgress = false;
                         }
                     }
@@ -246,13 +267,13 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
         public async Task RestoreAsync()
         {
             var records = await _deviceCollectionRepository.GetListAsync();
-            foreach (var record in records)
+            foreach (var record in records.Where(x=>x.IsEnabled && x.IsRunning))
             {
                 try
                 {
                     // 设备是否还在（可能已被删除）— 按设备编号查
                     var equipment = await _equipmentRepository.GetWithLineAsync(x =>
-                        x.EquipmentId == record.EquipmentId
+                        x.EquipmentId == record.EquipmentId 
                     );
                     if (equipment == null)
                     {
@@ -311,7 +332,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
 
                     // 恢复运行状态：只有"启用且上次在运行"的工位才自动接着跑
                     station.IsRunning = record.IsEnabled && record.IsRunning;
-                    station.Interval = TimeSpan.FromMilliseconds(500);
+                    station.Interval = TimeSpan.FromSeconds(1);
 
                     _stations[record.EquipmentId] = new StationRuntime
                     {
@@ -339,12 +360,10 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
                     );
                 }
             }
-  
+
             // 恢复后启动 Worker（幂等，重复调用安全）
             StartWorkers();
         }
-
-
 
         #endregion
 
@@ -367,33 +386,41 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
                 pwd = dict["pwd"],
                 topicId = int.Parse(dict["topicId"]),
             };
-            var mqtt = GetMqttService(new MqttPublishConfig() { Host = mqttObj.ip, Port = mqttObj.port, Username = mqttObj.user, Password = mqttObj.pwd, Topic = $"BearingBranch6/{mqttObj.topicId}/online" });
-            Task.Run( async () =>
-            {
-                while (!workersCts.IsCancellationRequested)
+            var mqtt = GetMqttService(
+                new MqttPublishConfig()
                 {
-                    mqtt.PublishAsync($"BearingBranch6/{mqttObj.topicId}/online", new
-                    {
-                        ID = mqttObj.topicId,
-                        status = "online",
-                        time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
-                    });
-                    await Task.Delay(1000, workersCts.Token);
+                    Host = mqttObj.ip,
+                    Port = mqttObj.port,
+                    Username = mqttObj.user,
+                    Password = mqttObj.pwd,
+                    Topic = $"BearingBranch6/{mqttObj.topicId}/online",
                 }
-                mqtt.PublishAsync($"BearingBranch6/{mqttObj.topicId}/online", new
+            );
+            Task.Run(
+                async () =>
                 {
-                    ID = mqttObj.topicId,
-                    status = "offline",
-                });
-
-
-            }, workersCts.Token);
+                    while (!workersCts.IsCancellationRequested)
+                    {
+                        mqtt.PublishAsync(
+                            $"BearingBranch6/{mqttObj.topicId}/online",
+                            new
+                            {
+                                ID = mqttObj.topicId,
+                                status = "online",
+                                time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                            }
+                        );
+                        await Task.Delay(1000, workersCts.Token);
+                    }
+                    mqtt.PublishAsync(
+                        $"BearingBranch6/{mqttObj.topicId}/online",
+                        new { ID = mqttObj.topicId, status = "offline" }
+                    );
+                },
+                workersCts.Token
+            );
         }
-            
-                
 
-
-   
         #endregion
 
         #region 注册 / 注销

@@ -1,12 +1,11 @@
 using Autofac;
-
 using HslCommunication.Profinet.Melsec;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MQTTnet.Server;
 using SL.MLineDataPrecisionTracking.Core.Middleware;
 using SL.MLineDataPrecisionTracking.Core.Services;
 using SL.MLineDataPrecisionTracking.Core.Services.DataCollection;
-using SL.MLineDataPrecisionTracking.Infrastructure.Common.Expansions;
+using SL.MLineDataPrecisionTracking.Infrastructure.Expand;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Domain;
@@ -73,6 +72,8 @@ namespace UnitTestProject.DataCollection
             var equipmentRepo = Container.Resolve<Tb_EquipmentRepository>();
             var deviceCollectionRepo = Container.Resolve<Tb_DeviceCollectionRepository>();
             var equipmentManagementService = Container.Resolve<EquipmentManagementService>();
+            var plcPointRepo = Container.Resolve<Tb_PlcPointRepository>();
+            
             var mcp = Container.Resolve<McpCommunication>();
 
             var manager = new StationCollectionManager(
@@ -88,34 +89,40 @@ namespace UnitTestProject.DataCollection
 
             Console.WriteLine($"共获取到 {equipments.Count} 个工位");
 
-            foreach (var equipment in equipments)
-            {
-                if (equipment.LineId == null)
-                {
-                    Console.WriteLine($"设备 {equipment.DeviceName} 未归属产线，跳过注册");
-                    continue;
-                }
+            //foreach (var equipment in equipments)
+            //{
+            //    if (equipment.LineId == null)
+            //    {
+            //        Console.WriteLine($"设备 {equipment.DeviceName} 未归属产线，跳过注册");
+            //        continue;
+            //    }
 
-                var result = await manager.RegisterDeviceAsync(equipment.EquipmentId);
-                if (result.IsSuccess)
-                {
-                    Console.WriteLine($"工位 {equipment.DeviceName}({equipment.EquipmentId}) 注册成功");
-                    await manager.StartAsync(equipment.EquipmentId);
-                }
-                else
-                {
-                    Console.WriteLine($"工位 {equipment.DeviceName}({equipment.EquipmentId}) 注册失败: {result.Message}");
-                }
-            }
+            //    var result = await manager.RegisterDeviceAsync(equipment.EquipmentId);
+            //    if (result.IsSuccess)
+            //    {
+            //        Console.WriteLine($"工位 {equipment.DeviceName}({equipment.EquipmentId}) 注册成功");
+            //        await manager.StartAsync(equipment.EquipmentId);
+            //    }
+            //    else
+            //    {
+            //        Console.WriteLine($"工位 {equipment.DeviceName}({equipment.EquipmentId}) 注册失败: {result.Message}");
+            //    }
+            //}
 
-            manager.StartWorkers();
+            manager.RestoreAsync();
 
             var writeTasks = new List<Task>();
             foreach (var equipment in equipments)
             {
-                if (equipment.LineId == null || equipment.PlcConnections == null || equipment.PlcConnections.Count == 0)
+                if (equipment.LineId == null || equipment.PlcConnections == null)
                     continue;
-
+             
+                
+                    foreach (Tb_PlcConnection item in equipment.PlcConnections)
+                    {
+                        item.Points= await plcPointRepo.QueryableAsync(x => x.PlcConnectionId == item.Id);
+                    }
+              
                 var task = Task.Run(async () =>
                 {
                     await WriteDataForStation(equipment);
@@ -228,7 +235,7 @@ namespace UnitTestProject.DataCollection
                     }
 
                     Console.WriteLine($"工位 {equipment.DeviceName} 数据写入完成 - 总数:{producedTotal}, OK:{producedOk}, NG:{producedNg}");
-                    await Task.Delay(TimeSpan.FromSeconds(20));
+                    await Task.Delay(TimeSpan.FromSeconds(5));
                 }
                 catch (Exception ex)
                 {

@@ -46,13 +46,14 @@ namespace SL.MLineDataPrecisionTracking.Models.Domain
             var tmpProducedOK = _producedOKPoint.Value[0].ObjToInt();
             var tmpProducedNG = _producedNGPoint.Value[0].ObjToInt();
             var tmpWarValue = _warValuePoint.Select(x => x.Value[0].ObjToBool()).ToArray();
-            var re =
+            var re = !(
                 this.Status == _statusPoint.Value[0].ObjToInt()
                 && this.Beat == tmpBeat
                 && this.ProducedTotal == tmpProducedTotal
                 && this.ProducedOK == tmpProducedOK
                 && this.ProducedNG == tmpProducedNG
-                && this.WarValue.SequenceEqual(tmpWarValue);
+                && this.WarValue.SequenceEqual(tmpWarValue)
+            );
             if (re)
             {
                 this.Status = tmpStatus;
@@ -65,6 +66,5 @@ namespace SL.MLineDataPrecisionTracking.Models.Domain
 
             return re;
         }
-
     }
 }

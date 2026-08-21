@@ -1,4 +1,5 @@
-﻿using SL.MLineDataPrecisionTracking.Models.Entities;
+﻿using NPOI.SS.Formula.Functions;
+using SL.MLineDataPrecisionTracking.Models.Entities;
 using SqlSugar;
 using System;
 using System.Collections.Generic;
@@ -32,7 +33,10 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
             return await _db.Insertable<Tb_PlcPoint>(devices).ExecuteCommandAsync();
         }
 
-
+        public async Task<List<Tb_PlcPoint>> QueryableAsync(Expression<Func<Tb_PlcPoint, bool>> expression)
+        {
+            return await _db.Queryable<Tb_PlcPoint>().Where(expression).ToListAsync();
+        }
 
         public async Task<Tb_PlcPoint> QueryableFirstAsync(Expression<Func<Tb_PlcPoint, bool>> expression)
         {

@@ -24,14 +24,12 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
         {
             return await _db.Queryable<Tb_Equipment>()
                 .Includes(e => e.PlcConnections) // 加载PLC
-                .Includes(e => e.PlcConnections.First().Points) // 加载点位
                 .ToListAsync();
         }
 
         public async Task<int> DeleteableAsync(Expression<Func<Tb_Equipment, bool>> expression)
         {
             return await _db.Deleteable<Tb_Equipment>().Where(expression).ExecuteCommandAsync();
-             
         }
 
         public async Task<Tb_Equipment> GetEquipmentAllAsync(
@@ -39,8 +37,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
         )
         {
             return await _db.Queryable<Tb_Equipment>()
-                .Includes(e =>e.PlcConnections,p=>p.Points) // 加载PLC
-               
+                .Includes(e => e.PlcConnections, p => p.Points) // 加载PLC
                 .FirstAsync(
                     expression
                 ) // 加载点位
@@ -52,8 +49,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
         /// </summary>
         public async Task<List<Tb_Equipment>> GetListWithLineAsync()
         {
-            return await _db
-                .Queryable<Tb_Equipment>()
+            return await _db.Queryable<Tb_Equipment>()
                 .Includes(e => e.ProductionLine)
                 .Includes(e => e.ProductionLine.Factory)
                 .OrderBy(e => e.Id)
@@ -64,8 +60,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
             Expression<Func<Tb_Equipment, bool>> expression
         )
         {
-            return await _db
-                .Queryable<Tb_Equipment>()
+            return await _db.Queryable<Tb_Equipment>()
                 .Includes(e => e.ProductionLine)
                 .Includes(e => e.ProductionLine.Factory)
                 .Includes(e => e.PlcConnections)
@@ -77,8 +72,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
         /// </summary>
         public async Task<int> UpdateLineAsync(string equipmentId, int? lineId)
         {
-            return await _db
-                .Updateable<Tb_Equipment>()
+            return await _db.Updateable<Tb_Equipment>()
                 .SetColumns(e => e.LineId == lineId)
                 .Where(e => e.EquipmentId == equipmentId)
                 .ExecuteCommandAsync();

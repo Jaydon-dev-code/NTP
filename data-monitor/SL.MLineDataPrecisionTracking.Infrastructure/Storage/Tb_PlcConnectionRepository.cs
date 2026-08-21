@@ -38,6 +38,10 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
         {
             return await _db.Queryable<Tb_PlcConnection>().FirstAsync(expression);
         }
-      
+        public async Task<List<Tb_PlcConnection>> QueryableAsync(Expression<Func<Tb_PlcConnection, bool>> expression)
+        {
+            return await _db.Queryable<Tb_PlcConnection>().Where(expression).ToListAsync();
+        }
+
     }
 }
