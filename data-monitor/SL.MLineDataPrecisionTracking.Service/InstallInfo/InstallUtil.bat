@@ -28,7 +28,7 @@ echo  配置故障重启规则：间隔60秒、最多重试3次、24小时重置
 echo ==============================
 :: reset=86400  失败计数24小时(86400秒)自动清零
 :: actions=三次重启，每次延迟60000毫秒=60秒
-sc failure "%SERVICE_NAME%" reset=86400 actions=restart/60000/restart/60000/restart/60000
+sc failure "%SERVICE_NAME%" reset=86400 actions=restart/60000/restart/120000/restart/180000
 :: 设置自动启动
 sc config "%SERVICE_NAME%" start=auto
 
