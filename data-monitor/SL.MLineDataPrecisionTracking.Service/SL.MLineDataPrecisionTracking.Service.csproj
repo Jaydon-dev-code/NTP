@@ -148,11 +148,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CompanyIcon.ico" />
-    <None Include="StaticHtml\index.html">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="StaticHtml\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>:: 复制 Npgsql.dll 到输出根目录
