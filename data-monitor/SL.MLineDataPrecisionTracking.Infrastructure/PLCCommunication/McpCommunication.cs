@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using McpXLib;
 using McpXLib.Enums;
 using Serilog;
-using SL.MLineDataPrecisionTracking.Infrastructure.Common;
+using SL.MLineDataPrecisionTracking.Infrastructure.Expand;
 using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Dtos;
 using SqlSugar;

@@ -9,7 +9,7 @@ using Microsoft.AspNet.SignalR.Hubs;
 using NPOI.POIFS.Crypt.Dsig;
 using NPOI.POIFS.FileSystem;
 using NPOI.SS.Formula.Functions;
-using SL.MLineDataPrecisionTracking.Infrastructure.Common;
+using SL.MLineDataPrecisionTracking.Infrastructure.Expand;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage.Factory6Workshop6_3AssemblyLine;
@@ -157,7 +157,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                 return Result<object>.Fail(readValue.Message);
             }
 
-            var result = Expand.SugarColumnReflectAssign(readValue, _dataModelType);
+            var result = DataCollectionExpand.SugarColumnReflectAssign(readValue, _dataModelType);
             if (result.IsSuccess is false)
             {
                 return result;

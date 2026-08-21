@@ -1,5 +1,4 @@
-﻿using SL.MLineDataPrecisionTracking.Infrastructure.Common;
-using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
+﻿using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Entities;

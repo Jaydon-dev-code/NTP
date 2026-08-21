@@ -7,7 +7,7 @@ using System.Windows.Controls;
 using McpXLib.Enums;
 using Microsoft.Owin.BuilderProperties;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SL.MLineDataPrecisionTracking.Infrastructure.Common;
+
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Models.Domain.Mc1E;
 using SL.MLineDataPrecisionTracking.Models.Dtos;

@@ -1,6 +1,5 @@
 ﻿using NPOI.POIFS.Crypt.Dsig;
 using SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Workshop6_3;
-using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Domain;

@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNet.SignalR;
-using SL.MLineDataPrecisionTracking.Infrastructure.Common;
+using SL.MLineDataPrecisionTracking.Infrastructure.Expand;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Domain;

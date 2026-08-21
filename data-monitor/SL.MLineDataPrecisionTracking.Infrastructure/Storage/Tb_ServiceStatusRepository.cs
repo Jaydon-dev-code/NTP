@@ -1,5 +1,4 @@
-using SL.MLineDataPrecisionTracking.Infrastructure.Common;
-using SL.MLineDataPrecisionTracking.Infrastructure.Storage;using SL.MLineDataPrecisionTracking.Models.Entities;
+using SL.MLineDataPrecisionTracking.Models.Entities;
 using SqlSugar;
 using System;
 using System.Collections.Generic;

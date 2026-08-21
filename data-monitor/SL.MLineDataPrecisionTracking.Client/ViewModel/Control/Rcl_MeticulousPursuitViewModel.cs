@@ -1,3 +1,21 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using HandyControl.Controls;
+using Microsoft.Win32;
+using ScottPlot;
+using ScottPlot.WPF;
+using SL.MLineDataPrecisionTracking.Client.Http;
+using SL.MLineDataPrecisionTracking.Core.Services;
+
+using SL.MLineDataPrecisionTracking.Infrastructure.Expand;
+using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
+using SL.MLineDataPrecisionTracking.Models.Domain;
+using SL.MLineDataPrecisionTracking.Models.Dtos;
+using SL.MLineDataPrecisionTracking.Models.Dtos.Request;
+using SL.MLineDataPrecisionTracking.Models.Dtos.Response;
+using SL.MLineDataPrecisionTracking.Models.Entities;
+using SL.MLineDataPrecisionTracking.Models.Entities.Factory6Workshop6_3AssemblyLine;
+using SqlSugar;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -10,24 +28,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Threading;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using HandyControl.Controls;
-using Microsoft.Win32;
-using ScottPlot;
-using ScottPlot.WPF;
-using SL.MLineDataPrecisionTracking.Client.Http;
-using SL.MLineDataPrecisionTracking.Core.Services;
-using SL.MLineDataPrecisionTracking.Infrastructure.Common;
-using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
-using SL.MLineDataPrecisionTracking.Models.Domain;
-using SL.MLineDataPrecisionTracking.Models.Dtos;
-using SL.MLineDataPrecisionTracking.Models.Dtos.Request;
-using SL.MLineDataPrecisionTracking.Models.Dtos.Response;
-using SL.MLineDataPrecisionTracking.Models.Entities;
-using SL.MLineDataPrecisionTracking.Models.Entities.Factory6Workshop6_3AssemblyLine;
-using SqlSugar;
-using static SL.MLineDataPrecisionTracking.Infrastructure.Common.Expand;
+
 
 namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 {
@@ -1130,7 +1131,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                     );
                     return;
                 }
-                var scanEx = Expand.ExportToExcel(scanData, saveFileDialog.FileName);
+                var scanEx = ExcelExpand.ExportToExcel(scanData, saveFileDialog.FileName);
                 if (scanEx.IsSuccess)
                 {
                     HandyControl.Controls.MessageBox.Success("导出完成！");

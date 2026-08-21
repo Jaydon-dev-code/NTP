@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using SL.MLineDataPrecisionTracking.Infrastructure.Common;
+using SL.MLineDataPrecisionTracking.Infrastructure.Expand;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Domain;
@@ -137,7 +137,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                 return Result<object>.Fail(readValue.Message);
             }
 
-            return Expand.SugarColumnReflectAssign(readValue, _dataModelType);
+            return DataCollectionExpand.SugarColumnReflectAssign(readValue, _dataModelType);
         }
 
         protected void ABToSummary(

@@ -8,12 +8,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using SL.MLineDataPrecisionTracking.Client.Http;
-using SL.MLineDataPrecisionTracking.Infrastructure.Common;
+
+using SL.MLineDataPrecisionTracking.Infrastructure.Expand;
 using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Dtos.Factory4Workshop4_10Line;
 using SL.MLineDataPrecisionTracking.Models.Dtos.Request;
 using SL.MLineDataPrecisionTracking.Models.Entities.Factory4Workshop4_10Line;
-using static SL.MLineDataPrecisionTracking.Infrastructure.Common.Expand;
+
 
 namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 {
@@ -355,7 +356,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                     HandyControl.Controls.MessageBox.Warning("未检测到导出的数据信息，请检测搜索条件后再次导出！");
                     return;
                 }
-                var scanEx = Expand.ExportToExcel(scanData, saveFileDialog.FileName);
+                var scanEx = ExcelExpand.ExportToExcel(scanData, saveFileDialog.FileName);
                 if (scanEx.IsSuccess)
                 {
                     HandyControl.Controls.MessageBox.Success("导出完成！");

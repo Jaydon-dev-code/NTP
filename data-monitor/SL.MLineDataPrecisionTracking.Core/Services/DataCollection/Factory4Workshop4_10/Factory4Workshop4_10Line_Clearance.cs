@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Mapster;
+﻿using Mapster;
 using Microsoft.AspNet.SignalR;
 using NPOI.POIFS.Crypt.Dsig;
 using SL.MLineDataPrecisionTracking.Core.Hubs;
-using SL.MLineDataPrecisionTracking.Infrastructure.Common;
+using SL.MLineDataPrecisionTracking.Infrastructure.Expand;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Domain;
@@ -16,6 +11,11 @@ using SL.MLineDataPrecisionTracking.Models.Dtos.Factory4Workshop4_10Line;
 using SL.MLineDataPrecisionTracking.Models.Entities.Factory4Workshop4_10Line;
 using SL.MLineDataPrecisionTracking.Models.Enum;
 using SqlSugar.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using IClientProxy = Microsoft.AspNet.SignalR.Hubs.IClientProxy;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Workshop4_10
@@ -120,7 +120,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
             {
                 return Result.Fail("PLC通讯失败");
             }
-            _clearance1ReTmp = Expand.BoolArrayToByte(
+            _clearance1ReTmp = DataConvertExpand.BoolArrayToByte(
                 new bool[]
                 {
                     _clearance1OK.Value[0].ObjToBool(),
@@ -128,7 +128,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                 }
             );
 
-            _clearance2ReTmp = Expand.BoolArrayToByte(
+            _clearance2ReTmp = DataConvertExpand.BoolArrayToByte(
                 new bool[]
                 {
                     _clearance2OK.Value[0].ObjToBool(),

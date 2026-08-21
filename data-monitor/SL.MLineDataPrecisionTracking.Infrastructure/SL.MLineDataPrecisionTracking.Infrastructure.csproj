@@ -45,7 +45,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common\Expand.cs" />
+    <Compile Include="Expand\CommonExpand.cs" />
+    <Compile Include="Expand\DataCollectionExpand.cs" />
+    <Compile Include="Expand\DataConvertExpand.cs" />
+    <Compile Include="Expand\ExcelExpand.cs" />
+    <Compile Include="Expand\McProtocolExpand..cs" />
+    <Compile Include="Expand\PlcExpand.cs" />
     <Compile Include="InfrastructureAssemblyMarker.cs" />
     <Compile Include="PLCCommunication\Mc1ECommunication.cs" />
     <Compile Include="PLCCommunication\IPlcCommunication.cs" />
@@ -118,6 +123,8 @@
   <ItemGroup>
     <None Include="Resources\DBPackages\System.Data.SQLite.dll" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Common\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
