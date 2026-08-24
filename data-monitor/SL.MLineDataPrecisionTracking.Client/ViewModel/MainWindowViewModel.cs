@@ -30,7 +30,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel
 {
     public partial class MainWindowViewModel : ObservableObject
     {
-        string lastMenuName;
+        string _lastMenuName;
 
         List<MenuItems> _menus;
 
@@ -203,7 +203,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel
                 if (isFirst)
                 {
                     isFirst = false;
-                    lastMenuName = item.Header;
+                    _lastMenuName = item.Header;
                     CurrentContent = item.Page;
                 }
             }
@@ -264,11 +264,11 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel
         }
         void SelectionChanged(FunctionEventArgs<object> e)
         {
-            if (e.Info is SideMenuItem menu && menu.Header != lastMenuName)
+            if (e.Info is SideMenuItem menu && menu.Header.ToString() != _lastMenuName)
             {
-                var select = _menus.FirstOrDefault(x => x.Header == menu.Header);
+                var select = _menus.FirstOrDefault(x => x.Header == menu.Header.ToString());
                 CurrentContent = select?.Page;
-                lastMenuName = select.Header;
+                _lastMenuName = select.Header;
             }
         }
 
