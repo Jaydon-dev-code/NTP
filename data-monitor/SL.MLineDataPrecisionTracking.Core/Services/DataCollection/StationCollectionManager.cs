@@ -1,15 +1,10 @@
 using System;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Diagnostics;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
-using MQTTnet.Internal;
-using Newtonsoft.Json.Linq;
 using SL.MLineDataPrecisionTracking.Core.Mqtt;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
@@ -267,13 +262,13 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
         public async Task RestoreAsync()
         {
             var records = await _deviceCollectionRepository.GetListAsync();
-            foreach (var record in records.Where(x=>x.IsEnabled && x.IsRunning))
+            foreach (var record in records.Where(x => x.IsEnabled && x.IsEnabled))
             {
                 try
                 {
                     // 设备是否还在（可能已被删除）— 按设备编号查
                     var equipment = await _equipmentRepository.GetWithLineAsync(x =>
-                        x.EquipmentId == record.EquipmentId 
+                        x.EquipmentId == record.EquipmentId
                     );
                     if (equipment == null)
                     {
@@ -401,7 +396,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
                 {
                     while (!workersCts.IsCancellationRequested)
                     {
-                        mqtt.PublishAsync(
+                        await mqtt.PublishAsync(
                             $"BearingBranch6/{mqttObj.topicId}/online",
                             new
                             {
@@ -412,7 +407,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
                         );
                         await Task.Delay(1000, workersCts.Token);
                     }
-                    mqtt.PublishAsync(
+                    await mqtt.PublishAsync(
                         $"BearingBranch6/{mqttObj.topicId}/online",
                         new { ID = mqttObj.topicId, status = "offline" }
                     );
