@@ -8,17 +8,17 @@ import type { DeviceDataCollectionInfo, MqttPublishConfig, TbEquipment } from '@
 const loading = ref(false)
 const registered = ref<DeviceDataCollectionInfo[]>([])
 
-async function load() {
-  loading.value = true
+async function load(silent = false) {
+  if (!silent) loading.value = true
   try {
     const res = await collectionApi.getAllRegistered()
     if (res.IsSuccess) {
       registered.value = res.Data ?? []
-    } else {
+    } else if (!silent) {
       ElMessage.error(res.Message)
     }
   } finally {
-    loading.value = false
+    if (!silent) loading.value = false
   }
 }
 
@@ -215,7 +215,7 @@ let timer: number | null = null
 // 定时刷新状态
 function startAutoRefresh() {
   timer = window.setInterval(() => {
-    load()
+    load(true)
   }, 5000)
 }
 

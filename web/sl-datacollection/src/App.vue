@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterView } from 'vue-router'
 </script>
 
 <template>
   <el-container class="layout">
     <el-header class="header">
       <div class="brand">设备数据采集管理</div>
-      <nav class="nav">
-        <RouterLink to="/" class="nav-item">设备管理</RouterLink>
-        <RouterLink to="/collection" class="nav-item">采集服务</RouterLink>
-      </nav>
+      <el-menu mode="horizontal" :ellipsis="false" class="nav" router>
+        <el-sub-menu index="1">
+          <template #title>数采</template>
+          <el-menu-item index="/">设备管理</el-menu-item>
+          <el-menu-item index="/collection">采集服务</el-menu-item>
+        </el-sub-menu>
+      </el-menu>
     </el-header>
     <el-main class="main">
       <RouterView />
@@ -33,21 +36,9 @@ import { RouterLink, RouterView } from 'vue-router'
   font-weight: bold;
 }
 .nav {
-  display: flex;
-  gap: 12px;
-}
-.nav-item {
-  padding: 6px 14px;
-  border-radius: 4px;
-  text-decoration: none;
-  color: var(--el-text-color-primary);
-}
-.nav-item:hover {
-  background: var(--el-fill-color-light);
-}
-.nav-item.router-link-exact-active {
-  color: var(--el-color-primary);
-  background: var(--el-color-primary-light-9);
+  flex: 1;
+  border-bottom: none !important;
+  height: 100%;
 }
 .main {
   padding: 0;
