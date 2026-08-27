@@ -262,7 +262,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
         public async Task RestoreAsync()
         {
             var records = await _deviceCollectionRepository.GetListAsync();
-            foreach (var record in records.Where(x => x.IsEnabled && x.IsEnabled))
+            foreach (var record in records.Where(x =>true))
             {
                 try
                 {
@@ -599,7 +599,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
             if (!_stations.TryGetValue(equipmentId, out var runtime))
                 return ApiResult.Fail("设备未注册");
 
-            var record = await _deviceCollectionRepository.GetByEquipmentIdAsync(equipmentId);
+            Tb_DeviceCollection record = await _deviceCollectionRepository.GetByEquipmentIdAsync(equipmentId);
             if (record != null && record.IsEnabled is false)
                 return ApiResult.Fail("设备采集未启用");
 

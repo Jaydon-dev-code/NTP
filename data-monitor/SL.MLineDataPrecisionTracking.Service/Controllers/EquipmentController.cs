@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 using SL.MLineDataPrecisionTracking.Core.Services;
+using SL.MLineDataPrecisionTracking.Core.Services.DataCollection;
 using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Entities;
 
@@ -14,11 +16,74 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
     public class EquipmentController : ApiController
     {
         private readonly EquipmentManagementService _equipmentService;
+        private readonly StationCollectionManager _stationCollectionManager;
 
-        public EquipmentController(EquipmentManagementService equipmentService)
+        public EquipmentController(EquipmentManagementService equipmentService, StationCollectionManager stationCollectionManager)
         {
             _equipmentService = equipmentService;
+            _stationCollectionManager = stationCollectionManager;
         }
+
+        #region 采集注册状态检查辅助方法
+
+        /// <summary>
+        /// 检查单个设备是否已注册采集
+        /// </summary>
+        private async Task<bool> IsEquipmentRegisteredAsync(string equipmentId)
+        {
+            if (string.IsNullOrWhiteSpace(equipmentId))
+                return false;
+
+            var result = await _stationCollectionManager.GetRegisteredAsync(equipmentId);
+            var isRegistered = result.IsSuccess && result.Data != null;
+            
+            if (isRegistered)
+            {
+                Serilog.Log.Warning("设备 {EquipmentId} 已注册采集，请先注销后再操作", equipmentId);
+            }
+            
+            return isRegistered;
+        }
+
+        /// <summary>
+        /// 检查指定厂下是否有已注册采集的设备
+        /// </summary>
+        private async Task<bool> HasRegisteredEquipmentInFactoryAsync(int factoryId)
+        {
+            var allStations = await _stationCollectionManager.GetAllRegisteredAsync();
+            if (!allStations.IsSuccess || allStations.Data == null)
+                return false;
+
+            var hasRegistered = allStations.Data.Any(s => s.FactoryId == factoryId);
+            
+            if (hasRegistered)
+            {
+                Serilog.Log.Warning("厂 {FactoryId} 下存在已注册采集的设备，请先注销后再操作", factoryId);
+            }
+            
+            return hasRegistered;
+        }
+
+        /// <summary>
+        /// 检查指定产线下是否有已注册采集的设备
+        /// </summary>
+        private async Task<bool> HasRegisteredEquipmentInLineAsync(int lineId)
+        {
+            var allStations = await _stationCollectionManager.GetAllRegisteredAsync();
+            if (!allStations.IsSuccess || allStations.Data == null)
+                return false;
+
+            var hasRegistered = allStations.Data.Any(s => s.LineId == lineId);
+            
+            if (hasRegistered)
+            {
+                Serilog.Log.Warning("产线 {LineId} 下存在已注册采集的设备，请先注销后再操作", lineId);
+            }
+            
+            return hasRegistered;
+        }
+
+        #endregion
 
         #region 厂（Factory）
 
@@ -40,6 +105,9 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
         {
             try
             {
+                if (await HasRegisteredEquipmentInFactoryAsync(factory.Id))
+                    return ApiResult.Fail("该厂下存在已注册采集的设备，请先注销后再操作");
+
                 return await _equipmentService.UpdateFactoryAsync(factory);
             }
             catch (Exception ex)
@@ -53,6 +121,9 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
         {
             try
             {
+                if (await HasRegisteredEquipmentInFactoryAsync(factoryId))
+                    return ApiResult.Fail("该厂下存在已注册采集的设备，请先注销后再操作");
+
                 return await _equipmentService.DeleteFactoryAsync(factoryId);
             }
             catch (Exception ex)
@@ -96,6 +167,9 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
         {
             try
             {
+                if (await HasRegisteredEquipmentInLineAsync(line.Id))
+                    return ApiResult.Fail("该产线下存在已注册采集的设备，请先注销后再操作");
+
                 return await _equipmentService.UpdateProductionLineAsync(line);
             }
             catch (Exception ex)
@@ -109,6 +183,9 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
         {
             try
             {
+                if (await HasRegisteredEquipmentInLineAsync(lineId))
+                    return ApiResult.Fail("该产线下存在已注册采集的设备，请先注销后再操作");
+
                 return await _equipmentService.DeleteProductionLineAsync(lineId);
             }
             catch (Exception ex)
@@ -154,6 +231,9 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
         {
             try
             {
+                if (await IsEquipmentRegisteredAsync(equipment.EquipmentId))
+                    return ApiResult.Fail("设备已注册采集，请先注销后再操作");
+
                 return await _equipmentService.UpdateEquipmentAsync(equipment);
             }
             catch (Exception ex)
@@ -167,6 +247,9 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
         {
             try
             {
+                if (await IsEquipmentRegisteredAsync(equipmentId))
+                    return ApiResult.Fail("设备已注册采集，请先注销后再操作");
+
                 return await _equipmentService.DeleteEquipmentAsync(equipmentId);
             }
             catch (Exception ex)
@@ -198,6 +281,9 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
         {
             try
             {
+                if (await IsEquipmentRegisteredAsync(dto.EquipmentId))
+                    return ApiResult.Fail("设备已注册采集，请先注销后再操作");
+
                 return await _equipmentService.AddEquipmentToLineAsync(
                     dto.EquipmentId,
                     dto.LineId
@@ -217,6 +303,9 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
         {
             try
             {
+                if (await IsEquipmentRegisteredAsync(equipmentId))
+                    return ApiResult.Fail("设备已注册采集，请先注销后再操作");
+
                 return await _equipmentService.RemoveEquipmentFromLineAsync(equipmentId);
             }
             catch (Exception ex)
