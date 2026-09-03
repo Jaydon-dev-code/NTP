@@ -1,0 +1,251 @@
+六分厂6-1和6-3产线数据采集核心服务业务逻辑详解
+=============================================
+
+一、整体架构
+----------
+
+1. 继承体系:
+   DataCollectionServiceAbstract (抽象基类)
+       │
+       ├── Factory6Workshop6_3AssemblyLineAbstract (装配线抽象基类)
+       │       ├── Factory6Workshop6_3AssemblyLineA (6-3装配A线)
+       │       ├── Factory6Workshop6_3AssemblyLineB (6-3装配B线)
+       │       ├── Factory6Workshop6_1AssemblyLineA (6-1装配A线)
+       │       └── Factory6Workshop6_1AssemblyLineB (6-1装配B线)
+       │
+       ├── Factory6Workshop6_3AssemblyLineABBinding (6-3 AB托盘绑定)
+       ├── Factory6Workshop6_1AssemblyLineABBinding (6-1 AB托盘绑定)
+       └── Factory6Section6_3HeatTreatment (6-3热处理)
+
+2. 核心生命周期方法 (模板方法模式):
+   InitAsync() → HandshakeAsync() → InteractAsync() → NotifyAsync()
+   (初始化)       (握手/轮询)        (数据交互)         (状态通知)
+
+二、装配线抽象基类 Factory6Workshop6_3AssemblyLineAbstract
+------------------------------------------------------
+职责:
+- 从数据库加载PLC点位配置
+- 提供通用的握手逻辑: 检测"采集开始"信号和托盘号
+- 提供通用的数据读取逻辑: 批量读取PLC数据并反射映射到实体类
+- 提供AB线数据合并工具方法ABToSummary
+- 提供枚举解析工具方法
+
+InitAsync流程:
+1. 从数据库读取设备点位配置
+2. 提取"采集开始"信号点位(单独监控)
+3. 提取托盘号点位
+4. 加载型号对照表
+
+HandshakeAsync流程:
+1. 读取"采集开始"信号，判断PLC是否触发采集
+2. 读取托盘号，判断是否有效且不重复
+
+InteractAsync流程:
+1. 批量读取所有PLC点位数据
+2. 通过SugarColumnReflectAssign反射映射到实体类
+
+NotifyAsync流程:
+1. 调用子类InsterValue插入数据
+2. 调用子类UpLastNo更新上次托盘号
+
+三、六分厂6-3产线详细业务逻辑
+---------------------------
+
+### 1. 6-3装配A线 (Factory6Workshop6_3AssemblyLineA)
+设备名: A线
+服务名: 六分厂6-3装配A线
+
+PLC点位:
+- 采集开始 - 触发信号
+- 托盘号A - 产品托盘号
+- 其他装配数据点位...
+
+数据采集逻辑:
+(1) HandshakeAsync - 检测采集信号和托盘号
+(2) InteractAsync - 批量读取PLC数据
+(3) InsterValue - A线数据处理
+    - ShieldStationA解析: 将位枚举值转换为可读字符串(如"(5) 工位1 工位3")
+    - NgCodeA解析: 将NG代码转换为描述字符串
+    - 如果有NG代码，创建汇总记录(Result=NG)并插入Summary表
+    - 插入A线数据记录
+
+数据库表: Tb_LineA
+
+### 2. 6-3装配B线 (Factory6Workshop6_3AssemblyLineB)
+设备名: B线
+服务名: 六分厂6-3装配B线
+
+数据采集逻辑:
+(1) HandshakeAsync - 检测采集信号和托盘号
+(2) InteractAsync - 批量读取PLC数据
+(3) InsterValue - B线数据处理(核心AB绑定逻辑)
+    - 通过LineATrayNo和TrayNoB查询A线未使用的匹配数据
+    - ShieldStationB解析: 位枚举转字符串
+    - NgCodeB解析: NG代码转描述，清空MarkingNo，标记Result=NG
+    - 如果找到A线数据: 关联ALineFID和ALineRecordTime
+    - 如果未找到A线数据: 在LineATrayNo前加"!"标记
+    - 插入B线数据记录
+    - 创建Summary汇总记录(AB线数据合并)
+    - 标记A线数据为已使用(IsUsed=true)
+
+数据库表: Tb_LineB, Tb_LineSummary
+
+### 3. 6-3 AB托盘绑定 (Factory6Workshop6_3AssemblyLineABBinding)
+服务名: 六分厂6-3AB托盘绑定
+
+职责:
+- 独立线程持续轮询A/B托盘绑定信号
+- 将B线托盘号更新到A线数据库记录中
+- 为B线采集时提供AB绑定关系
+
+数据采集逻辑:
+(1) InitAsync - 读取"A托盘绑定"和"B托盘绑定"两个点位
+(2) HandshakeAsync - 直接返回成功(持续轮询)
+(3) InteractAsync - 核心绑定逻辑
+    - 同时读取A托盘号和B托盘号
+    - 判断条件: 两个托盘号都非空/非0，且与上次不同
+    - 通过A托盘号查询A线最新未使用数据
+    - 将B托盘号写入A线记录的TrayNoB字段
+    - 更新_lastATrayNo和_lastBTrayNo
+
+### 4. 6-3热处理 (Factory6Section6_3HeatTreatment)
+设备名: 热处理
+服务名: 六分厂6-3热处理
+
+PLC点位:
+- 采集开始 - 触发信号
+- 序列码 - 产品序列号
+- 能量采集许可 - 能量采集开关
+- 能量 - 能量值
+- 能量时间 - 时间值
+- 其他热处理数据点位...
+
+数据采集逻辑:
+(1) InitAsync - 初始化点位，启动能量采集后台线程
+(2) HandshakeAsync - 检测采集信号和序列码(非空且不重复)
+(3) InteractAsync - 批量读取热处理数据
+(4) NotifyAsync - 数据处理
+    - 计算能量 = HeatingTime * OutputPower
+    - 插入热处理数据记录
+    - 更新_lastMarkingNo
+
+(5) EnergyCollectionLoopAsync - 能量采集后台线程
+    - 持续轮询"能量采集许可"信号
+    - 许可为true时: 读取能量值和时间，推送到前端(FSignalR)
+    - 许可为false时: 将历史数据批量存储到数据库
+      * 创建EnergyRange记录
+      * 批量插入EnergyRangePoint记录
+      * 清空历史数据缓存
+
+数据库表: Tb_HeatTreatmentData, Tb_Factory6Workshop6_3Line_EnergyRange, Tb_Factory6Workshop6_3Line_EnergyRangePoint
+
+四、六分厂6-1产线详细业务逻辑
+---------------------------
+
+### 1. 6-1装配A线 (Factory6Workshop6_1AssemblyLineA)
+设备名: 六分厂6-1装配A线
+服务名: 六分厂6-1装配A线
+
+继承自: Factory6Workshop6_3AssemblyLineAbstract
+
+数据采集逻辑:
+(1) 与6-3 A线逻辑基本一致
+(2) InsterValue - A线数据处理
+    - ShieldStationA解析: 使用Assembly_6Factory6_1ALine_PassCodeEnum枚举
+    - NgCodeA解析: 使用Assembly_6Factory6_1ALine_NgCodeEnum枚举
+    - 如果有NG代码，创建Summary记录(Result=NG)
+    - 插入6-1 A线数据记录
+
+数据库表: Tb_Factory6Workshop6_1AssemblyLineA, Tb_Factory6Workshop6_1AssemblyLineABSummary
+
+### 2. 6-1装配B线 (Factory6Workshop6_1AssemblyLineB)
+设备名: 六分厂6-1装配B线
+服务名: 六分厂6-1装配B线
+
+数据采集逻辑:
+(1) InsterValue - B线数据处理(核心AB绑定逻辑)
+    - VibrationDetectionResults转换: 0→"未采集", 1→"OK", 2→"NG"
+    - 通过LineATrayNo和TrayNoB查询A线未使用的匹配数据
+    - ShieldStationB解析: 使用Assembly_6Factory6_1BLine_PassCodeEnum枚举
+    - NgCodeB解析: 使用Assembly_6Factory6_1BLine_NgCodeEnum枚举
+    - 如果找到A线数据: 关联ALineFID和ALineRecordTime
+    - 如果未找到A线数据: 在LineATrayNo前加"!"标记
+    - 插入B线数据记录(InsertableReturnIdentityAsync获取自增ID)
+    - 创建Summary汇总记录(AB线数据合并)
+    - 标记A线数据为已使用(IsUsed=true)
+
+数据库表: Tb_Factory6Workshop6_1AssemblyLineB, Tb_Factory6Workshop6_1AssemblyLineABSummary
+
+### 3. 6-1 AB托盘绑定 (Factory6Workshop6_1AssemblyLineABBinding)
+服务名: 六分厂6-1AB托盘绑定
+
+职责和逻辑与6-3 AB托盘绑定完全一致:
+- 独立线程轮询A/B托盘绑定信号
+- 将B线托盘号更新到A线数据库记录
+
+五、AB线数据绑定机制详解
+-----------------------
+
+### 绑定流程:
+1. A线采集 → 插入A线数据(TrayNoA已知，TrayNoB为空)
+2. AB绑定服务 → 轮询PLC的A/B托盘绑定信号 → 更新A线记录的TrayNoB
+3. B线采集 → 通过TrayNoA+TrayNoB查询A线数据 → 关联AB记录
+
+### 关键字段:
+- TrayNoA: A线托盘号
+- TrayNoB: B线托盘号(由绑定服务写入)
+- IsUsed: A线数据是否已被B线使用(false→true)
+- ALineFID: B线记录中关联的A线记录ID
+- ALineRecordTime: B线记录中关联的A线记录时间
+
+### 未找到绑定的处理:
+- B线数据的LineATrayNo前加"!"标记(如"!TRAY001")
+- Summary中LineATrayNo保持原值
+
+六、NG代码和屏蔽工位解析
+-----------------------
+
+### ShieldStation(屏蔽工位):
+- 位枚举值，每个bit代表一个工位
+- 解析为可读字符串: "(数值) 工位名1 工位名2 ..."
+- 示例: 5(二进制101) → "(5) 工位1 工位3"
+
+### NgCode(NG代码):
+- 整数值，对应枚举描述
+- 解析为可读字符串: "(数值) 描述"
+- 示例: 3 → "(3) 传感器异常"
+
+七、数据库表结构汇总
+-----------------
+
+### 6-3产线:
+1. Tb_LineA - A线数据
+2. Tb_LineB - B线数据
+3. Tb_LineSummary - AB线汇总
+4. Tb_HeatTreatmentData - 热处理数据
+5. Tb_Factory6Workshop6_3Line_EnergyRange - 能量范围
+6. Tb_Factory6Workshop6_3Line_EnergyRangePoint - 能量范围点数据
+7. Tb_ModelNoToName - 型号对照表
+
+### 6-1产线:
+1. Tb_Factory6Workshop6_1AssemblyLineA - A线数据
+2. Tb_Factory6Workshop6_1AssemblyLineB - B线数据
+3. Tb_Factory6Workshop6_1AssemblyLineABSummary - AB线汇总
+
+八、SignalR推送事件
+-----------------
+- Factory6Section6_3HeatTreatEnergyMgmt - 热处理能量数据实时推送
+
+九、关键枚举类型
+--------------
+### 6-3产线:
+- Assembly_A_LinePassCodeEnum - A线屏蔽工位枚举
+- Assembly_A_LineNgCodeEnum - A线NG代码枚举
+- Assembly_B_LinePassCodeEnum - B线屏蔽工位枚举
+- Assembly_B_LineNgCodeEnum - B线NG代码枚举
+
+### 6-1产线:
+- Assembly_6Factory6_1ALine_PassCodeEnum - 6-1 A线屏蔽工位枚举
+- Assembly_6Factory6_1ALine_NgCodeEnum - 6-1 A线NG代码枚举
+- Assembly_6Factory6_1BLine_PassCodeEnum - 6-1 B线屏蔽工位枚举
+- Assembly_6Factory6_1BLine_NgCodeEnum - 6-1 B线NG代码枚举
