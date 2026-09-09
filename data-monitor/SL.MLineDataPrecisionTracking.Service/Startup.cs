@@ -14,6 +14,7 @@ using Microsoft.AspNet.SignalR;
 using Microsoft.Owin.FileSystems;
 using Microsoft.Owin.StaticFiles;
 using Owin;
+using Serilog;
 using SL.MLineDataPrecisionTracking.Core.Middleware;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Models.Domain;
@@ -36,6 +37,7 @@ namespace SL.MLineDataPrecisionTracking.Service
             {
                 app.UseCorsMiddleware();
                 LodeHtml(app);
+                Log.Information("web已挂载。");
             }
 
             //// WebAPI 设置

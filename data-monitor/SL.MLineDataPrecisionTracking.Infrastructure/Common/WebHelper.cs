@@ -9,8 +9,9 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Common
 {
     public class WebHelper
     {
-        public static bool IsHaveWebHtml() => File.Exists(@"./StaticHtml/index.html");
-
-
+        public static bool IsHaveWebHtml() =>
+            File.Exists(
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "StaticHtml", "index.html")
+            );
     }
 }

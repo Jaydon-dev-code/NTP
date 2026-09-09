@@ -18,7 +18,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         public int Id { get; set; }
 
         /// <summary>设备编号（业务标识，string）</summary>
-        [SugarColumn(ColumnDescription = "设备编号", IsNullable = false)]
+        [SugarColumn(ColumnDescription = "设备编号",DefaultValue =" ")]
         public string EquipmentId { get; set; }
 
         /// <summary>设备名称</summary>
