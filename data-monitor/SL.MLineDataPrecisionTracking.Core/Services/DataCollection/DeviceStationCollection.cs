@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using McpXLib.Enums;
+using NPOI.SS.Formula.Functions;
 using NPOI.XSSF.UserModel;
 using SL.MLineDataPrecisionTracking.Core.Mqtt;
 using SL.MLineDataPrecisionTracking.Infrastructure.Expand;
@@ -41,7 +42,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
         public string StationName => _deviceName;
         public bool IsRunning { get; set; }
         public string Description { get; set; } = "未初始化";
-        public TimeSpan Interval { get; set; } = TimeSpan.FromMilliseconds(500);
+        public TimeSpan Interval { get; set; } = TimeSpan.FromSeconds(1);
         public string Topic => _topic;
         CollectionInfo _collectionInfo;
         string _lineId;
@@ -130,35 +131,34 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
                 }
 
                 var read = await readTask;
-             
-                    // 离线信号推送
-                    if (_lastOnlieStuts != read.IsSuccess)
+
+                // 离线信号推送
+                if (_lastOnlieStuts != read.IsSuccess)
+                {
+                    try
                     {
-                        try
-                        {
-                            await _mqttService.PublishAsync(
-                                _topic + @$"{_equipmentId}/event/push",
-                                new { connect = read.IsSuccess, device = _equipmentId }
-                            );
-                        }
-                        catch (Exception ex)
-                        {
-                            Serilog.Log.Warning(
-                                "[设备采集]【{StationName}】MQTT 设备在线状态推送失败:{Message}",
-                                StationName,
-                                ex.Message
-                            );
-                        }
-                 
+                        await _mqttService.PublishAsync(
+                            _topic + @$"/event/push",
+                            new { connect = read.IsSuccess, device = _equipmentId }
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        Serilog.Log.Warning(
+                            "[设备采集]【{StationName}】MQTT 设备在线状态推送失败:{Message}",
+                            StationName,
+                            ex.Message
+                        );
+                    }
+
                     _lastOnlieStuts = read.IsSuccess;
                     if (_lastOnlieStuts is false)
                     {
                         Description = "读取失败";
                         return read;
                     }
-                   
                 }
-   
+
                 if (_collectionInfo.IsChang())
                 {
                     try
@@ -176,12 +176,12 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
                                     name = "设备状态",
                                     value = _collectionInfo.Status,
                                 },
-                                 Beat= new ParamItem()
-                                 {
-                                     name = "生产节拍",
-                                     value = _collectionInfo.Beat,
-                                 },
-                                 ProducedTotal = new ParamItem()
+                                Beat = new ParamItem()
+                                {
+                                    name = "生产节拍",
+                                    value = _collectionInfo.Beat,
+                                },
+                                ProducedTotal = new ParamItem()
                                 {
                                     name = "生产总数",
                                     value = _collectionInfo.ProducedTotal,
@@ -203,10 +203,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
                                 },
                             },
                         };
-                        await _mqttService.PublishAsync(
-                            _topic + @$"{_equipmentId}/data/push",
-                            mqttData
-                        );
+                        string topic = _topic + $@"/data/push";
+                        await _mqttService.PublishAsync(topic, mqttData);
+                        Serilog.Log.Information("[mqtt采集]: topic{topic}.", topic);
                     }
                     catch (Exception ex)
                     {

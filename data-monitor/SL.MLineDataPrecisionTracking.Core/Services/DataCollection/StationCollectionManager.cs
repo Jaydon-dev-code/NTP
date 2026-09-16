@@ -5,6 +5,7 @@ using System.Configuration;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using NPOI.SS.Formula.Functions;
 using SL.MLineDataPrecisionTracking.Core.Mqtt;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
@@ -187,7 +188,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
                 {
                     try
                     {
-                        await Task.Delay(20, token);
+                        await Task.Delay(250, token);
                     }
                     catch (OperationCanceledException)
                     {
@@ -262,7 +263,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
         public async Task RestoreAsync()
         {
             var records = await _deviceCollectionRepository.GetListAsync();
-            foreach (var record in records.Where(x =>true))
+            foreach (var record in records.Where(x => true))
             {
                 try
                 {
@@ -396,16 +397,24 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
                 {
                     while (!workersCts.IsCancellationRequested)
                     {
-                        await mqtt.PublishAsync(
-                            $"BearingBranch6/{mqttObj.topicId}/online",
-                            new
-                            {
-                                ID = mqttObj.topicId,
-                                status = "online",
-                                time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                            }
-                        );
-                        await Task.Delay(1000, workersCts.Token);
+                        try
+                        {
+                            await mqtt.PublishAsync(
+                                $"BearingBranch6/{mqttObj.topicId}/online",
+                                new
+                                {
+                                    ID = mqttObj.topicId,
+                                    status = "online",
+                                    time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                                }
+                            );
+                        }
+                        catch (Exception ex)
+                        {
+                            Serilog.Log.Warning("[mqtt上位机心态]【{ex}】服务已在运行中", ex);
+                        }
+
+                        await Task.Delay(5000, workersCts.Token);
                     }
                     await mqtt.PublishAsync(
                         $"BearingBranch6/{mqttObj.topicId}/online",
@@ -599,7 +608,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
             if (!_stations.TryGetValue(equipmentId, out var runtime))
                 return ApiResult.Fail("设备未注册");
 
-            Tb_DeviceCollection record = await _deviceCollectionRepository.GetByEquipmentIdAsync(equipmentId);
+            Tb_DeviceCollection record = await _deviceCollectionRepository.GetByEquipmentIdAsync(
+                equipmentId
+            );
             if (record != null && record.IsEnabled is false)
                 return ApiResult.Fail("设备采集未启用");
 
