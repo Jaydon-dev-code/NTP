@@ -18,6 +18,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Domain
             _producedTotalPoint = devPlcs.FirstOrDefault(x => x.PointName == "生产总数");
             _producedOKPoint = devPlcs.FirstOrDefault(x => x.PointName == "生产OK数");
             _producedNGPoint = devPlcs.FirstOrDefault(x => x.PointName == "生产NG数");
+            _isCollectionBeat = devPlcs.FirstOrDefault(x => x.PointName == "节拍采集信号");
             _warValuePoint = alarm;
         }
 
@@ -33,35 +34,48 @@ namespace SL.MLineDataPrecisionTracking.Models.Domain
         public int? ProducedNG { get; set; }
         DevPlcPointDto _producedNGPoint { get; set; }
         public bool[] WarValue { get; set; }
+
+        DevPlcPointDto _isCollectionBeat { get; set; }
+
+        bool? _lastCollectionBeat { get; set; }
         List<DevPlcPointDto> _warValuePoint { get; set; }
 
         public string[] WarInfo { get; set; }
 
         public bool IsChang()
         {
-            var tmpStatus = _statusPoint?.Value[0].ObjToInt();
+            var tmpStatus = _statusPoint?.Value == null ? null : _statusPoint?.Value[0]?.ObjToInt();
             float? tmpBeat =
-                _beatPoint?.Value[0] == null ? null : float.Parse(_beatPoint.Value[0].ToString());
-            var tmpProducedTotal = _producedTotalPoint?.Value[0].ObjToInt();
-            var tmpProducedOK = _producedOKPoint?.Value[0].ObjToInt();
-            var tmpProducedNG = _producedNGPoint?.Value[0].ObjToInt();
+                _beatPoint?.Value == null ? null : float.Parse(_beatPoint.Value[0].ToString());
+            var tmpProducedTotal =
+                _producedTotalPoint?.Value == null
+                    ? null
+                    : _producedTotalPoint?.Value[0].ObjToInt();
+            var tmpProducedOK = _producedOKPoint?.Value==null?null:_producedOKPoint?.Value[0].ObjToInt();
+            var tmpProducedNG = _producedNGPoint?.Value==null?null:_producedNGPoint?.Value[0].ObjToInt();
+            var tmpCollectionBeat = _isCollectionBeat?.Value==null?null:_isCollectionBeat?.Value[0].ObjToBool();
             bool[] tmpWarValue = _warValuePoint?.Select(x => x.Value[0].ObjToBool()).ToArray();
-            var re = !(
-                this.Status == tmpStatus
-                && this.Beat == tmpBeat
-                && this.ProducedTotal == tmpProducedTotal
-                && this.ProducedOK == tmpProducedOK
-                && this.ProducedNG == tmpProducedNG
-                && this.WarValue?.SequenceEqual(tmpWarValue)==true
-            );
+            bool isBeatChang = (_lastCollectionBeat == false && tmpCollectionBeat == true);
+            var re =
+                !(
+                    this.Status == tmpStatus
+                    && this.ProducedTotal == tmpProducedTotal
+                    && this.ProducedOK == tmpProducedOK
+                    && this.ProducedNG == tmpProducedNG
+                    && this.WarValue?.SequenceEqual(tmpWarValue) == true
+                ) || isBeatChang;
             if (re)
             {
                 this.Status = tmpStatus;
-                this.Beat = tmpBeat;
+                if (isBeatChang)
+                {
+                    this.Beat = tmpBeat;
+                }
                 this.ProducedTotal = tmpProducedTotal;
                 this.ProducedOK = tmpProducedOK;
                 this.ProducedNG = tmpProducedNG;
                 this.WarValue = tmpWarValue;
+                this._lastCollectionBeat = tmpCollectionBeat;
             }
 
             return re;
