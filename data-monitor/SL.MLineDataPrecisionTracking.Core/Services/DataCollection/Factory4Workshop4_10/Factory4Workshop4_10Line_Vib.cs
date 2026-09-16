@@ -114,7 +114,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                         SN = sn,
                         VibCrackTime = DateTime.Now,
                     };
-
+                 
                     if (clearanceInfo != null)
                     {
                         await _vibRepository.UpDataAsync(
@@ -125,13 +125,23 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                     }
                     else
                     {
-                        await _vibRepository.InsertableAsync(dataValue);
+                           await _vibRepository.InsertableAsync(dataValue);
                     }
-                    await _summaryRepository.UpDataAsync(
-                        dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
-                        x => new { x.SN },
-                        x => new { x.VibCrackResult, x.VibCrackTime }
-                    );
+                    if (await _summaryRepository.QueryableFirstAsync(x=>x.SN==dataValue.SN)==null)
+                    {
+                        await _summaryRepository.InsertableAsync(
+                               dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>()
+                           );
+                    }
+                    else
+                    {
+                        await _summaryRepository.UpDataAsync(
+                      dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
+                      x => new { x.SN },
+                      x => new { x.VibCrackResult, x.VibCrackTime }
+                  );
+                    }
+                  
 
                     ((IClientProxy)_chatHub.Clients.All).Invoke(
                         "VibData",

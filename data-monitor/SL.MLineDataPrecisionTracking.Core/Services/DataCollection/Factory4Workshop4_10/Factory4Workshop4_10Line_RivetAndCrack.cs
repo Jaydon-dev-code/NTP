@@ -1,4 +1,9 @@
-﻿using Mapster;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Mapster;
 using Microsoft.AspNet.SignalR;
 using NPOI.POIFS.Crypt.Dsig;
 using SL.MLineDataPrecisionTracking.Infrastructure.Expand;
@@ -10,11 +15,6 @@ using SL.MLineDataPrecisionTracking.Models.Dtos.Factory4Workshop4_10Line;
 using SL.MLineDataPrecisionTracking.Models.Entities.Factory4Workshop4_10Line;
 using SL.MLineDataPrecisionTracking.Models.Enum;
 using SqlSugar.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using IClientProxy = Microsoft.AspNet.SignalR.Hubs.IClientProxy;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Workshop4_10
@@ -86,6 +86,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                 _spinRivetingSNPlcInfo,
                 _rivetingSN,
             };
+
             return Result.Success();
         }
 
@@ -166,18 +167,30 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                         {
                             await _rivetAndCrackRepository.InsertableAsync(dataValue);
                         }
-                        await _summaryRepository.UpDataAsync(
-                            dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
-                            x => new { x.SN },
-                            x => new
-                            {
-                                x.RivetingResult,
-                                x.RivetingTime,
-                                x.RivetingInspection1Height,
-                                x.RivetingInspectionFormingHeight,
-                                x.RivetingInspection2Height,
-                            }
-                        );
+                        if (
+                            await _summaryRepository.QueryableFirstAsync(x => x.SN == dataValue.SN)
+                            == null
+                        )
+                        {
+                            await _summaryRepository.InsertableAsync(
+                                dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>()
+                            );
+                        }
+                        else
+                        {
+                            await _summaryRepository.UpDataAsync(
+                                dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
+                                x => new { x.SN },
+                                x => new
+                                {
+                                    x.RivetingResult,
+                                    x.RivetingTime,
+                                    x.RivetingInspection1Height,
+                                    x.RivetingInspectionFormingHeight,
+                                    x.RivetingInspection2Height,
+                                }
+                            );
+                        }
 
                         ((IClientProxy)_chatHub.Clients.All).Invoke(
                             "RivetingData",
