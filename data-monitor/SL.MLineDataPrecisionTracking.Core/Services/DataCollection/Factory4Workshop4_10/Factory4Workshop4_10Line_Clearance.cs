@@ -1,4 +1,13 @@
-﻿using Mapster;
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Mapster;
 using Microsoft.AspNet.SignalR;
 using NPOI.POIFS.Crypt.Dsig;
 using SL.MLineDataPrecisionTracking.Core.Hubs;
@@ -11,11 +20,6 @@ using SL.MLineDataPrecisionTracking.Models.Dtos.Factory4Workshop4_10Line;
 using SL.MLineDataPrecisionTracking.Models.Entities.Factory4Workshop4_10Line;
 using SL.MLineDataPrecisionTracking.Models.Enum;
 using SqlSugar.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using IClientProxy = Microsoft.AspNet.SignalR.Hubs.IClientProxy;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Workshop4_10
@@ -26,6 +30,11 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
 
         public Tb_Factory4Workshop4_10Line_ClearanceRepository _clearanceRepository;
 
+        /// <summary>
+        /// 下发序列码给plc的点位
+        /// </summary>
+        protected DevPlcPointDto _issueSancInfoPoint;
+        Socket _serverSocket;
         DevPlcPointDto _clearance1OK;
         DevPlcPointDto _clearance1NG;
         DevPlcPointDto _clearance1SN;
@@ -50,6 +59,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
         byte _clearance1ReTmp;
         byte _clearance2Re;
         byte _clearance2ReTmp;
+        string _lastClearance1SN;
+        string _lastcanInfo;
+        string _lastClearance2SN;
 
         public Factory4Workshop4_10Line_Clearance(
             Tb_EquipmentRepository tb_EquipmentRepository,
@@ -107,9 +119,116 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                 _afterPressInPlcInfo,
                 _gapPlcInfo,
             };
+            _issueSancInfoPoint = _linePlcInfo.First(x => x.PointName == "下发游隙SN");
+            _issueSancInfoPoint.Value = new List<object>() { "" };
             #endregion
-
+            Task.Run(() => ScanSocket());
             return Result.Success();
+        }
+
+        private void ScanSocket()
+        {
+            if (
+                int.TryParse(
+                    ConfigurationManager.AppSettings["Factory4_10_ClearanceScanPort"],
+                    out int factory4_10ScanPort
+                ) == false
+            )
+            {
+                Serilog.Log.Warning("[扫描枪数据推送]{_serverName}端口解析失败。", _serviceName);
+                return;
+            }
+            _serverSocket = new Socket(
+                AddressFamily.InterNetwork,
+                SocketType.Stream,
+                ProtocolType.Tcp
+            );
+            IPEndPoint ep = new IPEndPoint(IPAddress.Any, factory4_10ScanPort);
+            _serverSocket.Bind(ep);
+            _serverSocket.Listen(5);
+            // 循环等待读码器接入
+            try
+            {
+                while (true)
+                {
+                    Socket client = _serverSocket.Accept();
+                    ((IClientProxy)_chatHub.Clients.All).Invoke("IsOnlieClearanceScan", true);
+
+                    // 新开线程持续接收条码
+                    new Thread(() => ReceiveBarcodeLoop(client)).Start();
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                Serilog.Log.Information(
+                    "[扫描枪数据推送]{_serviceName}:Socket已关闭，停止监听。",
+                    _serviceName
+                );
+            }
+            catch (SocketException ex)
+            {
+                Serilog.Log.Warning(
+                    "[扫描枪数据推送]{_serviceName}监听异常:{ex.Message}",
+                    _serviceName,
+                    ex.Message
+                );
+            }
+        }
+
+        void ReceiveBarcodeLoop(Socket client)
+        {
+            byte[] buffer = new byte[100];
+            try
+            {
+                while (true)
+                {
+                    int len = client.Receive(buffer);
+                    ((IClientProxy)_chatHub.Clients.All).Invoke("IsOnlieClearanceScan", true);
+                    if (len <= 0)
+                    {
+                        Serilog.Log.Warning(
+                            "[扫描枪数据推送]{_serverName}通讯没数据。",
+                            _serviceName
+                        );
+
+                        break;
+                    }
+                    var soureLen = int.Parse(buffer.BytesToAscii(4)) - 4;
+                    var soureByte = buffer.RemoveStartBytes(4);
+                    var canInfo = soureByte.BytesToAscii(soureLen);
+                    if (_lastcanInfo != canInfo)
+                    {
+                        _issueSancInfoPoint.Value[0] = canInfo;
+                        _mcp.Write(_issueSancInfoPoint);
+                        _lastcanInfo = canInfo;
+                    }
+                    //if (!Expand.IsRunningInMSTest())
+                    //{
+
+                    //}
+                    //else
+                    //{
+                    //    string reMesg = "TestMsgIs" + ccanInfo;
+                    //    byte[] body = Encoding.UTF8.GetBytes(reMesg);
+                    //    client.Send(body);
+                    //}
+                }
+            }
+            catch (SocketException ex)
+            {
+                Serilog.Log.Warning(
+                    "[扫描枪数据推送]{_serverName}接收异常:{ex.Message}",
+                    _serviceName,
+                    ex.Message
+                );
+            }
+            finally
+            {
+                client.Close();
+                client.Dispose();
+                ((IClientProxy)_chatHub.Clients.All).Invoke("IsOnlieClearanceScan", false);
+                Serilog.Log.Warning("[扫描枪数据推送]{_serviceName}:客户端Socket已释放");
+            }
         }
 
         protected override async Task<Result> HandshakeAsync()
@@ -155,7 +274,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                 if (revalue.IsSuccess)
                 {
                     var sn = _clearance1SN.Value[0].ToString();
-                    if (string.IsNullOrEmpty(sn) == false)
+                    if (string.IsNullOrEmpty(sn) == false && _lastClearance1SN != sn)
                     {
                         var clearanceInfo = await _clearanceRepository.QueryableFirstAsync(
                             x => x.SN == sn,
@@ -201,12 +320,19 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                         }
                         else
                         {
-                            var a = await _clearanceRepository.InsertableAsync(dataValue);
-                            var b = await _summaryRepository.InsertableAsync(
-                                dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>()
-                            );
+                            await _clearanceRepository.InsertableAsync(dataValue);
+                            if (
+                                await _summaryRepository.QueryableFirstAsync(x =>
+                                    x.SN == dataValue.SN
+                                ) == null
+                            )
+                            {
+                                await _summaryRepository.InsertableAsync(
+                                    dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>()
+                                );
+                            }
                         }
-
+                        _lastClearance1SN = sn;
                         ((IClientProxy)_chatHub.Clients.All).Invoke(
                             "ClearanceStation1Data",
                             new Factory4Workshop4_10Line_Clearance_Station1Dto
@@ -228,7 +354,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                 if (reSN.IsSuccess)
                 {
                     var sn = _clearance2SN.Value[0].ToString();
-                    if (string.IsNullOrEmpty(sn) == false)
+                    if (string.IsNullOrEmpty(sn) == false && _lastClearance2SN != sn)
                     {
                         var clearanceInfo = await _clearanceRepository.QueryableFirstAsync(
                             x => x.SN == sn,
@@ -280,7 +406,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                                 x.Clearance2Time,
                             }
                         );
-
+                        _lastClearance2SN = sn;
                         ((IClientProxy)_chatHub.Clients.All).Invoke(
                             "ClearanceStation2Data",
                             new Factory4Workshop4_10Line_Clearance_Station2Dto

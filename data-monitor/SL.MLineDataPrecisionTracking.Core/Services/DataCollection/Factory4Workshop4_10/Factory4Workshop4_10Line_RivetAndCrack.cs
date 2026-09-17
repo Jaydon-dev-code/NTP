@@ -40,6 +40,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
         byte _spinRivetingRe;
         byte _spinRivetingReTmp;
 
+        string _lastRivetingSN;
+        string _lastSpinRivetingSN;
+
         public Factory4Workshop4_10Line_RivetAndCrack(
             Tb_EquipmentRepository tb_EquipmentRepository,
             McpCommunication mcpCommunication,
@@ -128,7 +131,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                 if (revalue.IsSuccess)
                 {
                     var sn = _rivetingSN.Value[0].ToString();
-                    if (string.IsNullOrEmpty(sn) == false)
+                    if (string.IsNullOrEmpty(sn) == false&& _lastRivetingSN!=sn)
                     {
                         var clearanceInfo = await _rivetAndCrackRepository.QueryableFirstAsync(x =>
                             x.SN == _rivetingSN.Value[0].ToString()
@@ -191,8 +194,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                                 }
                             );
                         }
-
-                        ((IClientProxy)_chatHub.Clients.All).Invoke(
+                        _lastRivetingSN = sn;
+                       ((IClientProxy)_chatHub.Clients.All).Invoke(
                             "RivetingData",
                             new Factory4Workshop4_10Line_RivetAndCrack_RivetingDto
                             {
@@ -216,7 +219,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                 {
                     var sn = _spinRivetingSNPlcInfo.Value[0].ToString();
 
-                    if (string.IsNullOrEmpty(sn) == false)
+                    if (string.IsNullOrEmpty(sn) == false && _lastSpinRivetingSN!=sn)
                     {
                         var spinInfo = await _rivetAndCrackRepository.QueryableFirstAsync(x =>
                             x.SN == sn
@@ -248,7 +251,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                             x => x.SN,
                             x => new { x.SpinRivetingResult, x.SpinRivetingTime }
                         );
-
+                        _lastSpinRivetingSN = sn;
                         ((IClientProxy)_chatHub.Clients.All).Invoke(
                             "SpinRivetingData",
                             new Factory4Workshop4_10Line_RivetAndCrack_SpinRivetingDto

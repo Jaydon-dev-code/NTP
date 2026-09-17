@@ -8,13 +8,11 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using SL.MLineDataPrecisionTracking.Client.Http;
-
 using SL.MLineDataPrecisionTracking.Infrastructure.Expand;
 using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Dtos.Factory4Workshop4_10Line;
 using SL.MLineDataPrecisionTracking.Models.Dtos.Request;
 using SL.MLineDataPrecisionTracking.Models.Entities.Factory4Workshop4_10Line;
-
 
 namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 {
@@ -53,6 +51,13 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
         {
             get => _isOnlieABS;
             set => SetProperty(ref _isOnlieABS, value);
+        }
+
+        private bool _isOnlieClearanceScan;
+        public bool IsOnlieClearanceScan
+        {
+            get => _isOnlieClearanceScan;
+            set => SetProperty(ref _isOnlieClearanceScan, value);
         }
 
         private Factory4Workshop4_10Line_VibDto _vibData;
@@ -217,7 +222,9 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             get
             {
                 if (_openScanCodeModelCommand == null)
-                    _openScanCodeModelCommand = new RelayCommand<System.Windows.Controls.TextBox>(OpenScanCodeModel);
+                    _openScanCodeModelCommand = new RelayCommand<System.Windows.Controls.TextBox>(
+                        OpenScanCodeModel
+                    );
                 return _openScanCodeModelCommand;
             }
         }
@@ -228,7 +235,10 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             get
             {
                 if (_markingNoQueryCommand == null)
-                    _markingNoQueryCommand = new AsyncRelayCommand<System.Windows.Controls.TextBox>(MarkingNoQuery, x => IsScanCode == true);
+                    _markingNoQueryCommand = new AsyncRelayCommand<System.Windows.Controls.TextBox>(
+                        MarkingNoQuery,
+                        x => IsScanCode == true
+                    );
                 return _markingNoQueryCommand;
             }
         }
@@ -255,7 +265,10 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             }
         }
 
-        public Factory4Workshop4_10LineViewModel(HubClien hubClien, Factory4Workshop4_10LineSummaryApi summaryApi)
+        public Factory4Workshop4_10LineViewModel(
+            HubClien hubClien,
+            Factory4Workshop4_10LineSummaryApi summaryApi
+        )
         {
             _summaryApi = summaryApi;
             PaginationPages.DataCountPerPage = 100;
@@ -269,13 +282,32 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             hubClien.Start<bool>(nameof(IsOnlieVib), x => IsOnlieVib = x);
             hubClien.Start<bool>(nameof(IsOnlieVibScan), x => IsOnlieVibScan = x);
             hubClien.Start<bool>(nameof(IsOnlieABS), x => IsOnlieABS = x);
+            hubClien.Start<bool>(nameof(IsOnlieClearanceScan), x => IsOnlieClearanceScan = x);
             hubClien.Start<Factory4Workshop4_10Line_VibDto>(nameof(VibData), x => VibData = x);
-            hubClien.Start<Factory4Workshop4_10Line_RivetAndCrack_RivetingDto>(nameof(RivetingData), x => RivetingData = x);
-            hubClien.Start<Factory4Workshop4_10Line_RivetAndCrack_SpinRivetingDto>(nameof(SpinRivetingData), x => SpinRivetingData = x);
-            hubClien.Start<Factory4Workshop4_10Line_Clearance_Station1Dto>(nameof(ClearanceStation1Data), x => ClearanceStation1Data = x);
-            hubClien.Start<Factory4Workshop4_10Line_Clearance_Station2Dto>(nameof(ClearanceStation2Data), x => ClearanceStation2Data = x);
-            hubClien.Start<Factory4Workshop4_10Line_ABS_PressDownDto>(nameof(ABSPressDownData), x => ABSPressDownData = x);
-            hubClien.Start<Factory4Workshop4_10Line_ABS_CheckDto>(nameof(ABSCheckData), x => ABSCheckData = x);
+            hubClien.Start<Factory4Workshop4_10Line_RivetAndCrack_RivetingDto>(
+                nameof(RivetingData),
+                x => RivetingData = x
+            );
+            hubClien.Start<Factory4Workshop4_10Line_RivetAndCrack_SpinRivetingDto>(
+                nameof(SpinRivetingData),
+                x => SpinRivetingData = x
+            );
+            hubClien.Start<Factory4Workshop4_10Line_Clearance_Station1Dto>(
+                nameof(ClearanceStation1Data),
+                x => ClearanceStation1Data = x
+            );
+            hubClien.Start<Factory4Workshop4_10Line_Clearance_Station2Dto>(
+                nameof(ClearanceStation2Data),
+                x => ClearanceStation2Data = x
+            );
+            hubClien.Start<Factory4Workshop4_10Line_ABS_PressDownDto>(
+                nameof(ABSPressDownData),
+                x => ABSPressDownData = x
+            );
+            hubClien.Start<Factory4Workshop4_10Line_ABS_CheckDto>(
+                nameof(ABSCheckData),
+                x => ABSCheckData = x
+            );
         }
 
         async Task Query()
@@ -301,7 +333,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 EndTime = endTime,
                 SN = QuerySN,
                 PageNumber = PaginationPages.PageIndex,
-                PageSize = PaginationPages.DataCountPerPage
+                PageSize = PaginationPages.DataCountPerPage,
             };
 
             var apiResult = await _summaryApi.QueryablToPagee(request);
@@ -353,7 +385,9 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 var scanData = QueryValue.ToList();
                 if (scanData?.Count == 0)
                 {
-                    HandyControl.Controls.MessageBox.Warning("未检测到导出的数据信息，请检测搜索条件后再次导出！");
+                    HandyControl.Controls.MessageBox.Warning(
+                        "未检测到导出的数据信息，请检测搜索条件后再次导出！"
+                    );
                     return;
                 }
                 var scanEx = ExcelExpand.ExportToExcel(scanData, saveFileDialog.FileName);
@@ -384,7 +418,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 EndTime = endTime,
                 SN = QuerySN,
                 PageNumber = 1,
-                PageSize = exportPageSize
+                PageSize = exportPageSize,
             };
 
             var firstPage = await _summaryApi.QueryablToPagee(request);
@@ -397,7 +431,9 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 
             if (firstPage.Data?.List == null || firstPage.Data.List.Count == 0)
             {
-                HandyControl.Controls.MessageBox.Warning("未检测到导出的数据信息，请检测搜索条件后再次导出！");
+                HandyControl.Controls.MessageBox.Warning(
+                    "未检测到导出的数据信息，请检测搜索条件后再次导出！"
+                );
                 return;
             }
 
@@ -418,7 +454,9 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                         var apiResult = await _summaryApi.QueryablToPagee(request);
                         if (!apiResult.IsSuccess)
                         {
-                            HandyControl.Controls.MessageBox.Warning($"导出查询失败：{apiResult.Message}");
+                            HandyControl.Controls.MessageBox.Warning(
+                                $"导出查询失败：{apiResult.Message}"
+                            );
                             return;
                         }
                         writer.WriteRows(apiResult.Data.List);
@@ -461,10 +499,7 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             if (string.IsNullOrEmpty(QuerySN))
                 return;
 
-            var request = new Factory4Workshop4_10LineSummaryQueryRequestDto
-            {
-                SN = QuerySN,
-            };
+            var request = new Factory4Workshop4_10LineSummaryQueryRequestDto { SN = QuerySN };
             var apiResult = await _summaryApi.SNQuery(request);
 
             Factory4Workshop4_10LineSummaryDto findValue;
@@ -488,11 +523,14 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
             }
             else
             {
-                HistoryScanMarkingNos.Insert(0, new ScanRecord
-                {
-                    MarkingNo = QuerySN,
-                    IsHave = apiResult.IsSuccess && apiResult.Data?.List?.Count > 0,
-                });
+                HistoryScanMarkingNos.Insert(
+                    0,
+                    new ScanRecord
+                    {
+                        MarkingNo = QuerySN,
+                        IsHave = apiResult.IsSuccess && apiResult.Data?.List?.Count > 0,
+                    }
+                );
             }
 
             QueryValue.Insert(0, findValue);

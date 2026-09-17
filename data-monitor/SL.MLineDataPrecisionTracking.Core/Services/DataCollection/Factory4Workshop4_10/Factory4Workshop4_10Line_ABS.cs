@@ -40,6 +40,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
         byte _aBSPressDownRe;
         byte _aBSPressDownReTmp;
 
+        string _lastABSPressDownSN;
+        string _lastAbsCheckSN;
+
         public Factory4Workshop4_10Line_ABS(
             Tb_EquipmentRepository tb_EquipmentRepository,
             McpCommunication mcpCommunication,
@@ -111,7 +114,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                 if (reSN.IsSuccess)
                 {
                     var sn = reSN.Data.Value[0].ToString();
-                    if (string.IsNullOrEmpty(sn) == false)
+                    if (string.IsNullOrEmpty(sn) == false && _lastABSPressDownSN != sn)
                     {
                         var absInfo = await _aBSRepository.QueryableFirstAsync(
                             x => x.SN == sn,
@@ -124,7 +127,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                                 _aBSPressDownReTmp == 1 ? ResultEnum.OK : ResultEnum.NG,
                             ABSPressDownTime = DateTime.Now,
                         };
-                   
+
                         if (absInfo != null)
                         {
                             await _aBSRepository.UpDataAsync(
@@ -137,7 +140,10 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                         {
                             await _aBSRepository.InsertableAsync(dataValue);
                         }
-                         if (await _summaryRepository.QueryableFirstAsync(x => x.SN == dataValue.SN) == null)
+                        if (
+                            await _summaryRepository.QueryableFirstAsync(x => x.SN == dataValue.SN)
+                            == null
+                        )
                         {
                             await _summaryRepository.InsertableAsync(
                                 dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>()
@@ -151,7 +157,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                                 x => new { x.ABSPressDownResult, x.ABSPressDownTime }
                             );
                         }
-
+                        _lastABSPressDownSN = sn;
                         ((IClientProxy)_chatHub.Clients.All).Invoke(
                             "ABSPressDownData",
                             new Factory4Workshop4_10Line_ABS_PressDownDto
@@ -171,7 +177,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                 if (reSN.IsSuccess)
                 {
                     var sn = reSN.Data.Value[0].ToString();
-                    if (string.IsNullOrEmpty(sn) == false)
+                    if (string.IsNullOrEmpty(sn) == false && _lastAbsCheckSN != sn)
                     {
                         var absInfo = await _aBSRepository.QueryableFirstAsync(
                             x => x.SN == sn,
@@ -211,7 +217,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                                 }
                             );
                         }
-
+                        _lastAbsCheckSN = sn;
                         ((IClientProxy)_chatHub.Clients.All).Invoke(
                             "ABSCheckData",
                             new Factory4Workshop4_10Line_ABS_CheckDto

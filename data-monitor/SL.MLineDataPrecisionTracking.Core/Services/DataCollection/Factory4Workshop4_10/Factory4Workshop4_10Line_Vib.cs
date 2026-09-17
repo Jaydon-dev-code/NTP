@@ -1,4 +1,13 @@
-﻿using Mapster;
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Mapster;
 using Microsoft.AspNet.SignalR;
 using NPOI.XWPF.UserModel;
 using SL.MLineDataPrecisionTracking.Infrastructure.Expand;
@@ -10,15 +19,6 @@ using SL.MLineDataPrecisionTracking.Models.Dtos.Factory4Workshop4_10Line;
 using SL.MLineDataPrecisionTracking.Models.Entities.Factory4Workshop4_10Line;
 using SL.MLineDataPrecisionTracking.Models.Enum;
 using SqlSugar.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using IClientProxy = Microsoft.AspNet.SignalR.Hubs.IClientProxy;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Workshop4_10
@@ -40,9 +40,10 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
         DevPlcPointDto _vibNG;
         DevPlcPointDto _vibSN;
         List<DevPlcPointDto> _vibResultPlcInfo;
-
         byte _vibRe;
         byte _vibReTmp;
+        string _lastVibSN;
+        string _lastCanInfo;
 
         public Factory4Workshop4_10Line_Vib(
             Tb_EquipmentRepository tb_EquipmentRepository,
@@ -105,7 +106,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
             if (revalue.IsSuccess)
             {
                 var sn = _vibSN.Value[0].ToString();
-                if (string.IsNullOrEmpty(sn) == false)
+                if (string.IsNullOrEmpty(sn) == false && _lastVibSN != sn)
                 {
                     var clearanceInfo = await _vibRepository.QueryableFirstAsync(x => x.SN == sn);
                     dataValue = new Tb_Factory4Workshop4_10Line_Vib()
@@ -114,7 +115,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                         SN = sn,
                         VibCrackTime = DateTime.Now,
                     };
-                 
+
                     if (clearanceInfo != null)
                     {
                         await _vibRepository.UpDataAsync(
@@ -125,24 +126,26 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                     }
                     else
                     {
-                           await _vibRepository.InsertableAsync(dataValue);
+                        await _vibRepository.InsertableAsync(dataValue);
                     }
-                    if (await _summaryRepository.QueryableFirstAsync(x=>x.SN==dataValue.SN)==null)
+                    if (
+                        await _summaryRepository.QueryableFirstAsync(x => x.SN == dataValue.SN)
+                        == null
+                    )
                     {
                         await _summaryRepository.InsertableAsync(
-                               dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>()
-                           );
+                            dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>()
+                        );
                     }
                     else
                     {
                         await _summaryRepository.UpDataAsync(
-                      dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
-                      x => new { x.SN },
-                      x => new { x.VibCrackResult, x.VibCrackTime }
-                  );
+                            dataValue.Adapt<Tb_Factory4Workshop4_10LineSummary>(),
+                            x => new { x.SN },
+                            x => new { x.VibCrackResult, x.VibCrackTime }
+                        );
                     }
-                  
-
+                    _lastVibSN = sn;
                     ((IClientProxy)_chatHub.Clients.All).Invoke(
                         "VibData",
                         new Factory4Workshop4_10Line_VibDto
@@ -258,11 +261,16 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory4Wor
                     }
                     var soureLen = int.Parse(buffer.BytesToAscii(4)) - 4;
                     var soureByte = buffer.RemoveStartBytes(4);
-                    var ccanInfo = soureByte.BytesToAscii(soureLen);
+                    var canInfo = soureByte.BytesToAscii(soureLen);
                     //if (!Expand.IsRunningInMSTest())
                     //{
-                    _issueSancInfoPoint.Value[0] = ccanInfo;
-                    _mc1ECommunication.Write(_issueSancInfoPoint);
+                    if (_lastCanInfo != canInfo)
+                    {
+                        _issueSancInfoPoint.Value[0] = canInfo;
+                        _mc1ECommunication.Write(_issueSancInfoPoint);
+                        _lastCanInfo = canInfo;
+                    }
+
                     //}
                     //else
                     //{
