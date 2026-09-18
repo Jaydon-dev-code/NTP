@@ -1,6 +1,8 @@
 // 基础 HTTP 客户端与通用类型
 
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://localhost:59088'
+// 开发 & 生产通用
+const host = window.location.hostname || '127.0.0.1';
+const BASE_URL = `http://${host}:59088`;
 
 /** 后端统一返回结构 */
 export interface ApiResult<T = null> {
