@@ -17,6 +17,7 @@ namespace SL.MLineDataPrecisionTracking.Service.Services
         public string ServiceId { get; set; }
         public string Name { get; set; }
         public string ServiceType { get; set; }
+        public ServiceCategory Category { get; set; }
         public bool IsRunning { get; set; }
         public bool IsEnabled { get; set; }
         public DataCollectionServiceAbstract ServiceInstance { get; set; }
@@ -61,6 +62,7 @@ namespace SL.MLineDataPrecisionTracking.Service.Services
                     ServiceId = serviceId,
                     Name = serviceName,
                     ServiceType = serviceType.Name,
+                    Category = service.Category,
                     IsRunning = false,
                     IsEnabled = isEnabled,
                     ServiceInstance = service,
@@ -75,6 +77,7 @@ namespace SL.MLineDataPrecisionTracking.Service.Services
                         ServiceId = serviceId,
                         ServiceName = serviceName,
                         ServiceType = serviceType.Name,
+                        Category = service.Category,
                         IsEnabled = isEnabled,
                         LastOperationTime = DateTime.Now,
                         LastOperator = dbStatus?.LastOperator ?? "System",
@@ -120,6 +123,43 @@ namespace SL.MLineDataPrecisionTracking.Service.Services
             {
                 await StopServiceAsync(serviceId);
             }
+        }
+
+        /// <summary>按类别获取所有服务</summary>
+        public async Task<List<DataCollectionServiceInfo>> GetAllServicesByCategoryAsync(ServiceCategory category)
+        {
+            var all = await GetAllServicesAsync();
+            return all.Where(s => s.Category == category).ToList();
+        }
+
+        /// <summary>按类别启动所有服务</summary>
+        public async Task StartAllByCategoryAsync(ServiceCategory category)
+        {
+            List<string> toStart;
+            lock (_lock)
+            {
+                toStart = _services.Values
+                    .Where(s => !s.IsRunning && s.IsEnabled && s.Category == category)
+                    .Select(s => s.ServiceId)
+                    .ToList();
+            }
+            foreach (var id in toStart)
+                await StartServiceAsync(id);
+        }
+
+        /// <summary>按类别停止所有服务</summary>
+        public async Task StopAllByCategoryAsync(ServiceCategory category)
+        {
+            List<string> toStop;
+            lock (_lock)
+            {
+                toStop = _services.Values
+                    .Where(s => s.IsRunning && s.Category == category)
+                    .Select(s => s.ServiceId)
+                    .ToList();
+            }
+            foreach (var id in toStop)
+                await StopServiceAsync(id);
         }
 
         public async Task StartServiceAsync(string serviceId)

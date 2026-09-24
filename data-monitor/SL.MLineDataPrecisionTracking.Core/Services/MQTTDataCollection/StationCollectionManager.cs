@@ -88,6 +88,12 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
         /// <summary>当前 Worker 数量（外部可查）</summary>
         public int WorkerCount => _workerCount;
 
+        /// <summary>Worker 是否正在运行</summary>
+        public bool WorkersRunning => _workers != null && _workers.Any(w => !w.IsCompleted);
+
+        /// <summary>是否启用（禁用时停止 Worker 并阻止启动）</summary>
+        public bool IsEnabled { get; set; } = true;
+
         public StationCollectionManager(
             Tb_EquipmentRepository equipmentRepository,
             EquipmentManagementService equipmentManagementService,

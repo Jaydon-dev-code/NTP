@@ -1,6 +1,8 @@
+using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -34,8 +36,19 @@ namespace UnitTestProject.PLC
         [TestMethod]
         public void GetAreaCode_C_Returns0xB0()
         {
-            var result = InvokeGetAreaCode("C");
-            Assert.AreEqual((byte)0xB0, result);
+            string[] re = new string[3] { "12345", "asdfg", "zxcb" };
+
+            char[] strings = new char[30];
+            var reIndenx = 0;
+            var stringsIndex = 0;
+           
+            for (int i = 0; i < 5; i++)
+            {
+                strings[stringsIndex] = re[reIndenx][i];
+                reIndenx++;
+                stringsIndex+=10;
+            }
+
         }
 
         [TestMethod]

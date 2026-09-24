@@ -69,6 +69,8 @@
     <Compile Include="Controllers\MeticulousPursuitController.cs" />
     <Compile Include="Controllers\Rcl_MeticulousPursuitController.cs" />
     <Compile Include="Controllers\ServiceController.cs" />
+    <Compile Include="Controllers\SpcController.cs" />
+    <Compile Include="Controllers\SpcDataCollectionController.cs" />
     <Compile Include="Middleware\CorsMiddleware.cs" />
     <Compile Include="OwinHostService.cs">
       <SubType>Component</SubType>

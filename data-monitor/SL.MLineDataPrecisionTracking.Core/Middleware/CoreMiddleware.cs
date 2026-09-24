@@ -10,6 +10,8 @@ using Microsoft.AspNet.SignalR;
 using SL.MLineDataPrecisionTracking.Core.Hubs;
 using SL.MLineDataPrecisionTracking.Core.Services;
 using SL.MLineDataPrecisionTracking.Core.Services.DataCollection;
+using SL.MLineDataPrecisionTracking.Core.Services.SPCDataCollection;
+using SL.MLineDataPrecisionTracking.Core.Services.SPCDataCollection.DataCollection;
 using SL.MLineDataPrecisionTracking.Infrastructure;
 using SL.MLineDataPrecisionTracking.Models.Entities;
 
@@ -23,6 +25,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Middleware
             services.RegisterType<EnergyRangeExcelImportService>().SingleInstance();
             services.RegisterType<EquipmentManagementService>().SingleInstance();
             services.RegisterType<StationCollectionManager>().SingleInstance();
+            services.RegisterType<SPCDataCollectionManager>().SingleInstance();
+            services.RegisterType<CurrentModelSyncService>().SingleInstance();
+            services.RegisterType<CurrentModelResolver>().SingleInstance();
             services
                 .Register(c => GlobalHost.ConnectionManager.GetHubContext<ChatHub>())
                 .As<IHubContext>()
@@ -37,6 +42,17 @@ namespace SL.MLineDataPrecisionTracking.Core.Middleware
                 )
                 .As<DataCollectionServiceAbstract>() // 🔥 全部绑定到同一个接口
                 .SingleInstance();
+
+            // SPC 采集实现：瞬时注入（每次 Resolve 得到独立实例）
+            services
+                .RegisterAssemblyTypes(assembly)
+                .Where(t =>
+                    t.IsClass
+                    && !t.IsAbstract
+                    && typeof(SPCDataCollectionAbstract).IsAssignableFrom(t)
+                )
+                .AsSelf()
+                .InstancePerDependency();
         }
     }
 }

@@ -4,8 +4,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
+using SL.MLineDataPrecisionTracking.Core.Services.DataCollection;
+using SL.MLineDataPrecisionTracking.Core.Services.SPCDataCollection;
 using SL.MLineDataPrecisionTracking.Service.Services;
 using SL.MLineDataPrecisionTracking.Models.Domain;
+using SL.MLineDataPrecisionTracking.Models.Enum;
 
 namespace SL.MLineDataPrecisionTracking.Service.Controllers
 {
@@ -15,10 +18,35 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
     public class ServiceController : ApiController
     {
         DataCollectionServiceManager _dataCollectionServiceManager;
+        StationCollectionManager _stationCollectionManager;
+        SPCDataCollectionManager _spcDataCollectionManager;
+        CurrentModelSyncService _currentModelSyncService;
 
-        public ServiceController(DataCollectionServiceManager dataCollectionServiceManager)
+        const string StationManagerId = "StationCollectionManager";
+        const string SpcManagerId = "SPCDataCollectionManager";
+        const string ModelSyncId = "CurrentModelSyncService";
+
+        public ServiceController(
+            DataCollectionServiceManager dataCollectionServiceManager,
+            StationCollectionManager stationCollectionManager,
+            SPCDataCollectionManager spcDataCollectionManager,
+            CurrentModelSyncService currentModelSyncService)
         {
             _dataCollectionServiceManager = dataCollectionServiceManager;
+            _stationCollectionManager = stationCollectionManager;
+            _spcDataCollectionManager = spcDataCollectionManager;
+            _currentModelSyncService = currentModelSyncService;
+        }
+
+        private string ModelSyncRemark()
+        {
+            if (!ThirdPartyDbConfig.Enabled)
+                return "三方开关关闭(ThirdPartyDb_Enabled=false)";
+            if (!ThirdPartyDbConfig.IsConfigured)
+                return "未配置连接串/型号SQL";
+            if (!_currentModelSyncService.IsEnabled)
+                return "服务已禁用";
+            return $"同步间隔 {ThirdPartyDbConfig.SyncIntervalSeconds}s · SPC 附属";
         }
 
         /// <summary>
@@ -54,6 +82,41 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
         [HttpPost]
         public async Task<ApiResult> StartService([FromBody] string id)
         {
+            // 工位采集调度服务特殊处理
+            if (id == StationManagerId)
+            {
+                if (!_stationCollectionManager.IsEnabled)
+                    return ApiResult.Fail("服务未启用");
+                if (_stationCollectionManager.WorkersRunning)
+                    return ApiResult.Fail("服务已经在运行中");
+                await _stationCollectionManager.RestoreAsync();
+                return ApiResult.Success("工位采集调度服务已启动");
+            }
+
+            // SPC 采集管理服务特殊处理
+            if (id == SpcManagerId)
+            {
+                if (!_spcDataCollectionManager.IsEnabled)
+                    return ApiResult.Fail("服务未启用");
+                if (_spcDataCollectionManager.WorkersRunning)
+                    return ApiResult.Fail("服务已经在运行中");
+                await _spcDataCollectionManager.LoadAsync();
+                return ApiResult.Success("SPC 采集管理服务已启动");
+            }
+
+            // SPC 型号同步服务（隶属 SPC，可独立启动）
+            if (id == ModelSyncId)
+            {
+                if (!_currentModelSyncService.IsEnabled)
+                    return ApiResult.Fail("服务未启用");
+                if (_currentModelSyncService.IsRunning)
+                    return ApiResult.Fail("服务已经在运行中");
+                _currentModelSyncService.Start();
+                if (!_currentModelSyncService.IsRunning)
+                    return ApiResult.Fail(ModelSyncRemark());
+                return ApiResult.Success("SPC 型号同步服务已启动");
+            }
+
             var service = await _dataCollectionServiceManager.GetServiceAsync(id);
             if (service == null)
             {
@@ -89,6 +152,33 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
         [HttpPost]
         public async Task<ApiResult> StopService([FromBody] string id)
         {
+            // 工位采集调度服务特殊处理
+            if (id == StationManagerId)
+            {
+                if (!_stationCollectionManager.WorkersRunning)
+                    return ApiResult.Fail("服务已经停止");
+                _stationCollectionManager.StopWorkers();
+                return ApiResult.Success("工位采集调度服务已停止");
+            }
+
+            // SPC 采集管理服务特殊处理
+            if (id == SpcManagerId)
+            {
+                if (!_spcDataCollectionManager.WorkersRunning)
+                    return ApiResult.Fail("服务已经停止");
+                _spcDataCollectionManager.StopWorkers();
+                return ApiResult.Success("SPC 采集管理服务已停止");
+            }
+
+            // SPC 型号同步服务
+            if (id == ModelSyncId)
+            {
+                if (!_currentModelSyncService.IsRunning)
+                    return ApiResult.Fail("服务已经停止");
+                _currentModelSyncService.Stop();
+                return ApiResult.Success("SPC 型号同步服务已停止");
+            }
+
             var service = await _dataCollectionServiceManager.GetServiceAsync(id);
             if (service == null)
             {
@@ -119,6 +209,32 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
         [HttpPost]
         public async Task<ApiResult> RestartService([FromBody] string id)
         {
+            // 工位采集调度服务特殊处理
+            if (id == StationManagerId)
+            {
+                _stationCollectionManager.StopWorkers();
+                await _stationCollectionManager.RestoreAsync();
+                return ApiResult.Success("工位采集调度服务已重启");
+            }
+
+            // SPC 采集管理服务特殊处理
+            if (id == SpcManagerId)
+            {
+                _spcDataCollectionManager.StopWorkers();
+                await _spcDataCollectionManager.LoadAsync();
+                return ApiResult.Success("SPC 采集管理服务已重启");
+            }
+
+            // SPC 型号同步服务
+            if (id == ModelSyncId)
+            {
+                _currentModelSyncService.Stop();
+                _currentModelSyncService.Start();
+                if (!_currentModelSyncService.IsRunning)
+                    return ApiResult.Fail(ModelSyncRemark());
+                return ApiResult.Success("SPC 型号同步服务已重启");
+            }
+
             var service = await _dataCollectionServiceManager.GetServiceAsync(id);
             if (service == null)
             {
@@ -150,6 +266,45 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
         [HttpPost]
         public async Task<ApiResult> SetServiceEnabled([FromBody] ServiceInfo serviceInfo)
         {
+            // 工位采集调度服务特殊处理
+            if (serviceInfo.ServiceId == StationManagerId)
+            {
+                _stationCollectionManager.IsEnabled = serviceInfo.IsEnabled;
+                if (!serviceInfo.IsEnabled && _stationCollectionManager.WorkersRunning)
+                {
+                    _stationCollectionManager.StopWorkers();
+                }
+                return ApiResult.Success(
+                    $"工位采集调度服务已{(serviceInfo.IsEnabled ? "启用" : "禁用")}"
+                );
+            }
+
+            // SPC 采集管理服务特殊处理
+            if (serviceInfo.ServiceId == SpcManagerId)
+            {
+                _spcDataCollectionManager.IsEnabled = serviceInfo.IsEnabled;
+                if (!serviceInfo.IsEnabled && _spcDataCollectionManager.WorkersRunning)
+                {
+                    _spcDataCollectionManager.StopWorkers();
+                }
+                return ApiResult.Success(
+                    $"SPC 采集管理服务已{(serviceInfo.IsEnabled ? "启用" : "禁用")}"
+                );
+            }
+
+            // SPC 型号同步服务
+            if (serviceInfo.ServiceId == ModelSyncId)
+            {
+                _currentModelSyncService.IsEnabled = serviceInfo.IsEnabled;
+                if (!serviceInfo.IsEnabled && _currentModelSyncService.IsRunning)
+                {
+                    _currentModelSyncService.Stop();
+                }
+                return ApiResult.Success(
+                    $"SPC 型号同步服务已{(serviceInfo.IsEnabled ? "启用" : "禁用")}"
+                );
+            }
+
             var service = await _dataCollectionServiceManager.GetServiceAsync(serviceInfo.ServiceId);
             if (service == null)
             {
@@ -209,5 +364,114 @@ namespace SL.MLineDataPrecisionTracking.Service.Controllers
                 return ApiResult.Fail($"所有服务已停止出现错误。\r\n{ex.Message}");
             }
         }
+
+        #region Web 端服务管理
+
+        /// <summary>
+        /// 获取所有 Web 端服务状态（含工位调度、SPC 采集、型号同步）
+        /// </summary>
+        [HttpPost]
+        public async Task<ApiResult<List<DataCollectionServiceInfo>>> GetWebServices()
+        {
+            var list = await _dataCollectionServiceManager.GetAllServicesByCategoryAsync(ServiceCategory.Web);
+
+            list.Add(new DataCollectionServiceInfo
+            {
+                ServiceId = StationManagerId,
+                Name = "工位采集调度服务",
+                ServiceType = nameof(StationCollectionManager),
+                Category = ServiceCategory.Web,
+                IsRunning = _stationCollectionManager.WorkersRunning,
+                IsEnabled = _stationCollectionManager.IsEnabled,
+                LastUpdateTime = DateTime.Now,
+                LastOperator = "System",
+                Remark = $"Worker数: {_stationCollectionManager.WorkerCount}",
+            });
+
+            list.Add(new DataCollectionServiceInfo
+            {
+                ServiceId = SpcManagerId,
+                Name = "SPC 采集管理服务",
+                ServiceType = nameof(SPCDataCollectionManager),
+                Category = ServiceCategory.Web,
+                IsRunning = _spcDataCollectionManager.WorkersRunning,
+                IsEnabled = _spcDataCollectionManager.IsEnabled,
+                LastUpdateTime = DateTime.Now,
+                LastOperator = "System",
+                Remark = $"Worker数: {_spcDataCollectionManager.WorkerCount}",
+            });
+
+            // 型号同步：隶属 SPC 采集服务组，可独立启停
+            list.Add(new DataCollectionServiceInfo
+            {
+                ServiceId = ModelSyncId,
+                Name = "SPC 型号同步服务",
+                ServiceType = nameof(CurrentModelSyncService),
+                Category = ServiceCategory.Web,
+                IsRunning = _currentModelSyncService.IsRunning,
+                IsEnabled = _currentModelSyncService.IsEnabled,
+                LastUpdateTime = DateTime.Now,
+                LastOperator = "System",
+                Remark = ModelSyncRemark(),
+            });
+
+            return ApiResult<List<DataCollectionServiceInfo>>.Success(list);
+        }
+
+        /// <summary>
+        /// 启动所有 Web 端服务（含工位 / SPC / 型号同步）
+        /// </summary>
+        [HttpPost]
+        public async Task<ApiResult> StartAllWebServices()
+        {
+            try
+            {
+                await _dataCollectionServiceManager.StartAllByCategoryAsync(ServiceCategory.Web);
+
+                if (_stationCollectionManager.IsEnabled && !_stationCollectionManager.WorkersRunning)
+                    await _stationCollectionManager.RestoreAsync();
+
+                if (_spcDataCollectionManager.IsEnabled && !_spcDataCollectionManager.WorkersRunning)
+                    await _spcDataCollectionManager.LoadAsync();
+
+                if (_currentModelSyncService.IsEnabled && !_currentModelSyncService.IsRunning)
+                    _currentModelSyncService.Start();
+
+                return ApiResult.Success("所有 Web 端服务已启动");
+            }
+            catch (Exception ex)
+            {
+                return ApiResult.Fail($"启动 Web 端服务失败: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 停止所有 Web 端服务（含工位 / SPC / 型号同步）
+        /// </summary>
+        [HttpPost]
+        public async Task<ApiResult> StopAllWebServices()
+        {
+            try
+            {
+                await _dataCollectionServiceManager.StopAllByCategoryAsync(ServiceCategory.Web);
+
+                if (_spcDataCollectionManager.WorkersRunning)
+                    _spcDataCollectionManager.StopWorkers();
+
+                if (_currentModelSyncService.IsRunning)
+                    _currentModelSyncService.Stop();
+
+                if (_stationCollectionManager.WorkersRunning)
+                    _stationCollectionManager.StopWorkers();
+
+                return ApiResult.Success("所有 Web 端服务已停止");
+            }
+            catch (Exception ex)
+            {
+                return ApiResult.Fail($"停止 Web 端服务失败: {ex.Message}");
+            }
+        }
+
+        #endregion
     }
 }

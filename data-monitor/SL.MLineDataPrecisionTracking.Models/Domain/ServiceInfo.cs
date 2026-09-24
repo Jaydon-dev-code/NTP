@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SL.MLineDataPrecisionTracking.Models.Enum;
 
 namespace SL.MLineDataPrecisionTracking.Models.Domain
 {
@@ -25,6 +26,11 @@ namespace SL.MLineDataPrecisionTracking.Models.Domain
         /// 服务类型
         /// </summary>
         public string ServiceType { get; set; }
+
+        /// <summary>
+        /// 服务类别（Client / Web）
+        /// </summary>
+        public ServiceCategory Category { get; set; }
 
         /// <summary>
         /// 是否运行中

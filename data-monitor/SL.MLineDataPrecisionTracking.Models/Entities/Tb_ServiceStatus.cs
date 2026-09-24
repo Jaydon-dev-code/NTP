@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SL.MLineDataPrecisionTracking.Models.Enum;
 using SqlSugar;
 
 namespace SL.MLineDataPrecisionTracking.Models.Entities
@@ -38,6 +39,12 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// </summary>
         [SugarColumn(ColumnDescription = "服务类型")]
         public string ServiceType { get; set; }
+
+        /// <summary>
+        /// 服务类别
+        /// </summary>
+        [SugarColumn(ColumnDescription = "服务类别", DefaultValue = "0")]
+        public ServiceCategory Category { get; set; } = ServiceCategory.Client;
 
         /// <summary>
         /// 是否启用

@@ -118,6 +118,16 @@
     <Compile Include="Entities\Tb_PlcConnection.cs" />
     <Compile Include="Entities\Tb_PlcPoint.cs" />
     <Compile Include="Entities\Tb_ServiceStatus.cs" />
+    <Compile Include="Entities\SPC\Tb_SPC_Product.cs" />
+    <Compile Include="Entities\SPC\Tb_SPC_Part.cs" />
+    <Compile Include="Entities\SPC\Tb_SPC_Equipment.cs" />
+    <Compile Include="Entities\SPC\Tb_SPC_Characteristic.cs" />
+    <Compile Include="Entities\SPC\Tb_SPC_CollectionSource.cs" />
+    <Compile Include="Entities\SPC\Tb_SPC_PlcPoint.cs" />
+    <Compile Include="Domain\SPCResolvedContext.cs" />
+    <Compile Include="Domain\SPCCurrentModelInfo.cs" />
+    <Compile Include="Enum\SPCDataTypeEnum.cs" />
+    <Compile Include="Enum\SPCDataSourceEnum.cs" />
     <Compile Include="Enum\Assembly_6Factory6_1ALine_NgCodeEnum.cs" />
     <Compile Include="Enum\Assembly_6Factory6_1ALine_PassCodeEnum.cs" />
     <Compile Include="Enum\Assembly_6Factory6_1BLine_NgCodeEnum.cs" />
@@ -130,6 +140,7 @@
     <Compile Include="Enum\Mc1E\Mc1EFunctionCodeEnum.cs" />
     <Compile Include="Enum\ResultEnum.cs" />
     <Compile Include="Enum\ServiceStatusEnum.cs" />
+    <Compile Include="Enum\ServiceCategoryEnum.cs" />
     <Compile Include="ModelsAssemblyMarker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

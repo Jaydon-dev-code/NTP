@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using SL.MLineDataPrecisionTracking.Models.Domain;
@@ -17,6 +17,11 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
         /// 服务名称
         /// </summary>
         protected abstract string _serviceName { get; }
+
+        /// <summary>
+        /// 服务类别（默认 Client）。Web 端服务 override 为 Web 即可。
+        /// </summary>
+        public virtual ServiceCategory Category => ServiceCategory.Client;
 
         /// <summary>
         /// 间隔时间

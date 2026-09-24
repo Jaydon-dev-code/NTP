@@ -8,10 +8,14 @@ import { RouterView } from 'vue-router'
       <div class="brand">设备数据采集管理</div>
       <el-menu mode="horizontal" :ellipsis="false" class="nav" router>
         <el-sub-menu index="1">
-          <template #title>数采</template>
+          <template #title>
+            数采
+          </template>
           <el-menu-item index="/">设备管理</el-menu-item>
           <el-menu-item index="/collection">采集服务</el-menu-item>
         </el-sub-menu>
+        <el-menu-item index="/spc">SPC 特性库</el-menu-item>
+        <el-menu-item index="/service">服务管理</el-menu-item>
       </el-menu>
     </el-header>
     <el-main class="main">

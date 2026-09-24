@@ -156,6 +156,49 @@ namespace SL.MLineDataPrecisionTracking.Client.Http
                 return ApiResult.Fail(ex.Message);
             }
         }
+
+        #region Web 端服务
+
+        public async Task<ApiResult<List<ServiceInfo>>> GetWebServicesAsync()
+        {
+            try
+            {
+                return await PostAsync<List<ServiceInfo>>("GetWebServices", null);
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error($"获取 Web 端服务状态失败: {ex.Message}");
+                return ApiResult<List<ServiceInfo>>.Fail(ex.Message);
+            }
+        }
+
+        public async Task<ApiResult> StartAllWebServicesAsync()
+        {
+            try
+            {
+                return await PostAsync("StartAllWebServices", null);
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error($"启动 Web 端服务失败: {ex.Message}");
+                return ApiResult.Fail(ex.Message);
+            }
+        }
+
+        public async Task<ApiResult> StopAllWebServicesAsync()
+        {
+            try
+            {
+                return await PostAsync("StopAllWebServices", null);
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error($"停止 Web 端服务失败: {ex.Message}");
+                return ApiResult.Fail(ex.Message);
+            }
+        }
+
+        #endregion
     }
 
 

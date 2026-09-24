@@ -8,7 +8,6 @@ using NPOI.POIFS.Crypt;
 using SL.MLineDataPrecisionTracking.Infrastructure;
 using SL.MLineDataPrecisionTracking.Models;
 using SqlSugar;
-using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace SL.MLineDataPrecisionTracking.Core.Middleware
 {

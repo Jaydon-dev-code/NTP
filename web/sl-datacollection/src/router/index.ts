@@ -13,6 +13,16 @@ const router = createRouter({
       name: 'collection',
       component: () => import('../views/CollectionView.vue'),
     },
+    {
+      path: '/service',
+      name: 'service',
+      component: () => import('../views/ServiceView.vue'),
+    },
+    {
+      path: '/spc',
+      name: 'spc',
+      component: () => import('../views/SpcView.vue'),
+    },
   ],
 })
 
