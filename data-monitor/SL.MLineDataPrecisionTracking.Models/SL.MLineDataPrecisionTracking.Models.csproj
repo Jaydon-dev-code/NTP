@@ -80,6 +80,7 @@
     <Compile Include="Dtos\Factory6Workshop6_1AssemblyLineDto.cs" />
     <Compile Include="Dtos\HeatTreatmentDataDto.cs" />
     <Compile Include="Dtos\LineSummaryDto.cs" />
+    <Compile Include="Dtos\MES\MesDtos.cs" />
     <Compile Include="Dtos\PlcPointImportDto.cs" />
     <Compile Include="Dtos\Request\Factory4Workshop4_10LineSummaryQueryRequestDto.cs" />
     <Compile Include="Dtos\Request\EnergyRangePointQueryRequestDto.cs" />
@@ -102,6 +103,8 @@
     <Compile Include="Entities\Factory6Workshop6_1AssemblyLine\Tb_Factory6Workshop6_1AssemblyLineABSummary.cs" />
     <Compile Include="Entities\Factory6Workshop6_3AssemblyLine\Tb_Factory6Workshop6_3Line_EnergyRange.cs" />
     <Compile Include="Entities\Factory6Workshop6_3AssemblyLine\Tb_Factory6Workshop6_3Line_EnergyRangePoint.cs" />
+    <Compile Include="Entities\Mes\Tb_MesWorkOrder.cs" />
+    <Compile Include="Entities\Mes\Tb_MesWorkOrderBom.cs" />
     <Compile Include="Entities\Tb_EnergyRange.cs" />
     <Compile Include="Entities\Tb_EnergyRangeDetail.cs" />
     <Compile Include="Entities\Tb_Equipment.cs" />

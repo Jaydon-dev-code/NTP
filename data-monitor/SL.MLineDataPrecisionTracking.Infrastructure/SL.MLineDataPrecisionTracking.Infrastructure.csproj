@@ -52,6 +52,7 @@
     <Compile Include="Expand\ExcelExpand.cs" />
     <Compile Include="Expand\McProtocolExpand..cs" />
     <Compile Include="Expand\PlcExpand.cs" />
+    <Compile Include="Http\BaseHttp.cs" />
     <Compile Include="InfrastructureAssemblyMarker.cs" />
     <Compile Include="PLCCommunication\Mc1ECommunication.cs" />
     <Compile Include="PLCCommunication\IPlcCommunication.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="Storage\Factory6Workshop6_1AssemblyLine\Tb_Factory6Workshop6_1AssemblyLineABSummaryRepository.cs" />
     <Compile Include="Storage\Factory6Workshop6_3AssemblyLine\Tb_Factory6Workshop6_3Line_EnergyRangePointRepository.cs" />
     <Compile Include="Storage\Factory6Workshop6_3AssemblyLine\Tb_Factory6Workshop6_3Line_EnergyRangeRepository.cs" />
+    <Compile Include="Storage\MES\Tb_MesWorkOrderRepository.cs" />
     <Compile Include="Storage\Tb_EnergyRangeDetailRepository.cs" />
     <Compile Include="Storage\Tb_EnergyRangeRepository.cs" />
     <Compile Include="Storage\Tb_EquipmentRepository.cs" />

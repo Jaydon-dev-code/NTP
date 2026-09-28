@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Autofac;
 using Microsoft.AspNet.SignalR;
 using SL.MLineDataPrecisionTracking.Core.Hubs;
+using SL.MLineDataPrecisionTracking.Core.Mes;
 using SL.MLineDataPrecisionTracking.Core.Services;
 using SL.MLineDataPrecisionTracking.Core.Services.DataCollection;
 using SL.MLineDataPrecisionTracking.Infrastructure;
@@ -23,6 +24,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Middleware
             services.RegisterType<EnergyRangeExcelImportService>().SingleInstance();
             services.RegisterType<EquipmentManagementService>().SingleInstance();
             services.RegisterType<StationCollectionManager>().SingleInstance();
+            services.RegisterType<MesOrderService>().SingleInstance();
             services
                 .Register(c => GlobalHost.ConnectionManager.GetHubContext<ChatHub>())
                 .As<IHubContext>()

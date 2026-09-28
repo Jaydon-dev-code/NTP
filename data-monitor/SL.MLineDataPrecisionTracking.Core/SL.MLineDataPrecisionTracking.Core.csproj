@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Hubs\ChatHub.cs" />
+    <Compile Include="Mes\MesOrderService.cs" />
     <Compile Include="Middleware\CoreMiddleware.cs" />
     <Compile Include="Middleware\InfrastructureMiddleware.cs" />
     <Compile Include="Middleware\LogMiddleware.cs" />
