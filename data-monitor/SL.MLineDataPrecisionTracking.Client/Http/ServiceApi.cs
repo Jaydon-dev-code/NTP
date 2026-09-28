@@ -11,7 +11,7 @@ namespace SL.MLineDataPrecisionTracking.Client.Http
     /// <summary>
     /// 服务管理 API 类
     /// </summary>
-    public class ServiceApi : BaseHttp
+    public class ServiceApi : BaseHttpClient
     {
         protected override string _controllerName => "Service";
 

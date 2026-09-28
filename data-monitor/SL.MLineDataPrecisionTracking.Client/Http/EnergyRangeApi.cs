@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SL.MLineDataPrecisionTracking.Client.Http
 {
-    public class EnergyRangeApi : BaseHttp
+    public class EnergyRangeApi : BaseHttpClient
     {
         protected override string _controllerName => "EnergyRange";
 

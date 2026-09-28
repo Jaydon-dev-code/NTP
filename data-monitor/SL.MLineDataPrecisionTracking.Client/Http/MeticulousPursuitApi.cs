@@ -9,7 +9,7 @@ using SL.MLineDataPrecisionTracking.Models.Dtos.Response;
 
 namespace SL.MLineDataPrecisionTracking.Client.Http
 {
-    public class MeticulousPursuitApi : BaseHttp
+    public class MeticulousPursuitApi : BaseHttpClient
     {
         protected override string _controllerName => "MeticulousPursuit";
 

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace SL.MLineDataPrecisionTracking.Client.Http
 {
-    public class Factory4Workshop4_10LineSummaryApi : BaseHttp
+    public class Factory4Workshop4_10LineSummaryApi : BaseHttpClient
     {
         protected override string _controllerName => "Factory4Workshop4_10Line";
 
