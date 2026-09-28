@@ -61,7 +61,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Mes
                 return MesApiResponse.Fail($"工单号 \"{request.WorkOrderNo}\" 已存在");
 
             // ③ 组装工单主表记录
-            var order = new Tb_MesWorkOrder
+            var order = new Tb_Mes_WorkOrder
             {
                 WorkOrderNo = request.WorkOrderNo,
                 MaterialCode = request.MaterialCode,
@@ -69,16 +69,17 @@ namespace SL.MLineDataPrecisionTracking.Core.Mes
                 PlanQty = request.PlanQty,
                 PlanDate = request.PlanDate,
                 CreateTime = DateTime.Now,
+                IsDeleted = false
             };
 
             // ④ 组装 BOM 明细：每条明细以工单号作为关联键（MES 未下发 BOM 时为空列表）
-            var boms = new List<Tb_MesWorkOrderBom>();
+            var boms = new List<Tb_Mes_WorkOrderBom>();
             if (request.OrderBoms != null)
             {
                 foreach (var item in request.OrderBoms)
                 {
                     boms.Add(
-                        new Tb_MesWorkOrderBom
+                        new Tb_Mes_WorkOrderBom
                         {
                             WorkOrderNo = request.WorkOrderNo,
                             ComponentCode = item.ComponentCode,
@@ -115,7 +116,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Mes
             //    （MES 可能同时下发 planQty 与 deleted=true，此时以删除为准）
             if (request.Deleted)
             {
-                await _workOrderRepository.DeleteOrderWithBomsAsync(request.WorkOrderNo);
+                await _workOrderRepository.DeleteOrderAsync(request.WorkOrderNo);
             }
             else
             {

@@ -1,13 +1,13 @@
-using SqlSugar;
 using System;
+using SqlSugar;
 
 namespace SL.MLineDataPrecisionTracking.Models.Entities.MES
 {
     /// <summary>
     /// MES 生产工单（接口一：/order/release 接收落库）
     /// </summary>
-    [SugarTable("MesWorkOrder")]
-    public class Tb_MesWorkOrder
+    [SugarTable("Mes_WorkOrder")]
+    public class Tb_Mes_WorkOrder
     {
         [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
         public int Id { get; set; }
@@ -31,6 +31,8 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities.MES
         /// <summary>计划生产日期</summary>
         [SugarColumn(ColumnDescription = "计划生产日期", IsNullable = true)]
         public DateTime? PlanDate { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         /// <summary>创建时间</summary>
         public DateTime CreateTime { get; set; } = DateTime.Now;

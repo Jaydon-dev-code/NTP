@@ -1,40 +1,39 @@
-
-using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
-using SL.MLineDataPrecisionTracking.Models.Entities.MES;
-using SqlSugar;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
+using SL.MLineDataPrecisionTracking.Models.Entities.MES;
+using SqlSugar;
 
 namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage.MES
 {
     /// <summary>
     /// MES 工单仓储（工单主表 + BOM 明细，主从一体维护）
     /// </summary>
-    public class Tb_MesWorkOrderRepository : BaseRepository<Tb_MesWorkOrder>
+    public class Tb_MesWorkOrderRepository : BaseRepository<Tb_Mes_WorkOrder>
     {
         public Tb_MesWorkOrderRepository(ISqlSugarClient db)
             : base(db) { }
 
-        public async Task<bool> AnyAsync(Expression<Func<Tb_MesWorkOrder, bool>> expression)
+        public async Task<bool> AnyAsync(Expression<Func<Tb_Mes_WorkOrder, bool>> expression)
         {
-            return await _db.Queryable<Tb_MesWorkOrder>().AnyAsync(expression);
+            return await _db.Queryable<Tb_Mes_WorkOrder>().AnyAsync(expression);
         }
 
-        public async Task<Tb_MesWorkOrder> GetFirstAsync(
-            Expression<Func<Tb_MesWorkOrder, bool>> expression
+        public async Task<Tb_Mes_WorkOrder> GetFirstAsync(
+            Expression<Func<Tb_Mes_WorkOrder, bool>> expression
         )
         {
-            return await _db.Queryable<Tb_MesWorkOrder>().FirstAsync(expression);
+            return await _db.Queryable<Tb_Mes_WorkOrder>().FirstAsync(expression);
         }
 
         /// <summary>
         /// 插入工单及其 BOM（同一事务）
         /// </summary>
         public async Task<int> InsertOrderWithBomsAsync(
-            Tb_MesWorkOrder order,
-            List<Tb_MesWorkOrderBom> boms
+            Tb_Mes_WorkOrder order,
+            List<Tb_Mes_WorkOrderBom> boms
         )
         {
             // BaseRepository 的 _db 每次访问返回新实例，此处固定引用以保证事务作用于同一上下文
@@ -63,9 +62,16 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage.MES
         public async Task<int> UpdatePlanQtyAsync(string workOrderNo, decimal planQty)
         {
             // 只更新 PlanQty 单列，不动其他字段（SetColumns 生成 SET 局部更新）
-            return await _db
-                .Updateable<Tb_MesWorkOrder>()
+            return await _db.Updateable<Tb_Mes_WorkOrder>()
                 .SetColumns(x => x.PlanQty == planQty)
+                .Where(x => x.WorkOrderNo == workOrderNo)
+                .ExecuteCommandAsync();
+        }
+
+        public async Task<int> DeleteOrderAsync(string workOrderNo)
+        {
+            return await _db.Updateable<Tb_Mes_WorkOrder>()
+                .SetColumns(x => x.IsDeleted == true)
                 .Where(x => x.WorkOrderNo == workOrderNo)
                 .ExecuteCommandAsync();
         }
@@ -80,12 +86,10 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage.MES
             try
             {
                 db.Ado.BeginTran();
-                var count = await db
-                    .Deleteable<Tb_MesWorkOrder>()
+                var count = await db.Deleteable<Tb_Mes_WorkOrder>()
                     .Where(x => x.WorkOrderNo == workOrderNo)
                     .ExecuteCommandAsync();
-                await db
-                    .Deleteable<Tb_MesWorkOrderBom>()
+                await db.Deleteable<Tb_Mes_WorkOrderBom>()
                     .Where(x => x.WorkOrderNo == workOrderNo)
                     .ExecuteCommandAsync();
                 db.Ado.CommitTran();

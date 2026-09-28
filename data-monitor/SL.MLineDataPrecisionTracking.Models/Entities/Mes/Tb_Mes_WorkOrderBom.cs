@@ -6,8 +6,8 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities.MES
     /// <summary>
     /// MES 生产工单 BOM 组件（接口一：随工单一同下发）
     /// </summary>
-    [SugarTable("MesWorkOrderBom")]
-    public class Tb_MesWorkOrderBom
+    [SugarTable("Mes_WorkOrderBom")]
+    public class Tb_Mes_WorkOrderBom
     {
         [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
         public int Id { get; set; }
