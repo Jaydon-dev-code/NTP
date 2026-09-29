@@ -1,0 +1,158 @@
+<Window
+    x:Class="SL.MLineDataPrecisionTracking.Client.View.Dialog.MqttPushSettingsWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="http://schemas.superdev.ch/valueconverters/2016/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="{Binding Title}"
+    Width="460"
+    SizeToContent="Height"
+    WindowStartupLocation="CenterOwner"
+    d:DesignHeight="400"
+    d:DesignWidth="460"
+    mc:Ignorable="d">
+    <Window.Resources>
+        <ResourceDictionary>
+            <converters:BoolInverter x:Key="BoolInverter" />
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,10">
+            <TextBlock
+                FontSize="14"
+                FontWeight="Bold"
+                Text="{Binding Title}" />
+            <TextBlock
+                Margin="0,4,0,0"
+                Foreground="Gray"
+                Text="{Binding Description}"
+                TextWrapping="Wrap" />
+        </StackPanel>
+
+        <Grid Grid.Row="1" IsEnabled="{Binding IsLoading, Converter={StaticResource BoolInverter}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="110" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="34" />
+                <RowDefinition Height="34" />
+                <RowDefinition Height="34" />
+                <RowDefinition Height="34" />
+                <RowDefinition Height="34" />
+                <RowDefinition Height="34" />
+                <RowDefinition Height="34" />
+            </Grid.RowDefinitions>
+
+            <TextBlock
+                Grid.Row="0"
+                Grid.Column="0"
+                VerticalAlignment="Center"
+                Text="开启 MQTT 推送" />
+            <CheckBox
+                Grid.Row="0"
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                IsChecked="{Binding IsEnabled, Mode=TwoWay}" />
+
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="0"
+                VerticalAlignment="Center"
+                Text="服务器地址" />
+            <TextBox
+                Grid.Row="1"
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                hc:InfoElement.Placeholder="如 192.168.1.10"
+                Style="{StaticResource DataGridEditingTextColumnStyle.Small}"
+                Text="{Binding Host, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="0"
+                VerticalAlignment="Center"
+                Text="端口" />
+            <TextBox
+                Grid.Row="2"
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                hc:InfoElement.Placeholder="默认 1883"
+                Style="{StaticResource DataGridEditingTextColumnStyle.Small}"
+                Text="{Binding PortText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBlock
+                Grid.Row="3"
+                Grid.Column="0"
+                VerticalAlignment="Center"
+                Text="用户名" />
+            <TextBox
+                Grid.Row="3"
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                Style="{StaticResource DataGridEditingTextColumnStyle.Small}"
+                Text="{Binding Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBlock
+                Grid.Row="4"
+                Grid.Column="0"
+                VerticalAlignment="Center"
+                Text="密码" />
+            <PasswordBox
+                x:Name="PasswordInput"
+                Grid.Row="4"
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                PasswordChanged="PasswordInput_PasswordChanged" />
+
+            <TextBlock
+                Grid.Row="5"
+                Grid.Column="0"
+                VerticalAlignment="Center"
+                Text="Topic" />
+            <TextBox
+                Grid.Row="5"
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                hc:InfoElement.Placeholder="为空时按配置键推送"
+                Style="{StaticResource DataGridEditingTextColumnStyle.Small}"
+                Text="{Binding Topic, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBlock
+                Grid.Row="6"
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                Margin="0,6,0,0"
+                Foreground="Gray"
+                Text="保存后立即生效，采集服务插入数据时按此配置推送。"
+                TextWrapping="Wrap" />
+        </Grid>
+
+        <StackPanel
+            Grid.Row="2"
+            Margin="0,15,0,0"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal">
+            <Button
+                MinWidth="80"
+                Margin="0,0,10,0"
+                Command="{Binding SaveCommand}"
+                Content="保存"
+                IsDefault="True"
+                Style="{StaticResource ButtonInfo.Small}" />
+            <Button
+                MinWidth="80"
+                Click="Cancel_Click"
+                Content="取消"
+                IsCancel="True" />
+        </StackPanel>
+    </Grid>
+</Window>

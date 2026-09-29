@@ -115,6 +115,7 @@
     <Compile Include="Entities\Tb_LineB.cs" />
     <Compile Include="Entities\Tb_LineSummary.cs" />
     <Compile Include="Entities\Tb_ModelNoToName.cs" />
+    <Compile Include="Entities\Tb_MqttPushConfig.cs" />
     <Compile Include="Entities\Tb_PlcConnection.cs" />
     <Compile Include="Entities\Tb_PlcPoint.cs" />
     <Compile Include="Entities\Tb_ServiceStatus.cs" />

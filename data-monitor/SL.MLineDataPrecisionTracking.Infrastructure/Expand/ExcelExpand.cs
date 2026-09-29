@@ -1,7 +1,4 @@
-﻿using NPOI.SS.UserModel;
-using NPOI.XSSF.Streaming;
-using SL.MLineDataPrecisionTracking.Models.Domain;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -9,6 +6,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using NPOI.SS.UserModel;
+using NPOI.XSSF.Streaming;
+using SL.MLineDataPrecisionTracking.Models.Domain;
 
 namespace SL.MLineDataPrecisionTracking.Infrastructure.Expand
 {
@@ -30,6 +30,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Expand
             }
         }
     }
+
     /// <summary>
     /// 流式Excel写入器：基于 SXSSFWorkbook 边写边刷盘，
     /// 内存中只保留最近一窗口的行，避免大数据量导出时内存溢出。
@@ -40,7 +41,7 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Expand
         /// 内存中保留的行窗口大小，超出即刷入临时文件
         /// </summary>
         private const int RowAccessWindowSize = 100;
-
+        Type _timeType = typeof(DateTime);
         private readonly SXSSFWorkbook _workbook;
         private readonly ISheet _sheet;
         private readonly List<PropertyInfo> _properties;
@@ -80,11 +81,25 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Expand
                 for (int colIndex = 0; colIndex < _properties.Count; colIndex++)
                 {
                     object val = _properties[colIndex].GetValue(data);
-                    string str = val?.ToString() ?? "";
+                    string str;
+                    if (val?.ToString() == null)
+                    {
+                        str = "";
+                    }
+                    else if (val.GetType() == _timeType)
+                    {
+                        str = string.Format("{0:yyyy-MM-dd HH:mm:ss}", val);
+                    }
+                    else
+                    {
+                        str = val?.ToString();
+                    }
+
                     if (str.Length > _maxColLen[colIndex])
                     {
                         _maxColLen[colIndex] = str.Length;
                     }
+
                     row.CreateCell(colIndex).SetCellValue(str);
                 }
             }

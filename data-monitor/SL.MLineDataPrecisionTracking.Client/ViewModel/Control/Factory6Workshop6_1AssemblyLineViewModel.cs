@@ -148,8 +148,25 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
         List<Factory6Workshop6_1AssemblyLineDto> _mkNoQuValues;
 
         Factory6Workshop6_1AssemblyLineApi _api;
+        MqttPushConfigApi _mqttPushConfigApi;
 
-        public Factory6Workshop6_1AssemblyLineViewModel(Factory6Workshop6_1AssemblyLineApi api)
+        private RelayCommand _openMqttSettingsCommand;
+        public IRelayCommand OpenMqttSettingsCommand
+        {
+            get
+            {
+                if (_openMqttSettingsCommand == null)
+                {
+                    _openMqttSettingsCommand = new RelayCommand(OpenMqttSettings);
+                }
+                return _openMqttSettingsCommand;
+            }
+        }
+
+        public Factory6Workshop6_1AssemblyLineViewModel(
+            Factory6Workshop6_1AssemblyLineApi api,
+            MqttPushConfigApi mqttPushConfigApi
+        )
         {
             PaginationPages = new PaginationPage();
             var lastDay = DateTime.Now.Date;
@@ -167,11 +184,24 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 HistoryScanMarkingNos = new ObservableCollection<ScanRecord>();
             }
             _api = api;
+            _mqttPushConfigApi = mqttPushConfigApi;
             QueryValue = new ObservableCollection<Factory6Workshop6_1AssemblyLineDto>();
             PageSoure = new ObservableCollection<int>() { 100, 200, 500 };
             PaginationPages.DataCountPerPage = 100;
             _quValues = new List<Factory6Workshop6_1AssemblyLineDto>();
             _mkNoQuValues = new List<Factory6Workshop6_1AssemblyLineDto>();
+        }
+
+        private void OpenMqttSettings()
+        {
+            var window = new View.Dialog.MqttPushSettingsWindow(
+                _mqttPushConfigApi,
+                nameof(SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Workshop6_1.Factory6Workshop6_1AssemblyLineB),
+                "六分厂6-1装配B线 MQTT 推送设置",
+                "配置采集服务 Factory6Workshop6_1AssemblyLineB 插入数据时推送 MQTT 的连接信息与开关。"
+            );
+            window.Owner = Application.Current.MainWindow;
+            window.ShowDialog();
         }
 
         private void RemoveHistoryScan(ScanRecord record)

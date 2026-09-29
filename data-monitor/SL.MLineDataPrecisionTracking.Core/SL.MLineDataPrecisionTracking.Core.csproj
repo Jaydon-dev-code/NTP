@@ -55,6 +55,7 @@
     <Compile Include="Middleware\InfrastructureMiddleware.cs" />
     <Compile Include="Middleware\LogMiddleware.cs" />
     <Compile Include="Middleware\SqlSugerMiddleware.cs" />
+    <Compile Include="Mqtt\MqttPushService.cs" />
     <Compile Include="Mqtt\MqttService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\DataCollection\DataCollectionServiceAbstract.cs" />

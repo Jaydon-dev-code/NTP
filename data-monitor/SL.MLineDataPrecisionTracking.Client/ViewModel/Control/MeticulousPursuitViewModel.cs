@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HandyControl.Controls;
 using HandyControl.Data;
@@ -154,8 +154,25 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
         List<LineSummaryDto> _mkNoQuValues;
 
         MeticulousPursuitApi _meticulousPursuitApi;
+        MqttPushConfigApi _mqttPushConfigApi;
 
-        public MeticulousPursuitViewModel(MeticulousPursuitApi meticulousPursuitApi)
+        private RelayCommand _openMqttSettingsCommand;
+        public IRelayCommand OpenMqttSettingsCommand
+        {
+            get
+            {
+                if (_openMqttSettingsCommand == null)
+                {
+                    _openMqttSettingsCommand = new RelayCommand(OpenMqttSettings);
+                }
+                return _openMqttSettingsCommand;
+            }
+        }
+
+        public MeticulousPursuitViewModel(
+            MeticulousPursuitApi meticulousPursuitApi,
+            MqttPushConfigApi mqttPushConfigApi
+        )
         {
             PaginationPages = new PaginationPage();
             var lastDay = DateTime.Now.Date;
@@ -173,11 +190,24 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
                 HistoryScanMarkingNos = new ObservableCollection<ScanRecord>();
             }
             _meticulousPursuitApi = meticulousPursuitApi;
+            _mqttPushConfigApi = mqttPushConfigApi;
             QueryValue = new ObservableCollection<LineSummaryDto>();
             PageSoure = new ObservableCollection<int>() { 100, 200, 500 };
             PaginationPages.DataCountPerPage = 100;
             _quValues = new List<LineSummaryDto>();
             _mkNoQuValues = new List<LineSummaryDto>();
+        }
+
+        private void OpenMqttSettings()
+        {
+            var window = new View.Dialog.MqttPushSettingsWindow(
+                _mqttPushConfigApi,
+                nameof(SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Workshop6_3.Factory6Workshop6_3AssemblyLineB),
+                "六分厂6-3装配B线 MQTT 推送设置",
+                "配置采集服务 Factory6Workshop6_3AssemblyLineB 插入数据时推送 MQTT 的连接信息与开关。"
+            );
+            window.Owner = Application.Current.MainWindow;
+            window.ShowDialog();
         }
 
         private void RemoveHistoryScan(ScanRecord record)

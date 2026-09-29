@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SL.MLineDataPrecisionTracking.Core.Mqtt;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Domain;
@@ -23,6 +24,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
         Tb_LineBRepository _LineBRepository;
         Tb_LineARepository _lineARepository;
         Tb_LineSummaryRepository _lineSummaryRepository;
+        MqttPushService _mqttPushService;
 
         public Factory6Workshop6_3AssemblyLineB(
             Tb_EquipmentRepository equipmentRepositor,
@@ -30,13 +32,15 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
             Tb_LineBRepository tb_LineBRepository,
             Tb_LineARepository tb_LineARepository,
             Tb_LineSummaryRepository tb_LineSummaryRepository,
-            Tb_ModelNoToNameRepository tb_ModelNoToNameRepository
+            Tb_ModelNoToNameRepository tb_ModelNoToNameRepository,
+            MqttPushService mqttPushService
         )
             : base(equipmentRepositor, mcp, tb_ModelNoToNameRepository)
         {
             _LineBRepository = tb_LineBRepository;
             _lineARepository = tb_LineARepository;
             _lineSummaryRepository = tb_LineSummaryRepository;
+            _mqttPushService = mqttPushService;
         }
 
         protected override void UpLastNo(object data)
@@ -118,6 +122,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                 aLineInfo.IsUsed = true;
                 await _lineARepository.UpdateableAsync(aLineInfo);
             }
+
+            // 按配置推送本条数据到 MQTT（后台执行，不阻塞采集）
+            _mqttPushService.PublishSafe(nameof(Factory6Workshop6_3AssemblyLineB), lineData);
 
             return lineData;
         }

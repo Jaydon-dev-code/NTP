@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Mapster;
+using SL.MLineDataPrecisionTracking.Core.Mqtt;
 using SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Workshop6_3;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
@@ -22,6 +23,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
         Tb_Factory6Workshop6_1AssemblyLineARepository _factory6Workshop6_1AssemblyLineARepository;
         Tb_Factory6Workshop6_1AssemblyLineABSummaryRepository _factory6Workshop6_1AssemblyLineABSummaryRepository;
         Tb_Factory6Workshop6_1AssemblyLineBRepository _factory6Workshop6_1AssemblyLineBRepository;
+        MqttPushService _mqttPushService;
 
         public Factory6Workshop6_1AssemblyLineB(
             Tb_EquipmentRepository equipmentRepositor,
@@ -29,7 +31,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
             Tb_ModelNoToNameRepository tb_ModelNoToNameRepository,
             Tb_Factory6Workshop6_1AssemblyLineARepository factory6Workshop6_1AssemblyLineARepository,
             Tb_Factory6Workshop6_1AssemblyLineABSummaryRepository factory6Workshop6_1AssemblyLineABSummaryRepository,
-            Tb_Factory6Workshop6_1AssemblyLineBRepository tb_Factory6Workshop6_1AssemblyLineBRepository
+            Tb_Factory6Workshop6_1AssemblyLineBRepository tb_Factory6Workshop6_1AssemblyLineBRepository,
+            MqttPushService mqttPushService
         )
             : base(equipmentRepositor, mcp, tb_ModelNoToNameRepository)
         {
@@ -39,6 +42,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                 factory6Workshop6_1AssemblyLineABSummaryRepository;
             _factory6Workshop6_1AssemblyLineBRepository =
                 tb_Factory6Workshop6_1AssemblyLineBRepository;
+            _mqttPushService = mqttPushService;
             _sleepTimeSpan = TimeSpan.FromMilliseconds(200);
         }
 
@@ -134,6 +138,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                 aLineInfo.IsUsed = true;
                 await _factory6Workshop6_1AssemblyLineARepository.UpdateableAsync(aLineInfo);
             }
+
+            // 按配置推送本条数据到 MQTT（后台执行，不阻塞采集）
+            _mqttPushService.PublishSafe(nameof(Factory6Workshop6_1AssemblyLineB), lineData);
 
             return lineData;
         }
