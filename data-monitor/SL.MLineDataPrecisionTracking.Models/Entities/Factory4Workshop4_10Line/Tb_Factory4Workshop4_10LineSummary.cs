@@ -100,7 +100,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities.Factory4Workshop4_10Line
         )]
         public ResultEnum? VibCrackResult { get; set; }
 
-        [SugarColumn(ColumnDescription = "震动时间", IsNullable = true)]
+        [SugarColumn(ColumnDescription = "振动时间", IsNullable = true)]
         public DateTime? VibCrackTime { get; set; }
 
         [SugarColumn(

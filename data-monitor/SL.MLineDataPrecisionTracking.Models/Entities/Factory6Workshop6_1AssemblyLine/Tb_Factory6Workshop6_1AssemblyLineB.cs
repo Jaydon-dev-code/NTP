@@ -184,7 +184,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities.Factory6Workshop6_1Assem
         /// <summary>
         /// 震动检测结果
         /// </summary>
-        [SugarColumn(ColumnDescription = "震动检测结果", DefaultValue = " ")]
+        [SugarColumn(ColumnDescription = "振动检测结果", DefaultValue = " ")]
         public string VibrationDetectionResults { get; set; }
 
         /// <summary>

@@ -463,7 +463,7 @@
                             <DataGridTextColumn
                                 MinWidth="110"
                                 Binding="{Binding VibrationDetectionResults}"
-                                Header="震动检测结果"
+                                Header="振动检测结果"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
                                 MinWidth="110"

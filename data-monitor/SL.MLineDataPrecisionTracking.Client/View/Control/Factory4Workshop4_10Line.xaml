@@ -191,7 +191,7 @@
                                         Width="50"
                                         Style="{DynamicResource TextBlockTitle}"
                                         Text="工位:" />
-                                    <TextBlock Style="{DynamicResource TextBlockTitle}" Text="震动" />
+                                    <TextBlock Style="{DynamicResource TextBlockTitle}" Text="振动" />
                                 </WrapPanel>
                             </GroupBox.Header>
                             <Grid>
@@ -511,7 +511,7 @@
                                         <DataGridTextColumn
                                             MinWidth="100"
                                             Binding="{Binding VibCrackResult}"
-                                            Header="震动结果"
+                                            Header="振动结果"
                                             IsReadOnly="True" />
                                         <DataGridTextColumn
                                             MinWidth="100"

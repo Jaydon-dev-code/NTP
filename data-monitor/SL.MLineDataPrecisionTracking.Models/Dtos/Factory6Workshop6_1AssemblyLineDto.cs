@@ -202,7 +202,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         /// <summary>
         /// 震动检测结果
         /// </summary>
-        [Description("震动检测结果")]
+        [Description("振动检测结果")]
         public string VibrationDetectionResults { get; set; }
 
         /// <summary>

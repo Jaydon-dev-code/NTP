@@ -75,7 +75,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos.Factory4Workshop4_10Line
         [Description("检测结果")]
         public ResultEnum? VibCrackResult { get; set; }
 
-        [Description("震动时间")]
+        [Description("振动时间")]
         public DateTime? VibCrackTime { get; set; }
 
         [Description("ABS压紧结果")]
