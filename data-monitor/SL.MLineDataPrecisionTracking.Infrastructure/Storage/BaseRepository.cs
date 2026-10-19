@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,12 +17,11 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
     public class BaseRepository<T>
         where T : class, new()
     {
-        protected  ISqlSugarClient _db=>dbs.CopyNew();
-        ISqlSugarClient dbs;
+        protected readonly ISqlSugarClient _db;
 
         public BaseRepository(ISqlSugarClient db)
         {
-            dbs = db;
+            _db = db;
         }
     }
 }

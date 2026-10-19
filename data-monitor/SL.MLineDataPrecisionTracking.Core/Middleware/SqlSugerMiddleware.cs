@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -92,7 +92,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Middleware
                 }
 
                 return db;
-            });
+            }).SingleInstance();
         }
     }
 }

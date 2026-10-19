@@ -72,6 +72,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                     .FirstOrDefault(x => x.ModelNo == tb_LineSummary.ModelNo)
                     ?.ModelName;
                 tb_LineSummary.ModelName = modelName ?? "";
+                tb_LineSummary.LineATrayNo = lineData.TrayNoA;
                 await _lineSummaryRepository.InsertableAsync(tb_LineSummary);
             }
 
