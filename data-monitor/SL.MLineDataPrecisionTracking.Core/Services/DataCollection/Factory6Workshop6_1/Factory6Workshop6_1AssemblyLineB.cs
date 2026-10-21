@@ -138,25 +138,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
             return lineData;
         }
 
-        private string GetVibrationDetectionResults(string vibrationDetectionResults)
-        {
-            switch (vibrationDetectionResults)
-            {
-                case null:
-                    return string.Empty;
-                case "0":
-                    return "未采集";
-
-                case "1":
-                    return "OK";
-
-                case "2":
-                    return "NG";
-                default:
-                    return vibrationDetectionResults;
-            }
-        }
-
+ 
         protected override void UpLastNo(object data)
         {
             _lastTrayNoPoint = ((Tb_Factory6Workshop6_1AssemblyLineB)data).TrayNoB;

@@ -140,6 +140,25 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
             return DataCollectionExpand.SugarColumnReflectAssign(readValue, _dataModelType);
         }
 
+        protected string GetVibrationDetectionResults(string vibrationDetectionResults)
+        {
+            switch (vibrationDetectionResults)
+            {
+                case null:
+                    return string.Empty;
+                case "0":
+                    return "未采集";
+
+                case "1":
+                    return "OK";
+
+                case "2":
+                    return "NG";
+                default:
+                    return vibrationDetectionResults;
+            }
+        }
+
         protected void ABToSummary(
             object sourceA,
             object sourceB,

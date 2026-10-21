@@ -47,7 +47,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
         protected override async Task<object> InsterValue(Result<object> interact)
         {
             var lineData = (Tb_LineB)interact.Data;
-
+            lineData.VibrationDetectionResults = GetVibrationDetectionResults(
+                lineData?.VibrationDetectionResults?.Trim()
+            );
             Tb_LineSummary tb_LineSummary = new Tb_LineSummary() { Result = ResultEnum.OK };
             Tb_LineA aLineInfo = null;
 
@@ -59,7 +61,6 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                     && x.IsUsed == false,
                 o => o.RecordTime
             );
-          
 
             if (lineData.ShieldStationB != "0")
             {
@@ -99,7 +100,11 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
 
             var bLineFid = await _LineBRepository.InsertableReturnIdentityAsync(lineData);
             ABToSummary(aLineInfo, lineData, tb_LineSummary, new List<string>() { "A线托盘编号" });
-            if (aLineInfo == null && lineData.LineATrayNo != "0" && !string.IsNullOrEmpty(lineData.LineATrayNo))
+            if (
+                aLineInfo == null
+                && lineData.LineATrayNo != "0"
+                && !string.IsNullOrEmpty(lineData.LineATrayNo)
+            )
             {
                 tb_LineSummary.LineATrayNo = tb_LineSummary.LineATrayNo;
             }

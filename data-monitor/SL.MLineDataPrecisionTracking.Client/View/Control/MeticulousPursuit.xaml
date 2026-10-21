@@ -631,33 +631,8 @@
                                 IsReadOnly="True" />
                             <DataGridTextColumn
                                 MinWidth="110"
-                                Binding="{Binding VibrationLowerLOAD}"
-                                Header="振动下LOAD"
-                                IsReadOnly="True" />
-                            <DataGridTextColumn
-                                MinWidth="100"
-                                Binding="{Binding VibrationLowerLH}"
-                                Header="振动下LH"
-                                IsReadOnly="True" />
-                            <DataGridTextColumn
-                                MinWidth="100"
-                                Binding="{Binding VibrationLowerRH}"
-                                Header="振动下RH"
-                                IsReadOnly="True" />
-                            <DataGridTextColumn
-                                MinWidth="110"
-                                Binding="{Binding VibrationUpperLOAD}"
-                                Header="振动上LOAD"
-                                IsReadOnly="True" />
-                            <DataGridTextColumn
-                                MinWidth="100"
-                                Binding="{Binding VibrationUpperLH}"
-                                Header="振动上LH"
-                                IsReadOnly="True" />
-                            <DataGridTextColumn
-                                MinWidth="100"
-                                Binding="{Binding VibrationUpperRH}"
-                                Header="振动上RH"
+                                Binding="{Binding VibrationDetectionResults}"
+                                Header="振动检测结果"
                                 IsReadOnly="True" />
                         </DataGrid.Columns>
                     </DataGrid>

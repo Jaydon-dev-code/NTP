@@ -20,11 +20,11 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// </summary>
         [SugarColumn(DefaultValue = "0")]
         public int ALineFID { get; set; }
+
         /// <summary>
         /// A线采集时间
         /// </summary>
-
-        [SugarColumn( IsNullable = true)]
+        [SugarColumn(IsNullable = true)]
         public DateTime? ALineRecordTime { get; set; }
 
         /// <summary>
@@ -44,8 +44,6 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// </summary>
         [SugarColumn(ColumnDescription = "屏蔽工位B", ColumnDataType = "varchar(500)")]
         public string ShieldStationB { get; set; }
-
-       
 
         /// <summary>
         /// NG代码
@@ -222,39 +220,9 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         public string MagneticRingParallelDiff { get; set; }
 
         /// <summary>
-        /// 振动下LOAD
+        /// 震动检测结果
         /// </summary>
-        [SugarColumn(ColumnDescription = "振动下LOAD")]
-        public string VibrationLowerLOAD { get; set; }
-
-        /// <summary>
-        /// 振动下LH
-        /// </summary>
-        [SugarColumn(ColumnDescription = "振动下LH")]
-        public string VibrationLowerLH { get; set; }
-
-        /// <summary>
-        /// 振动下RH
-        /// </summary>
-        [SugarColumn(ColumnDescription = "振动下RH")]
-        public string VibrationLowerRH { get; set; }
-
-        /// <summary>
-        /// 振动上LOAD
-        /// </summary>
-        [SugarColumn(ColumnDescription = "振动上LOAD")]
-        public string VibrationUpperLOAD { get; set; }
-
-        /// <summary>
-        /// 振动上LH
-        /// </summary>
-        [SugarColumn(ColumnDescription = "振动上LH")]
-        public string VibrationUpperLH { get; set; }
-
-        /// <summary>
-        /// 振动上RH
-        /// </summary>
-        [SugarColumn(ColumnDescription = "振动上RH")]
-        public string VibrationUpperRH { get; set; }
+        [SugarColumn(ColumnDescription = "振动检测结果", DefaultValue = " ")]
+        public string VibrationDetectionResults { get; set; }
     }
 }

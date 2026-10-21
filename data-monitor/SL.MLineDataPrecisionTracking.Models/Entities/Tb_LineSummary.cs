@@ -355,40 +355,10 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         public string MagneticRingParallelDiff { get; set; } = "";
 
         /// <summary>
-        /// 振动下LOAD
+        /// 震动检测结果
         /// </summary>
-        [SugarColumn(ColumnDescription = "振动下LOAD")]
-        public string VibrationLowerLOAD { get; set; } = "";
-
-        /// <summary>
-        /// 振动下LH
-        /// </summary>
-        [SugarColumn(ColumnDescription = "振动下LH")]
-        public string VibrationLowerLH { get; set; } = "";
-
-        /// <summary>
-        /// 振动下RH
-        /// </summary>
-        [SugarColumn(ColumnDescription = "振动下RH")]
-        public string VibrationLowerRH { get; set; } = "";
-
-        /// <summary>
-        /// 振动上LOAD
-        /// </summary>
-        [SugarColumn(ColumnDescription = "振动上LOAD")]
-        public string VibrationUpperLOAD { get; set; } = "";
-
-        /// <summary>
-        /// 振动上LH
-        /// </summary>
-        [SugarColumn(ColumnDescription = "振动上LH")]
-        public string VibrationUpperLH { get; set; } = "";
-
-        /// <summary>
-        /// 振动上RH
-        /// </summary>
-        [SugarColumn(ColumnDescription = "振动上RH")]
-        public string VibrationUpperRH { get; set; } = "";
+        [SugarColumn(ColumnDescription = "振动检测结果", DefaultValue = " ")]
+        public string VibrationDetectionResults { get; set; }
 
         /// <summary>
         /// 螺栓压装1
