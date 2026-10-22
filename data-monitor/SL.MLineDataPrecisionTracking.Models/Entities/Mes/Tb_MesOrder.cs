@@ -1,3 +1,4 @@
+using SL.MLineDataPrecisionTracking.Models.Enum;
 using SqlSugar;
 using System;
 
@@ -49,7 +50,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities.Mes
         /// 订单状态：0待执行 1执行中（MesOrderStatusEnum）
         /// </summary>
         [SugarColumn(ColumnDescription = "订单状态")]
-        public int Status { get; set; }
+        public MesOrderStatusEnum Status { get; set; }
 
         /// <summary>
         /// 创建时间

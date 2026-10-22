@@ -1,0 +1,126 @@
+﻿<UserControl
+    x:Class="SL.MLineDataPrecisionTracking.Client.View.Mes.MesOrderList"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Grid Margin="0,5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!--  标题 + 刷新  -->
+        <Grid Grid.Row="0" Margin="0,0,0,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock
+                Grid.Column="0"
+                VerticalAlignment="Center"
+                FontSize="16"
+                FontWeight="Bold"
+                Text="生产工单" />
+            <Button
+                Grid.Column="2"
+                Padding="12,2"
+                Command="{Binding RefreshCommand}"
+                Content="刷新" />
+        </Grid>
+
+        <!--  工单列表  -->
+        <DataGrid
+            Grid.Row="1"
+            hc:DataGridAttach.ShowRowNumber="True"
+            AutoGenerateColumns="False"
+            CanUserReorderColumns="False"
+            CanUserResizeColumns="False"
+            CanUserSortColumns="False"
+            ItemsSource="{Binding Orders}"
+            ScrollViewer.HorizontalScrollBarVisibility="Visible"
+            ScrollViewer.VerticalScrollBarVisibility="Visible">
+            <DataGrid.Columns>
+                <DataGridTextColumn
+                    MinWidth="140"
+                    Binding="{Binding WorkOrderNo}"
+                    Header="工单号"
+                    IsReadOnly="True" />
+                <DataGridTextColumn
+                    MinWidth="110"
+                    Binding="{Binding MaterialCode}"
+                    Header="成品料号"
+                    IsReadOnly="True" />
+                <DataGridTextColumn
+                    MinWidth="200"
+                    Binding="{Binding MaterialName}"
+                    Header="成品物料描述"
+                    IsReadOnly="True" />
+                <DataGridTextColumn
+                    MinWidth="90"
+                    Binding="{Binding PlanQty}"
+                    Header="计划数量"
+                    IsReadOnly="True" />
+                <DataGridTextColumn
+                    MinWidth="120"
+                    Binding="{Binding PlanDate, StringFormat=yyyy-MM-dd}"
+                    Header="计划生产日期"
+                    IsReadOnly="True" />
+                <DataGridTemplateColumn MinWidth="90" Header="订单状态">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="待执行" />
+                                        <Setter Property="Foreground" Value="#E6A23C" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Status}" Value="1">
+                                                <Setter Property="Text" Value="执行中" />
+                                                <Setter Property="Foreground" Value="#67C23A" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn
+                    MinWidth="150"
+                    Binding="{Binding CreateTime, StringFormat=yyyy-MM-dd HH:mm:ss}"
+                    Header="创建时间"
+                    IsReadOnly="True" />
+                <DataGridTemplateColumn MinWidth="110" Header="操作">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button
+                                Padding="10,2"
+                                Command="{Binding DataContext.ToggleStatusCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding}">
+                                <Button.Style>
+                                    <Style BasedOn="{StaticResource ButtonPrimary}" TargetType="Button">
+                                        <Setter Property="Content" Value="开始执行" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Status}" Value="1">
+                                                <Setter Property="Content" Value="改为待执行" />
+                                                <Setter Property="Background" Value="Gold" />
+                                                <Setter Property="Foreground" Value="Black" />
+                                                <Setter Property="BorderThickness" Value="0" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>
