@@ -11,7 +11,7 @@ using SL.MLineDataPrecisionTracking.Models.Entities;
 
 namespace SL.MLineDataPrecisionTracking.Client.Http
 {
-    public class Rcl_MeticulousPursuitApi : BaseHttp
+    public class Rcl_MeticulousPursuitApi : BaseHttpClient
     {
         protected override string _controllerName => "Rcl_MeticulousPursuit";
 

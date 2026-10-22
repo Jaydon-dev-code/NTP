@@ -1,7 +1,10 @@
 using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Dtos.Mes;
 using SL.MLineDataPrecisionTracking.Models.Entities.Mes;
+using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace SL.MLineDataPrecisionTracking.Client.Http
@@ -9,9 +12,11 @@ namespace SL.MLineDataPrecisionTracking.Client.Http
     /// <summary>
     /// MES 工单 API（对接本机 Service 的 api/order/*）
     /// </summary>
-    public class MesOrderApi : BaseHttp
+    public class MesOrderApi : BaseHttpClient
     {
         protected override string _controllerName => "order";
+        protected override Uri InitHttpUri() =>
+         new Uri($"{ConfigurationManager.AppSettings["ServiceUri"]}/{_controllerName}/");
 
         /// <summary>
         /// 接口一：新增工单

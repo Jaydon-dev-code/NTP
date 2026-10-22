@@ -111,7 +111,7 @@
     <Compile Include="Common\IntEqualsConverter.cs" />
     <Compile Include="Common\ViewLinkServerInfoAttribute.cs" />
     <Compile Include="Common\ViewServiceMapper.cs" />
-    <Compile Include="Http\BaseHttp.cs" />
+    <Compile Include="Http\BaseHttpClient.cs" />
     <Compile Include="Http\DeviceCollectionConfigApi.cs" />
     <Compile Include="Http\EnergyRangeApi.cs" />
     <Compile Include="Http\Factory4Workshop4_10LineSummaryApi.cs" />

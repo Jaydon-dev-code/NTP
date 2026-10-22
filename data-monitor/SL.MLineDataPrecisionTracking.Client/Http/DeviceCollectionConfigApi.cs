@@ -4,7 +4,7 @@ using SL.MLineDataPrecisionTracking.Models.Domain;
 
 namespace SL.MLineDataPrecisionTracking.Client.Http
 {
-    public class DeviceCollectionConfigApi : BaseHttp
+    public class DeviceCollectionConfigApi : BaseHttpClient
     {
         protected override string _controllerName => "DeviceCollectionConfig";
 

@@ -11,19 +11,26 @@ using Newtonsoft.Json;
 using Serilog;
 using SL.MLineDataPrecisionTracking.Models.Domain;
 
-namespace SL.MLineDataPrecisionTracking.Client.Http
+namespace SL.MLineDataPrecisionTracking.Infrastructure.Http
 {
     public abstract class BaseHttp
     {
-        protected readonly HttpClient _client;
+        protected HttpClient _client;
 
         protected abstract string _controllerName { get; }
+
         public BaseHttp()
+        {
+            Intit();
+        }
+
+        protected abstract Uri InitHttpUri();
+        protected virtual void Intit()
         {
             _client = new HttpClient
             {
                 // 这里配置你的后端地址
-                BaseAddress = new Uri($"{ConfigurationManager.AppSettings["ServiceUri"]}/api/{_controllerName}/"),
+                BaseAddress = InitHttpUri(),
             };
 
             // 默认 JSON 请求
@@ -137,7 +144,8 @@ namespace SL.MLineDataPrecisionTracking.Client.Http
             catch (Exception ex)
             {
                 Serilog.Log.Warning($"POST 异常：{ex.Message}");
-                return ApiResult<T>.Fail(ex.Message); ;
+                return ApiResult<T>.Fail(ex.Message);
+                ;
             }
         }
 
@@ -157,7 +165,8 @@ namespace SL.MLineDataPrecisionTracking.Client.Http
             catch (Exception ex)
             {
                 Serilog.Log.Warning($"POST 异常：{ex.Message}");
-                return ApiResult.Fail(ex.Message); ;
+                return ApiResult.Fail(ex.Message);
+                ;
             }
         }
         #endregion

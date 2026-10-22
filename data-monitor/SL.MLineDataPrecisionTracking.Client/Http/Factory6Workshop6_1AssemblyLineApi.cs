@@ -5,7 +5,7 @@ using SL.MLineDataPrecisionTracking.Models.Dtos.Response;
 
 namespace SL.MLineDataPrecisionTracking.Client.Http
 {
-    public class Factory6Workshop6_1AssemblyLineApi : BaseHttp
+    public class Factory6Workshop6_1AssemblyLineApi : BaseHttpClient
     {
         protected override string _controllerName => "Factory6Workshop6_1AssemblyLine";
 
