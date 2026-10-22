@@ -17,7 +17,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
     /// </summary>
     public class Factory6Workshop6_3AssemblyLineABBinding : DataCollectionServiceAbstract
     {
-        private const string _lineName = "B线";
+        private const string _lineName = "六分厂6-3装配B线";
         private const string _aBindPointName = "A托盘绑定";
         private const string _bBindPointName = "B托盘绑定";
 

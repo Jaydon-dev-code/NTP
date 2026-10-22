@@ -13,7 +13,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
 {
     public class Factory6Workshop6_3AssemblyLineB : Factory6Workshop6_3AssemblyLineAbstract
     {
-        protected override string _lineName => "B线";
+        protected override string _lineName => "六分厂6-3装配B线";
         protected override Type _dataModelType => typeof(Tb_LineB);
         protected override string _trayPointName => "托盘号B";
         protected override string _serviceName => "六分厂6-3装配B线";

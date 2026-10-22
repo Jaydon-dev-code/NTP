@@ -203,16 +203,13 @@ namespace UnitTestProject.DataCollection
 
             var mcp = Container.Resolve<McpCommunication>();
 
-            var bLinePoints = await InitPlcAddre("B线");
+            var bLinePoints = await InitPlcAddre("六分厂6-3装配B线");
             var aBindPoint = bLinePoints.FirstOrDefault(x => x.PointName == "A托盘绑定");
             var bBindPoint = bLinePoints.FirstOrDefault(x => x.PointName == "B托盘绑定");
             Assert.IsNotNull(aBindPoint, "未找到点位：A托盘绑定");
             Assert.IsNotNull(bBindPoint, "未找到点位：B托盘绑定");
 
             bindService.Start();
-
-            Task aTask = RunAsync("A线", aService, aTrayNos, null);
-            await Task.Delay(5000);
             var binTask = (async () =>
             {
                 for (int i = 0; i < 9; i++)
@@ -224,10 +221,13 @@ namespace UnitTestProject.DataCollection
                     await Task.Delay(1000);
                 }
             });
-            await Task.WhenAll(aTask);
+          //  Task aTask = RunAsync("六分厂6-3装配A线", aService, aTrayNos, null);
+        //    await Task.Delay(5000);
+        
+         //   await Task.WhenAll(aTask);
             await binTask();
             Task bTask = RunAsync(
-                "B线",
+                "六分厂6-3装配B线",
                 bService,
                 bTrayNos,
                 async (lineInfo, index) =>
@@ -242,7 +242,7 @@ namespace UnitTestProject.DataCollection
                 }
             );
 
-            await Task.WhenAll(aTask, bTask);
+         //   await Task.WhenAll(aTask, bTask);
             await Task.Delay(2000 * 10);
         }
 

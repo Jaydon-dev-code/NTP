@@ -379,40 +379,10 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos
         public string MagneticRingParallelDiff { get; set; }
 
         /// <summary>
-        /// 振动下LOAD
+        /// 震动检测结果
         /// </summary>
-        [Description("振动下LOAD")]
-        public string VibrationLowerLOAD { get; set; }
-
-        /// <summary>
-        /// 振动下LH
-        /// </summary>
-        [Description("振动下LH")]
-        public string VibrationLowerLH { get; set; }
-
-        /// <summary>
-        /// 振动下RH
-        /// </summary>
-        [Description("振动下RH")]
-        public string VibrationLowerRH { get; set; }
-
-        /// <summary>
-        /// 振动上LOAD
-        /// </summary>
-        [Description("振动上LOAD")]
-        public string VibrationUpperLOAD { get; set; }
-
-        /// <summary>
-        /// 振动上LH
-        /// </summary>
-        [Description("振动上LH")]
-        public string VibrationUpperLH { get; set; }
-
-        /// <summary>
-        /// 振动上RH
-        /// </summary>
-        [Description("振动上RH")]
-        public string VibrationUpperRH { get; set; }
+        [Description("振动检测结果")]
+        public string VibrationDetectionResults { get; set; }
 
         /// <summary>
         /// 螺栓压装1
