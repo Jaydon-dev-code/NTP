@@ -145,10 +145,10 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Http
             {
                 Serilog.Log.Warning($"POST 异常：{ex.Message}");
                 return ApiResult<T>.Fail(ex.Message);
-                ;
+                
             }
         }
-
+         
         protected async Task<ApiResult> PostAsync(string url, object data)
         {
             try
@@ -169,6 +169,34 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Http
                 ;
             }
         }
+        /// <summary>
+        /// 三方对外的post 请求
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="url"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        protected async Task<ApiResult<T>> PostOtherAsync<T>(string url, object data)
+        {
+            try
+            {
+                var json = JsonConvert.SerializeObject(data);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await _client.PostAsync(url, content);
+                response.EnsureSuccessStatusCode();
+
+                var resultJson = await response.Content.ReadAsStringAsync();
+                return ApiResult<T>.Success(JsonConvert.DeserializeObject<T>(resultJson));
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Warning($"POST 异常：{ex.Message}");
+                return ApiResult<T>.Fail(ex.Message);
+
+            }
+        }
+
         #endregion
     }
 }
