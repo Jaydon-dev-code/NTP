@@ -80,6 +80,12 @@
     <Compile Include="Dtos\Factory6Workshop6_1AssemblyLineDto.cs" />
     <Compile Include="Dtos\HeatTreatmentDataDto.cs" />
     <Compile Include="Dtos\LineSummaryDto.cs" />
+    <Compile Include="Dtos\Mes\MesDataAcquisitionUploadItemDTO.cs" />
+    <Compile Include="Dtos\Mes\MesMeasurePushDto.cs" />
+    <Compile Include="Dtos\Mes\MesModelAlertDtos.cs" />
+    <Compile Include="Dtos\Mes\MesModelMatchedPushDto.cs" />
+    <Compile Include="Dtos\Mes\MesModelMismatchPushDto.cs" />
+    <Compile Include="Dtos\Mes\MesOrderDtos.cs" />
     <Compile Include="Dtos\PlcPointImportDto.cs" />
     <Compile Include="Dtos\Request\Factory4Workshop4_10LineSummaryQueryRequestDto.cs" />
     <Compile Include="Dtos\Request\EnergyRangePointQueryRequestDto.cs" />
@@ -102,6 +108,10 @@
     <Compile Include="Entities\Factory6Workshop6_1AssemblyLine\Tb_Factory6Workshop6_1AssemblyLineABSummary.cs" />
     <Compile Include="Entities\Factory6Workshop6_3AssemblyLine\Tb_Factory6Workshop6_3Line_EnergyRange.cs" />
     <Compile Include="Entities\Factory6Workshop6_3AssemblyLine\Tb_Factory6Workshop6_3Line_EnergyRangePoint.cs" />
+    <Compile Include="Entities\Mes\Tb_MesModelAbnormalRecord.cs" />
+    <Compile Include="Entities\Mes\Tb_MesOrder.cs" />
+    <Compile Include="Entities\Mes\Tb_MesOrderBom.cs" />
+    <Compile Include="Entities\Mes\Tb_MesPushCursor.cs" />
     <Compile Include="Entities\Tb_EnergyRange.cs" />
     <Compile Include="Entities\Tb_EnergyRangeDetail.cs" />
     <Compile Include="Entities\Tb_Equipment.cs" />
@@ -110,10 +120,10 @@
     <Compile Include="Entities\Tb_DeviceCollection.cs" />
     <Compile Include="Entities\Factory6Workshop6_1AssemblyLine\Tb_Factory6Workshop6_1AssemblyLineA.cs" />
     <Compile Include="Entities\Factory6Workshop6_1AssemblyLine\Tb_Factory6Workshop6_1AssemblyLineB.cs" />
-    <Compile Include="Entities\Tb_HeatTreatmentData.cs" />
-    <Compile Include="Entities\Tb_LineA.cs" />
-    <Compile Include="Entities\Tb_LineB.cs" />
-    <Compile Include="Entities\Tb_LineSummary.cs" />
+    <Compile Include="Entities\Factory6Workshop6_3AssemblyLine\Tb_HeatTreatmentData.cs" />
+    <Compile Include="Entities\Factory6Workshop6_3AssemblyLine\Tb_LineA.cs" />
+    <Compile Include="Entities\Factory6Workshop6_3AssemblyLine\Tb_LineB.cs" />
+    <Compile Include="Entities\Factory6Workshop6_3AssemblyLine\Tb_LineSummary.cs" />
     <Compile Include="Entities\Tb_ModelNoToName.cs" />
     <Compile Include="Entities\Tb_PlcConnection.cs" />
     <Compile Include="Entities\Tb_PlcPoint.cs" />
@@ -128,6 +138,8 @@
     <Compile Include="Enum\Assembly_B_LinePassCodeEnum.cs" />
     <Compile Include="Enum\Br8Sec63HeatEnergyWorkEnum.cs" />
     <Compile Include="Enum\Mc1E\Mc1EFunctionCodeEnum.cs" />
+    <Compile Include="Enum\MesModelAbnormalStatusEnum.cs" />
+    <Compile Include="Enum\MesOrderStatusEnum.cs" />
     <Compile Include="Enum\ResultEnum.cs" />
     <Compile Include="Enum\ServiceStatusEnum.cs" />
     <Compile Include="ModelsAssemblyMarker.cs" />

@@ -7,7 +7,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities.Mes
     /// <summary>
     /// MES 生产工单（接口一 /order/release）
     /// </summary>
-    [SugarTable("MesOrder")]
+    [SugarTable("Mes_Order")]
     public class Tb_MesOrder
     {
         /// <summary>

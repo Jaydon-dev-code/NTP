@@ -6,7 +6,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities.Mes
     /// <summary>
     /// MES 生产工单 BOM 组件（接口一 orderBoms）
     /// </summary>
-    [SugarTable("MesOrderBom")]
+    [SugarTable("Mes_OrderBom")]
     public class Tb_MesOrderBom
     {
         /// <summary>
