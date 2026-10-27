@@ -14,13 +14,13 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TextBlock
+        <!--<TextBlock
             Grid.Row="0"
             Margin="0,0,0,5"
             VerticalAlignment="Center"
             FontSize="18"
             FontWeight="Bold"
-            Text="6分厂2号线" />
+            Text="6分厂2号线" />-->
 
         <!--  MES 控件区域  -->
         <Border

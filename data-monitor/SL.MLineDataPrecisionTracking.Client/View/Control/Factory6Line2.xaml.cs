@@ -8,8 +8,8 @@ namespace SL.MLineDataPrecisionTracking.Client.View.Control
     /// 6分厂2号线（承载 MES 工单控件 + 型号不一致告警订阅）
     /// </summary>
     [ViewLinkServerInfoAttribute(
-        serverNames: new string[] { },
-        header: "6分厂2号线",
+        serverNames: new string[] { "Factory6Line2MeasurePushService", "Factory6Line2ModelCheckService" },
+        header: "订单",
         icon: "Resources\\Image\\ProductionRecord.png",
         MatchMode = ViewMatchMode.Any
     )]
