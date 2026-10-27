@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NPOI.HSSF.Record.Chart;
 using SL.MLineDataPrecisionTracking.Infrastructure.Http;
 using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Dtos.Mes;
@@ -21,11 +22,11 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.Mes
             List<MesDataAcquisitionUploadItemDTO> mesDataAcquisitionUploads
         )
         {
-            ApiResult<dynamic> re = await PostOtherAsync<dynamic>(
-                "/tracing/data_acquisition/upload",
+           var re = await PostOtherAsync<MesResponse>(
+                "tracing/data_acquisition/upload",
                 mesDataAcquisitionUploads
             );
-            return re.Data.code == 200;
+            return re.Data.Data.Success;
         }
     }
 }

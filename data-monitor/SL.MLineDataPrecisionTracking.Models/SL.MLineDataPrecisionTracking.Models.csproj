@@ -86,6 +86,7 @@
     <Compile Include="Dtos\Mes\MesModelMatchedPushDto.cs" />
     <Compile Include="Dtos\Mes\MesModelMismatchPushDto.cs" />
     <Compile Include="Dtos\Mes\MesOrderDtos.cs" />
+    <Compile Include="Dtos\Mes\MesResponse.cs" />
     <Compile Include="Dtos\PlcPointImportDto.cs" />
     <Compile Include="Dtos\Request\Factory4Workshop4_10LineSummaryQueryRequestDto.cs" />
     <Compile Include="Dtos\Request\EnergyRangePointQueryRequestDto.cs" />
