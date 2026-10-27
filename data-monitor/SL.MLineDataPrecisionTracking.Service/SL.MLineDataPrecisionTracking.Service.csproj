@@ -66,6 +66,8 @@
     <Compile Include="Controllers\EquipmentController.cs" />
     <Compile Include="Controllers\Factory4Workshop4_10LineController.cs" />
     <Compile Include="Controllers\Factory6Workshop6_1AssemblyLineController.cs" />
+    <Compile Include="Controllers\MesModelCheckController.cs" />
+    <Compile Include="Controllers\MesOrderController.cs" />
     <Compile Include="Controllers\MeticulousPursuitController.cs" />
     <Compile Include="Controllers\Rcl_MeticulousPursuitController.cs" />
     <Compile Include="Controllers\ServiceController.cs" />
