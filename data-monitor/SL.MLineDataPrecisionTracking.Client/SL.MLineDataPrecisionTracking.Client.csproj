@@ -120,11 +120,13 @@
     <Compile Include="Http\MeticulousPursuitApi.cs" />
     <Compile Include="Http\Rcl_MeticulousPursuitApi.cs" />
     <Compile Include="Http\MesOrderApi.cs" />
+    <Compile Include="Http\ModelCheckApi.cs" />
     <Compile Include="Http\ServiceApi.cs" />
     <Compile Include="Middleware\HttpMiddleware.cs" />
     <Compile Include="Middleware\ViewMiddleware.cs" />
     <Compile Include="ViewModel\Control\DeviceCollectionConfigViewModel.cs" />
     <Compile Include="ViewModel\Control\Factory4Workshop4_10LineViewModel.cs" />
+    <Compile Include="ViewModel\Control\Factory6Line2ViewModel.cs" />
     <Compile Include="ViewModel\Control\Factory6Workshop6_1AssemblyLineViewModel.cs" />
     <Compile Include="ViewModel\Control\FrmBr8Sec63HeatEnergyChartViewModel.cs" />
     <Compile Include="ViewModel\Control\MesOrderListViewModel.cs" />
@@ -139,6 +141,9 @@
     </Compile>
     <Compile Include="View\Control\Factory6Line2.xaml.cs">
       <DependentUpon>Factory6Line2.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Control\Factory6Line2AlertWindow.xaml.cs">
+      <DependentUpon>Factory6Line2AlertWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Control\Factory6Workshop6_1AssemblyLine.xaml.cs">
       <DependentUpon>Factory6Workshop6_1AssemblyLine.xaml</DependentUpon>
@@ -204,6 +209,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Control\Factory6Line2.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Control\Factory6Line2AlertWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
