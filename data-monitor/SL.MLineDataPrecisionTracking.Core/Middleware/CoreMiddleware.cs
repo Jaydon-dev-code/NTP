@@ -23,6 +23,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Middleware
             services.RegisterType<EnergyRangeExcelImportService>().SingleInstance();
             services.RegisterType<EquipmentManagementService>().SingleInstance();
             services.RegisterType<StationCollectionManager>().SingleInstance();
+            services.RegisterType<Services.Mes.MesApiOp>().SingleInstance();
+            services.RegisterType<Services.Mes.MesOrderOP>().SingleInstance();
             services
                 .Register(c => GlobalHost.ConnectionManager.GetHubContext<ChatHub>())
                 .As<IHubContext>()
