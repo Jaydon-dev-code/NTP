@@ -36,18 +36,18 @@ namespace UnitTestProject.DataCollection
             Container = builder.Build();
 
             _servers = new List<MelsecMcServer>();
-            foreach (var port in new int[] { 8002, 8001 })
-            {
-                var server = new MelsecMcServer
-                {
-                    IsBinary = true,
-                    AnalysisLogMessage = true,
-                    ActiveTimeSpan = TimeSpan.Parse("01:00:00"),
-                    EnableIPv6 = false,
-                };
-                server.ServerStart(port);
-                _servers.Add(server);
-            }
+            //foreach (var port in new int[] { 8002, 8001 })
+            //{
+            //    var server = new MelsecMcServer
+            //    {
+            //        IsBinary = true,
+            //        AnalysisLogMessage = true,
+            //        ActiveTimeSpan = TimeSpan.Parse("01:00:00"),
+            //        EnableIPv6 = false,
+            //    };
+            //    server.ServerStart(port);
+            //    _servers.Add(server);
+            //}
         }
 
         #region A线
@@ -312,7 +312,7 @@ namespace UnitTestProject.DataCollection
             );
 
             await Task.WhenAll(aTask, bTask);
-            await Task.Delay(2000 * 10);
+            await Task.Delay(2000 * 100);
         }
 
         #endregion

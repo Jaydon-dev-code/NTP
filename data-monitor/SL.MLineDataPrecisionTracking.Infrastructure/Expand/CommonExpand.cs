@@ -25,6 +25,34 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Expand
             return result;
         }
 
+        /// <summary>
+        /// 获取对象所有字段上【指定类型的特性】
+        /// </summary>
+        /// <typeparam name="TAttr">要获取的特性类型，比如DescriptionAttribute</typeparam>
+        /// <param name="obj">对象实例</param>
+        /// <param name="bindingFlags">字段过滤</param>
+        /// <returns>字典：Key=字段名，Value=特性实例，没有该特性则不在字典里</returns>
+        public static Dictionary<string, TAttr> GetFieldAttributeDict<TAttr>(this object obj)
+            where TAttr : Attribute
+        {
+            Dictionary<string, TAttr> result = new Dictionary<string, TAttr>();
+            if (obj == null)
+                return result;
+
+            Type type = obj.GetType();
+            var fields = type.GetProperties();
+
+            foreach (var field in fields)
+            {
+                var attr = field.GetCustomAttribute<TAttr>();
+                if (attr != null)
+                {
+                    result[field.Name] = attr;
+                }
+            }
+            return result;
+        }
+
         /// <soure>
         /// 获取枚举描述
         /// </soure>

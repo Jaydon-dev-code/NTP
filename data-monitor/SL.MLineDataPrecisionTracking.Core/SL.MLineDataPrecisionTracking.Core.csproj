@@ -58,7 +58,6 @@
     <Compile Include="Mqtt\MqttService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\Mes\MesApiOp.cs" />
-    <Compile Include="Services\Mes\MesLineSummaryPushHelper.cs" />
     <Compile Include="Services\DataCollection\Factory6Line2\Factory6Line2MeasurePushService.cs" />
     <Compile Include="Services\DataCollection\Factory6Line2\Factory6Line2ModelCheckService.cs" />
     <Compile Include="Services\DataCollection\DataCollectionServiceAbstract.cs" />

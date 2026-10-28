@@ -17,11 +17,13 @@ namespace SL.MLineDataPrecisionTracking.Infrastructure.Storage
     public class BaseRepository<T>
         where T : class, new()
     {
-        protected readonly ISqlSugarClient _db;
+        protected  ISqlSugarClient _db=>_dbs.CopyNew();
+
+        ISqlSugarClient _dbs;
 
         public BaseRepository(ISqlSugarClient db)
         {
-            _db = db;
+            _dbs = db;
         }
     }
 }

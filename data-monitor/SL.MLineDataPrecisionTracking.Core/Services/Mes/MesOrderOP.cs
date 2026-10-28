@@ -31,9 +31,9 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.Mes
         /// </summary>
         private sealed class ExecutingOrderSnapshot
         {
-            public ExecutingOrderSnapshot(string orderNo, string materialCode, string materialName)
+            public ExecutingOrderSnapshot(string? orderNo, string materialCode, string materialName)
             {
-                OrderNo = orderNo ?? string.Empty;
+                OrderNo = orderNo;
                 MaterialCode = materialCode ?? string.Empty;
                 MaterialName = materialName ?? string.Empty;
             }
@@ -56,7 +56,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.Mes
         private int _modelRefreshing;
 
         /// <summary>执行中工单号（无执行中工单为空串）</summary>
-        public string OrderNo => _snapshot?.OrderNo ?? string.Empty;
+        public string? OrderNo => _snapshot?.OrderNo;
 
         /// <summary>
         /// 当前生产型号（型号库「产品型号_当前产品型号表」最新型号名称；带10秒内存缓存）。

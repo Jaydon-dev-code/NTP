@@ -62,8 +62,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Lin
             }
 
             /// <summary>TestCode 用的描述文本</summary>
-            public string TestCodeText =>
-                string.IsNullOrEmpty(Description) ? Column : Description;
+            public string TestCodeText => string.IsNullOrEmpty(Description) ? Column : Description;
         }
 
         /// <summary>
@@ -74,7 +73,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Lin
             public string TableName;
             public ColumnGroup[] Groups;
         }
-
+        //OP510 ZP32-16
         /// <summary>
         /// 全部表的查询配置（来源：新建文本文档 (4).txt + ABS，同表名已合并）
         /// </summary>
@@ -114,8 +113,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Lin
                         ResultColumn = "分项结果_端跳",
                         ValueColumns = new[]
                         {
-                            new ValueColumn("端跳值1","跳动端跳值1"),
-                            new ValueColumn("端跳值2","跳动端跳值2"),
+                            new ValueColumn("端跳值1", "跳动端跳值1"),
+                            new ValueColumn("端跳值2", "跳动端跳值2"),
                         },
                     },
                     new ColumnGroup
@@ -211,7 +210,10 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Lin
         /// 游标初始化的表清单（每张表在 MesPushCursor 中按表名独立保存游标）。
         /// 必须声明在 QueryConfigs 之后（静态字段按文本顺序初始化）。
         /// </summary>
-        static readonly string[] Tables = QueryConfigs.Select(c => c.TableName).Distinct().ToArray();
+        static readonly string[] Tables = QueryConfigs
+            .Select(c => c.TableName)
+            .Distinct()
+            .ToArray();
 
         private readonly ThirdPartyDb _thirdPartyDb;
         private readonly Tb_MesMeasureSourceRepository _sourceRepository;
@@ -288,7 +290,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Lin
                 var startTime = cursor?.LastMeasureTime ?? DateTime.Now;
 
                 var result = SelectByConfig(cfg, startTime, out var maxTime);
-                if (maxTime > startTime)
+                if (maxTime > startTime && await PuseDateToMES(result))
                 {
                     await _cursorRepository.UpsertAsync(cfg.TableName, maxTime);
                     Serilog.Log.Information(
@@ -298,7 +300,6 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Lin
                         maxTime
                     );
                 }
-                await PuseDateToMES(result);
             }
             return Result<object>.Success(null);
         }
@@ -370,12 +371,12 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Lin
                         items.Add(
                             new MesDataAcquisitionUploadItemDTO
                             {
-                                PlantCode = "61",
+                                PlantCode = "62",
                                 EquipCode = g.EquipCode,
                                 RouteCode = g.RouteCode,
                                 SerialNo = sn,
                                 TestResult = re,
-                                TestCode = "DB" + vc.TestCodeText,
+                                TestCode = vc.TestCodeText,
                                 WorkOrderNo = _mesOrderOP.OrderNo,
                                 TestValue = val,
                                 TestTime = reTime,
@@ -392,19 +393,20 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Lin
             return Result<List<MesDataAcquisitionUploadItemDTO>>.Success(items);
         }
 
-        async Task PuseDateToMES(Result<List<MesDataAcquisitionUploadItemDTO>> data)
+        async Task<bool> PuseDateToMES(Result<List<MesDataAcquisitionUploadItemDTO>> data)
         {
             if (data.IsSuccess)
             {
                 try
                 {
-                    await _mesApiOp.DataAcquisition(data.Data);
+                    return await _mesApiOp.DataAcquisition(data.Data);
                 }
                 catch (Exception ex)
                 {
                     Serilog.Log.Warning($"【6-2】测量数据推送 异常：{ex.Message}");
                 }
             }
+            return false;
         }
 
         protected override Task NotifyAsync(Result<object> interact)
