@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
 using SL.MLineDataPrecisionTracking.Core.Services.Mes;
+using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
 using SL.MLineDataPrecisionTracking.Models.Domain;
 using SL.MLineDataPrecisionTracking.Models.Dtos.Mes;
@@ -73,6 +74,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Lin
             public string TableName;
             public ColumnGroup[] Groups;
         }
+
         //OP510 ZP32-16
         /// <summary>
         /// 全部表的查询配置（来源：新建文本文档 (4).txt + ABS，同表名已合并）
@@ -371,6 +373,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Lin
                         items.Add(
                             new MesDataAcquisitionUploadItemDTO
                             {
+                                TenantId = MesHelper.Factory6TenantId,
                                 PlantCode = "62",
                                 EquipCode = g.EquipCode,
                                 RouteCode = g.RouteCode,

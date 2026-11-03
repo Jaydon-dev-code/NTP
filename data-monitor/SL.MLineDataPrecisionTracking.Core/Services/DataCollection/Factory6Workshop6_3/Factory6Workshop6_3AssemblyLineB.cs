@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SL.MLineDataPrecisionTracking.Core.Services.Mes;
+﻿using SL.MLineDataPrecisionTracking.Core.Services.Mes;
+using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.Expand;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
 using SL.MLineDataPrecisionTracking.Infrastructure.Storage;
@@ -13,6 +9,11 @@ using SL.MLineDataPrecisionTracking.Models.Entities;
 using SL.MLineDataPrecisionTracking.Models.Entities.Factory6Workshop6_1AssemblyLine;
 using SL.MLineDataPrecisionTracking.Models.Enum;
 using SqlSugar;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Workshop6_3
 {
@@ -166,6 +167,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                 re.Add(
                     new MesDataAcquisitionUploadItemDTO
                     {
+                        TenantId = MesHelper.Factory6TenantId,
                         PlantCode = "63",
                         EquipCode = item.EquipCode,
                         RouteCode = item.RouteCode,

@@ -1,15 +1,21 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace SL.MLineDataPrecisionTracking.Models.Dtos.Mes
 {
     public class MesDataAcquisitionUploadItemDTO
     {
+        /// <summary>
+        /// 租户ID（多租户隔离必填）
+        /// </summary>
+        [JsonProperty("tenantId")]
+        public long TenantId { get; set; }
+
         /// <summary>
         /// 工厂编码
         /// </summary>
@@ -21,6 +27,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Dtos.Mes
         /// </summary>
         [JsonProperty("serialNo")]
         public string SerialNo { get; set; }
+
         [JsonProperty("workOrderNo")]
         public string WorkOrderNo { get; set; }
 
