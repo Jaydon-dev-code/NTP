@@ -89,7 +89,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Lin
                 {
                     new ColumnGroup
                     {
-                        RouteCode = "OP520",
+                        RouteCode = "ZC_XHJ_LFC_LGZCJGX_OP46",
                         EquipCode = "ZP32-17",
                         ResultColumn = "测量结果",
                         ValueColumns = new[]
@@ -110,7 +110,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Lin
                 {
                     new ColumnGroup
                     {
-                        RouteCode = "OP500",
+                        RouteCode = "ZC_XHJ_LFC_LGZCJGX_OP44",
                         EquipCode = "ZP32-15",
                         ResultColumn = "分项结果_端跳",
                         ValueColumns = new[]
@@ -121,10 +121,10 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Lin
                     },
                     new ColumnGroup
                     {
-                        RouteCode = "OP440",
+                        RouteCode = "ZC_XHJ_LFC_LGZCJGX_OP38",
                         EquipCode = "ZP32-12",
                         ResultColumn = "辅助_深度结果",
-                        ValueColumns = new[] { new ValueColumn("压装深度", "压装深度") },
+                        ValueColumns = new[] { new ValueColumn("压装深度", "压装组合磁性密封圈") },
                     },
                 },
             },
@@ -135,10 +135,10 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Lin
                 {
                     new ColumnGroup
                     {
-                        RouteCode = "OP490",
+                        RouteCode = "ZC_XHJ_LFC_LGZCJGX_OP43",
                         EquipCode = "ZP32-14",
                         ResultColumn = "测量结果",
-                        ValueColumns = new[] { new ValueColumn("测量值", "压装测量值") },
+                        ValueColumns = new[] { new ValueColumn("测量值", "螺栓压装") },
                     },
                 },
             },
@@ -149,10 +149,10 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Lin
                 {
                     new ColumnGroup
                     {
-                        RouteCode = "OP420",
+                        RouteCode = "ZC_XHJ_LFC_LGZCJGX_OP36",
                         EquipCode = "ZP32-10",
                         ResultColumn = "测量结果",
-                        ValueColumns = new[] { new ValueColumn("游隙值", "游隙值") },
+                        ValueColumns = new[] { new ValueColumn("游隙值", "负游隙检测") },
                     },
                 },
             },
@@ -163,10 +163,10 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Lin
                 {
                     new ColumnGroup
                     {
-                        RouteCode = "OP410",
+                        RouteCode = "ZC_XHJ_LFC_LGZCJGX_OP32",
                         EquipCode = "ZP32-09",
                         ResultColumn = "测量结果",
-                        ValueColumns = new[] { new ValueColumn("测量值", "注脂测量值") },
+                        ValueColumns = new[] { new ValueColumn("测量值", "B面注脂称重") },
                     },
                 },
             },
@@ -177,10 +177,10 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Lin
                 {
                     new ColumnGroup
                     {
-                        RouteCode = "OP110",
+                        RouteCode = "ZC_XHJ_LFC_LGZCJGX_OP30",
                         EquipCode = "ZP32-02",
                         ResultColumn = "测量结果",
-                        ValueColumns = new[] { new ValueColumn("测量值", "法兰盘分选测量值") },
+                        ValueColumns = new[] { new ValueColumn("测量值", "内法兰盘测量") },
                     },
                 },
             },
@@ -192,17 +192,17 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Lin
                 {
                     new ColumnGroup
                     {
-                        RouteCode = "OP210",
+                        RouteCode = "ZC_XHJ_LFC_LGZCJGX_OP32",
                         EquipCode = "ZP32-06",
                         ResultColumn = "测量结果",
-                        ValueColumns = new[] { new ValueColumn("外圈测量值", "外圈测量值") },
+                        ValueColumns = new[] { new ValueColumn("外圈测量值", "外法兰盘测量") },
                     },
                     new ColumnGroup
                     {
-                        RouteCode = "OP310",
+                        RouteCode = "ZC_XHJ_LFC_LGZCJGX_OP35",
                         EquipCode = "ZP32-08",
                         ResultColumn = "测量结果",
-                        ValueColumns = new[] { new ValueColumn("内圈测量值", "内圈测量值") },
+                        ValueColumns = new[] { new ValueColumn("内圈测量值", "内圈测量") },
                     },
                 },
             },
@@ -264,7 +264,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Lin
                     await _cursorRepository.UpsertAsync(table, DateTime.Now);
                     Serilog.Log.Information(
                         "[MES推送]【{_serverName}】表[{Table}]游标初始化为当前时间",
-                        _serviceName,
+                        propertyValue0: _serviceName,
                         table
                     );
                 }

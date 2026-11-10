@@ -206,115 +206,115 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.ASideSteelBallGroupDiff),
                 "ZP33-10",
-                "OP700"
+                "ZC XHJ_LFC1 LGZCJGX_OP40"
             ),
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.ASideSteelBallGreaseVolume),
                 "ZP33-10",
-                "OP700"
+                "ZC XHJ_LFC1 LGZCJGX_OP40"
             ),
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.BSideSteelBallGreaseVolume),
                 "ZP33-08",
-                "OP510"
+                "ZC_XHJ_LFC1_LGZCJGX_OP38"
             ),
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.BSideSteelBallGroupDiff),
                 "ZP33-08",
-                "OP510"
+                "ZC_XHJ_LFC1_LGZCJGX_OP38"
             ),
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.SealRingParallelDiff),
                 "ZP33-05",
-                "OP230"
+                "ZC_XHJ_LFC1_LGZCJGX_OP39"
             ),
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.PositiveClearanceValue),
                 "ZP33-12",
-                "OP900"
+                "ZC_XHJ_LFC1_LGZCJGX_OP42"
             ),
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.ClearancePressureValue),
                 "ZP33-12",
-                "OP900"
+                "ZC_XHJ_LFC1_LGZCJGX_OP42"
             ),
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.DisplacementValue),
                 "ZP33-12",
-                "OP900"
+                "ZC_XHJ_LFC1_LGZCJGX_OP42"
             ),
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.NegativeClearanceValue),
                 "ZP33-12",
-                "OP900"
+                "ZC_XHJ_LFC1_LGZCJGX_OP42"
             ),
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.SealRingPressPressure),
                 "ZP33-12",
-                "OP900"
+                "ZC_XHJ_LFC1_LGZCJGX_OP42"
             ),
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.MagneticRingParallelSensor1),
                 "ZP33-12",
-                "OP900"
+                "ZC_XHJ_LFC1_LGZCJGX_OP42"
             ),
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.MagneticRingParallelSensor2),
                 "ZP33-13",
-                "0P1000"
+                "ZC_XHJ_LFC1_LGZCJGX_OP45"
             ),
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.MagneticRingParallelSensor3),
                 "ZP33-13",
-                "0P1000"
+                "ZC_XHJ_LFC1_LGZCJGX_OP45"
             ),
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.MagneticRingParallelAVG),
                 "ZP33-13",
-                "0P1000"
+                "ZC_XHJ_LFC1_LGZCJGX_OP45"
             ),
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.EndRunoutAxis),
                 "ZP33-15",
-                "OP1200"
+                "ZC_XHJ_LFC1_LGZCJGX_OP49"
             ),
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.EndRunoutPlane),
                 "ZP33-15",
-                "OP1200"
+                "ZC_XHJ_LFC1_LGZCJGX_OP49"
             ),
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.EndRunoutHeight),
                 "ZP33-15",
-                "OP1200"
+                "ZC_XHJ_LFC1_LGZCJGX_OP49"
             ),
-            (nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.RunoutValue), "ZP33-15", "OP1200"),
-            (nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.TQ_1400), "ZP33-17", "OP1400"),
-            (nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.M_HIGH_1400), "ZP33-17", "OP1400"),
+            (nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.RunoutValue), "ZP33-15", "ZC_XHJ_LFC1_LGZCJGX_OP49"),
+            (nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.TQ_1400), "ZP33-17", "ZC_XHJ_LFC1_LGZCJGX_OP51"),
+            (nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.M_HIGH_1400), "ZP33-17", "ZC_XHJ_LFC1_LGZCJGX_OP51"),
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.P_1600_M1400_ABSSINGLE_MAX),
                 "ZP33-17",
-                "OP1400"
+                "ZC_XHJ_LFC1_LGZCJGX_OP51"
             ),
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.P_1600_M1400_ABSSINGLE_min),
                 "ZP33-17",
-                "OP1400"
+                "ZC_XHJ_LFC1_LGZCJGX_OP51"
             ),
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.P_1600_M1400_ABSTOTAL),
                 "ZP33-17",
-                "OP1400"
+                "ZC_XHJ_LFC1_LGZCJGX_OP51"
             ),
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.P_1600_M1400_ABSTOOTH),
                 "ZP33-17",
-                "OP1400"
+                "ZC_XHJ_LFC1_LGZCJGX_OP51"
             ),
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.GONO_CHECK_1150),
                 "ZP33-14",
-                "OP1150"
+                "ZC_XHJ_LFC1_LGZCJGX_OP47"
             ),
         };
 

@@ -277,12 +277,18 @@ namespace SL.MLineDataPrecisionTracking.Client.ViewModel.Control
 
         void UpValue(HubClien hubClien)
         {
-            hubClien.Start<bool>(nameof(IsOnlieClearance), x => IsOnlieClearance = x);
-            hubClien.Start<bool>(nameof(IsOnlieRivetAndCrack), x => IsOnlieRivetAndCrack = x);
-            hubClien.Start<bool>(nameof(IsOnlieVib), x => IsOnlieVib = x);
-            hubClien.Start<bool>(nameof(IsOnlieVibScan), x => IsOnlieVibScan = x);
-            hubClien.Start<bool>(nameof(IsOnlieABS), x => IsOnlieABS = x);
-            hubClien.Start<bool>(nameof(IsOnlieClearanceScan), x => IsOnlieClearanceScan = x);
+            IsOnlieClearance = true;
+            IsOnlieRivetAndCrack = true;
+            IsOnlieVib = true;
+            IsOnlieVibScan = true;
+            IsOnlieABS = true;
+            IsOnlieClearanceScan = true;
+            //hubClien.Start<bool>(nameof(IsOnlieClearance), x => IsOnlieClearance = x);
+            //hubClien.Start<bool>(nameof(IsOnlieRivetAndCrack), x => IsOnlieRivetAndCrack = x);
+            //hubClien.Start<bool>(nameof(IsOnlieVib), x => IsOnlieVib = x);
+            //hubClien.Start<bool>(nameof(IsOnlieVibScan), x => IsOnlieVibScan = x);
+            //hubClien.Start<bool>(nameof(IsOnlieABS), x => IsOnlieABS = x);
+            //hubClien.Start<bool>(nameof(IsOnlieClearanceScan), x => IsOnlieClearanceScan = x);
             hubClien.Start<Factory4Workshop4_10Line_VibDto>(nameof(VibData), x => VibData = x);
             hubClien.Start<Factory4Workshop4_10Line_RivetAndCrack_RivetingDto>(
                 nameof(RivetingData),
