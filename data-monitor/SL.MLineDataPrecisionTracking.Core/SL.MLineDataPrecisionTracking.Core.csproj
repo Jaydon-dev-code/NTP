@@ -61,9 +61,9 @@
     <Compile Include="Services\DataCollection\Factory6Line2\Factory6Line2MeasurePushService.cs" />
     <Compile Include="Services\DataCollection\Factory6Line2\Factory6Line2ModelCheckService.cs" />
     <Compile Include="Services\DataCollection\DataCollectionServiceAbstract.cs" />
-    <Compile Include="Services\DataCollection\DeviceStationCollection.cs" />
-    <Compile Include="Services\DataCollection\IStationCollection.cs" />
-    <Compile Include="Services\DataCollection\StationCollectionManager.cs" />
+    <Compile Include="Services\DataCollection\MqttWorkStatus\WorkModel\DeviceStationCollection.cs" />
+    <Compile Include="Services\DataCollection\MqttWorkStatus\WorkModel\IStationCollection.cs" />
+    <Compile Include="Services\DataCollection\MqttWorkStatus\StationCollectionManager.cs" />
     <Compile Include="Services\DataCollection\Factory4Workshop4_10\Factory4Workshop4_10LineBase.cs" />
     <Compile Include="Services\DataCollection\Factory4Workshop4_10\Factory4Workshop4_10Line_ABS.cs" />
     <Compile Include="Services\DataCollection\Factory4Workshop4_10\Factory4Workshop4_10Line_Clearance.cs" />
