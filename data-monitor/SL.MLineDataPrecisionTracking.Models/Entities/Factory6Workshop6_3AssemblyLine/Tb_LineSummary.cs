@@ -358,7 +358,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Entities
         /// 震动检测结果
         /// </summary>
         [SugarColumn(ColumnDescription = "振动检测结果", DefaultValue = " ")]
-        public string VibrationDetectionResults { get; set; }
+        public string VibrationDetectionResults { get; set; } = "";
 
         /// <summary>
         /// 螺栓压装1

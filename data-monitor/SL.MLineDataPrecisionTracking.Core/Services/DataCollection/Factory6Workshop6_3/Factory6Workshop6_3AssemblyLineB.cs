@@ -1,4 +1,9 @@
-﻿using SL.MLineDataPrecisionTracking.Core.Services.Mes;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using SL.MLineDataPrecisionTracking.Core.Services.Mes;
 using SL.MLineDataPrecisionTracking.Infrastructure.Common;
 using SL.MLineDataPrecisionTracking.Infrastructure.Expand;
 using SL.MLineDataPrecisionTracking.Infrastructure.PLCCommunication;
@@ -9,11 +14,6 @@ using SL.MLineDataPrecisionTracking.Models.Entities;
 using SL.MLineDataPrecisionTracking.Models.Entities.Factory6Workshop6_1AssemblyLine;
 using SL.MLineDataPrecisionTracking.Models.Enum;
 using SqlSugar;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Workshop6_3
 {
@@ -137,10 +137,20 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                 aLineInfo.IsUsed = true;
                 await _lineARepository.UpdateableAsync(aLineInfo);
             }
-            var buildValue = BuildMesUploadItems(tb_LineSummary);
-            if (buildValue?.Count > 0)
+            try
             {
-                await _mesApiOp.DataAcquisition(buildValue);
+                var buildValue = BuildMesUploadItems(tb_LineSummary);
+                if (buildValue?.Count > 0)
+                {
+                    await _mesApiOp.DataAcquisition(buildValue);
+                }
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Information(
+                    "[数据交互]【{_serverName}】推送数据到mes失败",
+                    _serviceName
+                );
             }
 
             return lineData;
@@ -187,22 +197,50 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
         // 每项仅 字段名/设备编码/工序编码 不同，其余取值共用
         (string Field, string EquipCode, string RouteCode)[] _items =
         {
-            (nameof(Tb_LineSummary.SmallInnerRingSortingData), "ZP24-03", "ZC_XHJ_LFC3_LGZCJGX_OP26"),
+            (
+                nameof(Tb_LineSummary.SmallInnerRingSortingData),
+                "ZP24-03",
+                "ZC_XHJ_LFC3_LGZCJGX_OP26"
+            ),
             (nameof(Tb_LineSummary.OuterFlangeSortingData), "ZP24-04", "ZC_XHJ_LFC3_LGZCJGX_OP27"),
             (nameof(Tb_LineSummary.InnerFlangeSortingData), "ZP24-06", "ZC_XHJ_LFC3_LGZCJGX_OP26"),
             (nameof(Tb_LineSummary.ASideSteelBallGroupDiff), "ZP24-12", "ZC XHJ LFC3 LGZCJGX OP35"),
-            (nameof(Tb_LineSummary.ASideSteelBallGreaseVolume), "ZP24-12", "ZC XHJ LFC3 LGZCJGX OP35"),
+            (
+                nameof(Tb_LineSummary.ASideSteelBallGreaseVolume),
+                "ZP24-12",
+                "ZC XHJ LFC3 LGZCJGX OP35"
+            ),
             (nameof(Tb_LineSummary.BSideSteelBallGroupDiff), "ZP24-09", "ZC XHJ_LFC3_LGZCJGX_OP32"),
-            (nameof(Tb_LineSummary.BSideSteelBallGreaseVolume), "ZP24-09", "ZC XHJ_LFC3_LGZCJGX_OP32"),
+            (
+                nameof(Tb_LineSummary.BSideSteelBallGreaseVolume),
+                "ZP24-09",
+                "ZC XHJ_LFC3_LGZCJGX_OP32"
+            ),
             (nameof(Tb_LineSummary.SealRingGreaseVolume), "ZP24-10", "ZC_XHJ_LFC3_LGZCJGX_OP33"),
             (nameof(Tb_LineSummary.SealRingPressForce), "ZP24-10", "ZC_XHJ_LFC3_LGZCJGX_OP33"),
-            (nameof(Tb_LineSummary.SealRingPressDisplacementA), "ZP24-10", "ZC_XHJ_LFC3_LGZCJGX_OP33"),
+            (
+                nameof(Tb_LineSummary.SealRingPressDisplacementA),
+                "ZP24-10",
+                "ZC_XHJ_LFC3_LGZCJGX_OP33"
+            ),
             (nameof(Tb_LineSummary.SealRingParallelDiff), "ZP24-10", "ZC_XHJ_LFC3_LGZCJGX_OP33"),
             (nameof(Tb_LineSummary.WaterBafflePressForce), "ZP24-11", "ZC_XHJ_LFC3_LGZCJGX_OP34"),
-            (nameof(Tb_LineSummary.WaterBafflePressDisplacement), "ZP24-11", "ZC_XHJ_LFC3_LGZCJGX_OP34"),
+            (
+                nameof(Tb_LineSummary.WaterBafflePressDisplacement),
+                "ZP24-11",
+                "ZC_XHJ_LFC3_LGZCJGX_OP34"
+            ),
             (nameof(Tb_LineSummary.WaterBaffleParallelDiff), "ZP24-11", "ZC_XHJ_LFC3_LGZCJGX_OP34"),
-            (nameof(Tb_LineSummary.SmallInnerRingAssemblePressure), "ZP24-03", "ZC_XHJ_LFC3_LGZCJGX_OP26"),
-            (nameof(Tb_LineSummary.SmallInnerRingAssembleDisplacement), "ZP24-03", "ZC_XHJ_LFC3_LGZCJGX_OP26"),
+            (
+                nameof(Tb_LineSummary.SmallInnerRingAssemblePressure),
+                "ZP24-03",
+                "ZC_XHJ_LFC3_LGZCJGX_OP26"
+            ),
+            (
+                nameof(Tb_LineSummary.SmallInnerRingAssembleDisplacement),
+                "ZP24-03",
+                "ZC_XHJ_LFC3_LGZCJGX_OP26"
+            ),
             (nameof(Tb_LineSummary.BoltPressAssemble1), "ZP24-05", "ZC_XHJ_LFC3_LGZCJGX_OP28"),
             (nameof(Tb_LineSummary.BoltPressAssemble2), "ZP24-05", "ZC_XHJ_LFC3_LGZCJGX_OP28"),
             (nameof(Tb_LineSummary.BoltPressAssemble3), "ZP24-05", "ZC_XHJ_LFC3_LGZCJGX_OP28"),
@@ -221,15 +259,43 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
             (nameof(Tb_LineSummary.RivetingDisplacement), "ZP24-15", "ZC_XHJ_LFC3_LGZCJGX_OP38"),
             (nameof(Tb_LineSummary.PostRivetingHeight), "ZP24-15", "ZC_XHJ_LFC3_LGZCJGX_OP38"),
             (nameof(Tb_LineSummary.PostRivetingShape), "ZP24-15", "ZC_XHJ_LFC3_LGZCJGX_OP38"),
-            (nameof(Tb_LineSummary.PostRivetingOuterDiameter), "ZP24-15", "ZC_XHJ_LFC3_LGZCJGX_OP38"),
+            (
+                nameof(Tb_LineSummary.PostRivetingOuterDiameter),
+                "ZP24-15",
+                "ZC_XHJ_LFC3_LGZCJGX_OP38"
+            ),
             (nameof(Tb_LineSummary.SealRingPressPressure), "ZP24-17", "ZC_XHJ_LFC3_LGZCJGX_OP40"),
-            (nameof(Tb_LineSummary.SealRingPressDisplacementB), "ZP24-17", "ZC_XHJ_LFC3_LGZCJGX_OP40"),
-            (nameof(Tb_LineSummary.MagneticRingParallelSensor1), "ZP24-19", "ZC_XHJ_LFC3_LGZCJGX_OP40"),
-            (nameof(Tb_LineSummary.MagneticRingParallelSensor2), "ZP24-19", "ZC_XHJ_LFC3_LGZCJGX_OP40"),
-            (nameof(Tb_LineSummary.MagneticRingParallelSensor3), "ZP24-19", "ZC_XHJ_LFC3_LGZCJGX_OP40"),
-            (nameof(Tb_LineSummary.MagneticRingParallelDiff), "ZP24-19", "ZC_XHJ_LFC3_LGZCJGX_OP40"),
+            (
+                nameof(Tb_LineSummary.SealRingPressDisplacementB),
+                "ZP24-17",
+                "ZC_XHJ_LFC3_LGZCJGX_OP40"
+            ),
+            (
+                nameof(Tb_LineSummary.MagneticRingParallelSensor1),
+                "ZP24-19",
+                "ZC_XHJ_LFC3_LGZCJGX_OP40"
+            ),
+            (
+                nameof(Tb_LineSummary.MagneticRingParallelSensor2),
+                "ZP24-19",
+                "ZC_XHJ_LFC3_LGZCJGX_OP40"
+            ),
+            (
+                nameof(Tb_LineSummary.MagneticRingParallelSensor3),
+                "ZP24-19",
+                "ZC_XHJ_LFC3_LGZCJGX_OP40"
+            ),
+            (
+                nameof(Tb_LineSummary.MagneticRingParallelDiff),
+                "ZP24-19",
+                "ZC_XHJ_LFC3_LGZCJGX_OP40"
+            ),
             (nameof(Tb_LineSummary.GearRingPressPressure), "ZP24-17", "ZC_XHJ_LFC3_LGZCJGX_OP40"),
-            (nameof(Tb_LineSummary.GearRingPressDisplacement), "ZP24-17", "ZC_XHJ_LFC3_LGZCJGX_OP40"),
+            (
+                nameof(Tb_LineSummary.GearRingPressDisplacement),
+                "ZP24-17",
+                "ZC_XHJ_LFC3_LGZCJGX_OP40"
+            ),
             (nameof(Tb_LineSummary.RadialRunout), "ZP24-20", "ZC_XHJ_LFC3_LGZCJGX_OP44"),
             (nameof(Tb_LineSummary.EndRunout), "ZP24-20", "ZC_XHJ_LFC3_LGZCJGX_OP44"),
         };

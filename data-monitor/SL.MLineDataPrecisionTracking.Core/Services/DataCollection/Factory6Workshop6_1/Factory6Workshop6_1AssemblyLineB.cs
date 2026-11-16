@@ -1,4 +1,10 @@
-﻿using Mapster;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+using Mapster;
 using NPOI.POIFS.Crypt.Standard;
 using SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Workshop6_3;
 using SL.MLineDataPrecisionTracking.Core.Services.Mes;
@@ -12,12 +18,6 @@ using SL.MLineDataPrecisionTracking.Models.Entities;
 using SL.MLineDataPrecisionTracking.Models.Entities.Factory6Workshop6_1AssemblyLine;
 using SL.MLineDataPrecisionTracking.Models.Enum;
 using SqlSugar;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Workshop6_1
 {
@@ -151,13 +151,21 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                 aLineInfo.IsUsed = true;
                 await _factory6Workshop6_1AssemblyLineARepository.UpdateableAsync(aLineInfo);
             }
-            var buildValues = BuildMesUploadItems(tb_LineSummary);
-            if (buildValues?.Count > 0)
+            try
             {
-                await _mesApiOp.DataAcquisition(buildValues);
+                var buildValue = BuildMesUploadItems(tb_LineSummary);
+                if (buildValue?.Count > 0)
+                {
+                    await _mesApiOp.DataAcquisition(buildValue);
+                }
             }
-
-  
+            catch (Exception ex)
+            {
+                Serilog.Log.Information(
+                    "[数据交互]【{_serverName}】推送数据到mes失败",
+                    _serviceName
+                );
+            }
 
             return lineData;
         }
@@ -288,9 +296,21 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                 "ZP33-15",
                 "ZC_XHJ_LFC1_LGZCJGX_OP49"
             ),
-            (nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.RunoutValue), "ZP33-15", "ZC_XHJ_LFC1_LGZCJGX_OP49"),
-            (nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.TQ_1400), "ZP33-17", "ZC_XHJ_LFC1_LGZCJGX_OP51"),
-            (nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.M_HIGH_1400), "ZP33-17", "ZC_XHJ_LFC1_LGZCJGX_OP51"),
+            (
+                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.RunoutValue),
+                "ZP33-15",
+                "ZC_XHJ_LFC1_LGZCJGX_OP49"
+            ),
+            (
+                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.TQ_1400),
+                "ZP33-17",
+                "ZC_XHJ_LFC1_LGZCJGX_OP51"
+            ),
+            (
+                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.M_HIGH_1400),
+                "ZP33-17",
+                "ZC_XHJ_LFC1_LGZCJGX_OP51"
+            ),
             (
                 nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.P_1600_M1400_ABSSINGLE_MAX),
                 "ZP33-17",
