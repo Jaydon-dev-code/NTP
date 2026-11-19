@@ -35,10 +35,8 @@ namespace SL.MLineDataPrecisionTracking.Models.Domain
         DevPlcPointDto _producedNGPoint { get; set; }
         public bool[] WarValue { get; set; }
 
-        public bool IsCollectionBeat { get; set; }
+        public bool? IsCollectionBeat { get; set; }
         DevPlcPointDto _isCollectionBeat { get; set; }
-
-        bool? _lastCollectionBeat { get; set; }
         List<DevPlcPointDto> _warValuePoint { get; set; }
 
         public string[] WarInfo { get; set; }
@@ -59,28 +57,24 @@ namespace SL.MLineDataPrecisionTracking.Models.Domain
             var tmpCollectionBeat =
                 _isCollectionBeat?.Value == null ? null : _isCollectionBeat?.Value[0].ObjToBool();
             bool[] tmpWarValue = _warValuePoint?.Select(x => x.Value[0].ObjToBool()).ToArray();
-            bool isBeatChang = (_lastCollectionBeat == false && tmpCollectionBeat == true);
-            var re =
-                !(
-                    this.Status == tmpStatus
-                    && this.ProducedTotal == tmpProducedTotal
-                    && this.ProducedOK == tmpProducedOK
-                    && this.ProducedNG == tmpProducedNG
-                    && this.WarValue?.SequenceEqual(tmpWarValue) == true
-                ) || isBeatChang;
+            var re = !(
+                this.Status == tmpStatus
+                && this.ProducedTotal == tmpProducedTotal
+                && this.ProducedOK == tmpProducedOK
+                && this.ProducedNG == tmpProducedNG
+                && this.WarValue?.SequenceEqual(tmpWarValue) == true
+                && this.IsCollectionBeat == tmpCollectionBeat
+                && this.Beat == tmpBeat
+            );
             if (re)
             {
                 this.Status = tmpStatus;
-                if (isBeatChang)
-                {
-                    this.Beat = tmpBeat;
-                }
-                this.IsCollectionBeat = isBeatChang;
+                this.Beat = tmpBeat;
+                this.IsCollectionBeat = tmpCollectionBeat;
                 this.ProducedTotal = tmpProducedTotal;
                 this.ProducedOK = tmpProducedOK;
                 this.ProducedNG = tmpProducedNG;
                 this.WarValue = tmpWarValue;
-                this._lastCollectionBeat = tmpCollectionBeat;
             }
 
             return re;

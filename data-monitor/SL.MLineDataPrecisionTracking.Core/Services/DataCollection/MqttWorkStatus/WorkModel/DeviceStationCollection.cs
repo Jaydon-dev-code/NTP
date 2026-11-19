@@ -208,7 +208,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
                                 },
                             },
                         };
-                        string topic = _topic + $@"/data/push";
+                        string topic = _topic + $@"/device/data/push";
                         await _mqttService.PublishAsync(topic, mqttData);
                         Serilog.Log.Information("[mqtt采集]: topic{topic}.", topic);
                     }
