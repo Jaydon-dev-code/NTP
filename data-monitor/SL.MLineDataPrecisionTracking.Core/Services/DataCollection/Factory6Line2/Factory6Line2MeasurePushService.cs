@@ -383,6 +383,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Lin
                                 WorkOrderNo = _mesOrderOP.OrderNo,
                                 TestValue = val,
                                 TestTime = reTime,
+                                Remark=re
                             }
                         );
                     }
