@@ -181,6 +181,11 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
                                     name = "生产节拍",
                                     value = _collectionInfo.Beat,
                                 },
+                                BeatSignal = new ParamItem()
+                                {
+                                    name = "节拍信号",
+                                    value = _collectionInfo.IsCollectionBeat,
+                                },
                                 ProducedTotal = new ParamItem()
                                 {
                                     name = "生产总数",
@@ -255,6 +260,8 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection
     {
         public ParamItem Status { get; set; }
         public ParamItem Beat { get; set; }
+        public ParamItem BeatSignal
+        { get; set; }
         public ParamItem ProducedTotal { get; set; }
         public ParamItem ProducedOK { get; set; }
         public ParamItem ProducedNG { get; set; }
