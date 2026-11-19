@@ -29,8 +29,6 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
         Tb_LineBRepository _LineBRepository;
         Tb_LineARepository _lineARepository;
         Tb_LineSummaryRepository _lineSummaryRepository;
-        MesOrderOP _mesOrderOP;
-        MesApiOp _mesApiOp;
         Dictionary<string, SugarColumn> _fieldAttributeDic;
 
         public Factory6Workshop6_3AssemblyLineB(
@@ -43,7 +41,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
             MesOrderOP mesOrderOP,
             MesApiOp mesApiOp
         )
-            : base(equipmentRepositor, mcp, tb_ModelNoToNameRepository)
+            : base(equipmentRepositor, mcp, tb_ModelNoToNameRepository, mesOrderOP, mesApiOp)
         {
             _LineBRepository = tb_LineBRepository;
             _lineARepository = tb_LineARepository;
@@ -165,7 +163,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
             var workOrderNo = _mesOrderOP.OrderNo;
             var testTime = tb_LineSummary.RecordTime.ToString("yyyy-MM-dd HH:mm:ss");
             var re = new List<MesDataAcquisitionUploadItemDTO>();
-            foreach (var item in _items)
+            foreach (var item in _items63)
             {
                 var val =
                     typeof(Tb_LineSummary).GetProperty(item.Field)?.GetValue(tb_LineSummary)
@@ -181,123 +179,18 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                         PlantCode = "63",
                         EquipCode = item.EquipCode,
                         RouteCode = item.RouteCode,
-                        SerialNo = serialNo,
+                        SerialNo = tb_LineSummary.Result== ResultEnum.OK? serialNo : $"NG_63_B_{testTime}",
                         TestResult = testResult,
                         TestCode = _fieldAttributeDic[item.Field].ColumnDescription,
                         WorkOrderNo = workOrderNo,
                         TestValue = val,
                         TestTime = testTime,
+                        Remark=testResult
                     }
                 );
             }
 
             return re;
         }
-
-        // 每项仅 字段名/设备编码/工序编码 不同，其余取值共用
-        (string Field, string EquipCode, string RouteCode)[] _items =
-        {
-            (
-                nameof(Tb_LineSummary.SmallInnerRingSortingData),
-                "ZP24-03",
-                "ZC_XHJ_LFC3_LGZCJGX_OP26"
-            ),
-            (nameof(Tb_LineSummary.OuterFlangeSortingData), "ZP24-04", "ZC_XHJ_LFC3_LGZCJGX_OP27"),
-            (nameof(Tb_LineSummary.InnerFlangeSortingData), "ZP24-06", "ZC_XHJ_LFC3_LGZCJGX_OP26"),
-            (nameof(Tb_LineSummary.ASideSteelBallGroupDiff), "ZP24-12", "ZC XHJ LFC3 LGZCJGX OP35"),
-            (
-                nameof(Tb_LineSummary.ASideSteelBallGreaseVolume),
-                "ZP24-12",
-                "ZC XHJ LFC3 LGZCJGX OP35"
-            ),
-            (nameof(Tb_LineSummary.BSideSteelBallGroupDiff), "ZP24-09", "ZC XHJ_LFC3_LGZCJGX_OP32"),
-            (
-                nameof(Tb_LineSummary.BSideSteelBallGreaseVolume),
-                "ZP24-09",
-                "ZC XHJ_LFC3_LGZCJGX_OP32"
-            ),
-            (nameof(Tb_LineSummary.SealRingGreaseVolume), "ZP24-10", "ZC_XHJ_LFC3_LGZCJGX_OP33"),
-            (nameof(Tb_LineSummary.SealRingPressForce), "ZP24-10", "ZC_XHJ_LFC3_LGZCJGX_OP33"),
-            (
-                nameof(Tb_LineSummary.SealRingPressDisplacementA),
-                "ZP24-10",
-                "ZC_XHJ_LFC3_LGZCJGX_OP33"
-            ),
-            (nameof(Tb_LineSummary.SealRingParallelDiff), "ZP24-10", "ZC_XHJ_LFC3_LGZCJGX_OP33"),
-            (nameof(Tb_LineSummary.WaterBafflePressForce), "ZP24-11", "ZC_XHJ_LFC3_LGZCJGX_OP34"),
-            (
-                nameof(Tb_LineSummary.WaterBafflePressDisplacement),
-                "ZP24-11",
-                "ZC_XHJ_LFC3_LGZCJGX_OP34"
-            ),
-            (nameof(Tb_LineSummary.WaterBaffleParallelDiff), "ZP24-11", "ZC_XHJ_LFC3_LGZCJGX_OP34"),
-            (
-                nameof(Tb_LineSummary.SmallInnerRingAssemblePressure),
-                "ZP24-03",
-                "ZC_XHJ_LFC3_LGZCJGX_OP26"
-            ),
-            (
-                nameof(Tb_LineSummary.SmallInnerRingAssembleDisplacement),
-                "ZP24-03",
-                "ZC_XHJ_LFC3_LGZCJGX_OP26"
-            ),
-            (nameof(Tb_LineSummary.BoltPressAssemble1), "ZP24-05", "ZC_XHJ_LFC3_LGZCJGX_OP28"),
-            (nameof(Tb_LineSummary.BoltPressAssemble2), "ZP24-05", "ZC_XHJ_LFC3_LGZCJGX_OP28"),
-            (nameof(Tb_LineSummary.BoltPressAssemble3), "ZP24-05", "ZC_XHJ_LFC3_LGZCJGX_OP28"),
-            (nameof(Tb_LineSummary.BoltPressAssemble4), "ZP24-05", "ZC_XHJ_LFC3_LGZCJGX_OP28"),
-            (nameof(Tb_LineSummary.BoltPressAssemble5), "ZP24-05", "ZC_XHJ_LFC3_LGZCJGX_OP28"),
-            (nameof(Tb_LineSummary.BoltPressAssembleAVG), "ZP24-05", "ZC_XHJ_LFC3_LGZCJGX_OP28"),
-            (nameof(Tb_LineSummary.AbsToothCount), "ZP24-22", "ZC_XHJ_LFC3_LGZCJGX_OP46"),
-            (nameof(Tb_LineSummary.TorqueValue), "ZP24-22", "ZC_XHJ_LFC3_LGZCJGX_OP46"),
-            (nameof(Tb_LineSummary.AbsPeakValue), "ZP24-22", "ZC_XHJ_LFC3_LGZCJGX_OP46"),
-            (nameof(Tb_LineSummary.AbsValleyValue), "ZP24-22", "ZC_XHJ_LFC3_LGZCJGX_OP46"),
-            (nameof(Tb_LineSummary.PositiveClearanceValue), "ZP24-25", "ZC_XHJ_LFC3_LGZCJGX_OP37"),
-            (nameof(Tb_LineSummary.DisplacementValue), "ZP24-25", "ZC_XHJ_LFC3_LGZCJGX_OP37"),
-            (nameof(Tb_LineSummary.NegativeClearanceValue), "ZP24-25", "ZC_XHJ_LFC3_LGZCJGX_OP37"),
-            (nameof(Tb_LineSummary.PreRivetingHeight), "ZP24-15", "ZC_XHJ_LFC3_LGZCJGX_OP38"),
-            (nameof(Tb_LineSummary.RivetingForce), "ZP24-15", "ZC_XHJ_LFC3_LGZCJGX_OP38"),
-            (nameof(Tb_LineSummary.RivetingDisplacement), "ZP24-15", "ZC_XHJ_LFC3_LGZCJGX_OP38"),
-            (nameof(Tb_LineSummary.PostRivetingHeight), "ZP24-15", "ZC_XHJ_LFC3_LGZCJGX_OP38"),
-            (nameof(Tb_LineSummary.PostRivetingShape), "ZP24-15", "ZC_XHJ_LFC3_LGZCJGX_OP38"),
-            (
-                nameof(Tb_LineSummary.PostRivetingOuterDiameter),
-                "ZP24-15",
-                "ZC_XHJ_LFC3_LGZCJGX_OP38"
-            ),
-            (nameof(Tb_LineSummary.SealRingPressPressure), "ZP24-17", "ZC_XHJ_LFC3_LGZCJGX_OP40"),
-            (
-                nameof(Tb_LineSummary.SealRingPressDisplacementB),
-                "ZP24-17",
-                "ZC_XHJ_LFC3_LGZCJGX_OP40"
-            ),
-            (
-                nameof(Tb_LineSummary.MagneticRingParallelSensor1),
-                "ZP24-19",
-                "ZC_XHJ_LFC3_LGZCJGX_OP40"
-            ),
-            (
-                nameof(Tb_LineSummary.MagneticRingParallelSensor2),
-                "ZP24-19",
-                "ZC_XHJ_LFC3_LGZCJGX_OP40"
-            ),
-            (
-                nameof(Tb_LineSummary.MagneticRingParallelSensor3),
-                "ZP24-19",
-                "ZC_XHJ_LFC3_LGZCJGX_OP40"
-            ),
-            (
-                nameof(Tb_LineSummary.MagneticRingParallelDiff),
-                "ZP24-19",
-                "ZC_XHJ_LFC3_LGZCJGX_OP40"
-            ),
-            (nameof(Tb_LineSummary.GearRingPressPressure), "ZP24-17", "ZC_XHJ_LFC3_LGZCJGX_OP40"),
-            (
-                nameof(Tb_LineSummary.GearRingPressDisplacement),
-                "ZP24-17",
-                "ZC_XHJ_LFC3_LGZCJGX_OP40"
-            ),
-            (nameof(Tb_LineSummary.RadialRunout), "ZP24-20", "ZC_XHJ_LFC3_LGZCJGX_OP44"),
-            (nameof(Tb_LineSummary.EndRunout), "ZP24-20", "ZC_XHJ_LFC3_LGZCJGX_OP44"),
-        };
     }
 }

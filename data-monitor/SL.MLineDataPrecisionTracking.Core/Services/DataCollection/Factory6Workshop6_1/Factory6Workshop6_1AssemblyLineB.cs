@@ -5,6 +5,9 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Mapster;
+using MathNet.Numerics.Distributions;
+using Microsoft.AspNet.SignalR.Json;
+using Newtonsoft.Json;
 using NPOI.POIFS.Crypt.Standard;
 using SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Workshop6_3;
 using SL.MLineDataPrecisionTracking.Core.Services.Mes;
@@ -29,8 +32,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
         Tb_Factory6Workshop6_1AssemblyLineARepository _factory6Workshop6_1AssemblyLineARepository;
         Tb_Factory6Workshop6_1AssemblyLineABSummaryRepository _factory6Workshop6_1AssemblyLineABSummaryRepository;
         Tb_Factory6Workshop6_1AssemblyLineBRepository _factory6Workshop6_1AssemblyLineBRepository;
-        MesOrderOP _mesOrderOP;
-        MesApiOp _mesApiOp;
+
         Dictionary<string, SugarColumn> _fieldAttributeDic;
         protected override string _lineName => "六分厂6-1装配B线";
 
@@ -50,7 +52,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
             MesOrderOP mesOrderOP,
             MesApiOp mesApiOp
         )
-            : base(equipmentRepositor, mcp, tb_ModelNoToNameRepository)
+            : base(equipmentRepositor, mcp, tb_ModelNoToNameRepository, mesOrderOP, mesApiOp)
         {
             _factory6Workshop6_1AssemblyLineARepository =
                 factory6Workshop6_1AssemblyLineARepository;
@@ -59,7 +61,6 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
             _factory6Workshop6_1AssemblyLineBRepository =
                 tb_Factory6Workshop6_1AssemblyLineBRepository;
             _mesOrderOP = mesOrderOP;
-            _mesApiOp = mesApiOp;
             _fieldAttributeDic = (
                 new Tb_Factory6Workshop6_1AssemblyLineABSummary()
             ).GetFieldAttributeDict<SugarColumn>();
@@ -156,21 +157,18 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                 var buildValue = BuildMesUploadItems(tb_LineSummary);
                 if (buildValue?.Count > 0)
                 {
-                    await _mesApiOp.DataAcquisition(buildValue);
+                    await PushMes(buildValue); 
                 }
             }
             catch (Exception ex)
             {
-                Serilog.Log.Information(
-                    "[数据交互]【{_serverName}】推送数据到mes失败",
-                    _serviceName
-                );
+                Serilog.Log.Warning("[数据交互]【{_serverName}】推送数据到mes失败", _serviceName);
             }
 
             return lineData;
         }
 
-        private List<MesDataAcquisitionUploadItemDTO> BuildMesUploadItems(
+        List<MesDataAcquisitionUploadItemDTO> BuildMesUploadItems(
             Tb_Factory6Workshop6_1AssemblyLineABSummary tb_LineSummary
         )
         {
@@ -179,7 +177,7 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
             var workOrderNo = _mesOrderOP.OrderNo;
             var testTime = tb_LineSummary.RecordTime.ToString("yyyy-MM-dd HH:mm:ss");
             var re = new List<MesDataAcquisitionUploadItemDTO>();
-            foreach (var item in _items)
+            foreach (var item in _items61)
             {
                 var val =
                     typeof(Tb_Factory6Workshop6_1AssemblyLineABSummary)
@@ -196,147 +194,19 @@ namespace SL.MLineDataPrecisionTracking.Core.Services.DataCollection.Factory6Wor
                         PlantCode = "61",
                         EquipCode = item.EquipCode,
                         RouteCode = item.RouteCode,
-                        SerialNo = serialNo,
+                        SerialNo =
+                            tb_LineSummary.Result == ResultEnum.OK ? serialNo : $"NG_61_B_{testTime}",
                         TestResult = testResult,
                         TestCode = _fieldAttributeDic[item.Field].ColumnDescription,
                         WorkOrderNo = workOrderNo,
                         TestValue = val,
                         TestTime = testTime,
+                        Remark = testResult,
                     }
                 );
             }
             return re;
         }
-
-        // 每项仅 字段名/设备编码/工序编码 不同，其余取值共用
-        (string Field, string EquipCode, string RouteCode)[] _items =
-        {
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.ASideSteelBallGroupDiff),
-                "ZP33-10",
-                "ZC XHJ_LFC1 LGZCJGX_OP40"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.ASideSteelBallGreaseVolume),
-                "ZP33-10",
-                "ZC XHJ_LFC1 LGZCJGX_OP40"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.BSideSteelBallGreaseVolume),
-                "ZP33-08",
-                "ZC_XHJ_LFC1_LGZCJGX_OP38"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.BSideSteelBallGroupDiff),
-                "ZP33-08",
-                "ZC_XHJ_LFC1_LGZCJGX_OP38"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.SealRingParallelDiff),
-                "ZP33-05",
-                "ZC_XHJ_LFC1_LGZCJGX_OP39"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.PositiveClearanceValue),
-                "ZP33-12",
-                "ZC_XHJ_LFC1_LGZCJGX_OP42"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.ClearancePressureValue),
-                "ZP33-12",
-                "ZC_XHJ_LFC1_LGZCJGX_OP42"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.DisplacementValue),
-                "ZP33-12",
-                "ZC_XHJ_LFC1_LGZCJGX_OP42"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.NegativeClearanceValue),
-                "ZP33-12",
-                "ZC_XHJ_LFC1_LGZCJGX_OP42"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.SealRingPressPressure),
-                "ZP33-12",
-                "ZC_XHJ_LFC1_LGZCJGX_OP42"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.MagneticRingParallelSensor1),
-                "ZP33-12",
-                "ZC_XHJ_LFC1_LGZCJGX_OP42"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.MagneticRingParallelSensor2),
-                "ZP33-13",
-                "ZC_XHJ_LFC1_LGZCJGX_OP45"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.MagneticRingParallelSensor3),
-                "ZP33-13",
-                "ZC_XHJ_LFC1_LGZCJGX_OP45"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.MagneticRingParallelAVG),
-                "ZP33-13",
-                "ZC_XHJ_LFC1_LGZCJGX_OP45"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.EndRunoutAxis),
-                "ZP33-15",
-                "ZC_XHJ_LFC1_LGZCJGX_OP49"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.EndRunoutPlane),
-                "ZP33-15",
-                "ZC_XHJ_LFC1_LGZCJGX_OP49"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.EndRunoutHeight),
-                "ZP33-15",
-                "ZC_XHJ_LFC1_LGZCJGX_OP49"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.RunoutValue),
-                "ZP33-15",
-                "ZC_XHJ_LFC1_LGZCJGX_OP49"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.TQ_1400),
-                "ZP33-17",
-                "ZC_XHJ_LFC1_LGZCJGX_OP51"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.M_HIGH_1400),
-                "ZP33-17",
-                "ZC_XHJ_LFC1_LGZCJGX_OP51"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.P_1600_M1400_ABSSINGLE_MAX),
-                "ZP33-17",
-                "ZC_XHJ_LFC1_LGZCJGX_OP51"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.P_1600_M1400_ABSSINGLE_min),
-                "ZP33-17",
-                "ZC_XHJ_LFC1_LGZCJGX_OP51"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.P_1600_M1400_ABSTOTAL),
-                "ZP33-17",
-                "ZC_XHJ_LFC1_LGZCJGX_OP51"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.P_1600_M1400_ABSTOOTH),
-                "ZP33-17",
-                "ZC_XHJ_LFC1_LGZCJGX_OP51"
-            ),
-            (
-                nameof(Tb_Factory6Workshop6_1AssemblyLineABSummary.GONO_CHECK_1150),
-                "ZP33-14",
-                "ZC_XHJ_LFC1_LGZCJGX_OP47"
-            ),
-        };
 
         protected override void UpLastNo(object data)
         {
