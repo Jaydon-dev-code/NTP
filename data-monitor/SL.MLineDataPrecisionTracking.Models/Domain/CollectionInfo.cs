@@ -35,6 +35,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Domain
         DevPlcPointDto _producedNGPoint { get; set; }
         public bool[] WarValue { get; set; }
 
+        public bool IsCollectionBeat { get; set; }
         DevPlcPointDto _isCollectionBeat { get; set; }
 
         bool? _lastCollectionBeat { get; set; }
@@ -51,9 +52,12 @@ namespace SL.MLineDataPrecisionTracking.Models.Domain
                 _producedTotalPoint?.Value == null
                     ? null
                     : _producedTotalPoint?.Value[0].ObjToInt();
-            var tmpProducedOK = _producedOKPoint?.Value==null?null:_producedOKPoint?.Value[0].ObjToInt();
-            var tmpProducedNG = _producedNGPoint?.Value==null?null:_producedNGPoint?.Value[0].ObjToInt();
-            var tmpCollectionBeat = _isCollectionBeat?.Value==null?null:_isCollectionBeat?.Value[0].ObjToBool();
+            var tmpProducedOK =
+                _producedOKPoint?.Value == null ? null : _producedOKPoint?.Value[0].ObjToInt();
+            var tmpProducedNG =
+                _producedNGPoint?.Value == null ? null : _producedNGPoint?.Value[0].ObjToInt();
+            var tmpCollectionBeat =
+                _isCollectionBeat?.Value == null ? null : _isCollectionBeat?.Value[0].ObjToBool();
             bool[] tmpWarValue = _warValuePoint?.Select(x => x.Value[0].ObjToBool()).ToArray();
             bool isBeatChang = (_lastCollectionBeat == false && tmpCollectionBeat == true);
             var re =
@@ -71,6 +75,7 @@ namespace SL.MLineDataPrecisionTracking.Models.Domain
                 {
                     this.Beat = tmpBeat;
                 }
+                this.IsCollectionBeat = isBeatChang;
                 this.ProducedTotal = tmpProducedTotal;
                 this.ProducedOK = tmpProducedOK;
                 this.ProducedNG = tmpProducedNG;
